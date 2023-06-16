@@ -7,23 +7,49 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		81DFA414E85E9886A030A6AF /* Pods_MapProject.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6634CE3C5FAEE57E22C0233C /* Pods_MapProject.framework */; };
 		D60B32B22A32EDAF008573EC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B32B12A32EDAF008573EC /* AppDelegate.swift */; };
 		D60B32B42A32EDAF008573EC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B32B32A32EDAF008573EC /* SceneDelegate.swift */; };
 		D60B32B62A32EDAF008573EC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B32B52A32EDAF008573EC /* ViewController.swift */; };
-		D60B32B92A32EDAF008573EC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D60B32B72A32EDAF008573EC /* Main.storyboard */; };
 		D60B32BB2A32EDB0008573EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D60B32BA2A32EDB0008573EC /* Assets.xcassets */; };
 		D60B32BE2A32EDB0008573EC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D60B32BC2A32EDB0008573EC /* LaunchScreen.storyboard */; };
+		D60B330C2A36D4CD008573EC /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B330B2A36D4CD008573EC /* NetworkManager.swift */; };
+		D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B330E2A36DC18008573EC /* NaverSearchResult.swift */; };
+		D60B33112A371682008573EC /* NaverLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33102A371682008573EC /* NaverLocation.swift */; };
+		D60B33132A38795F008573EC /* ThirdVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33122A38795F008573EC /* ThirdVC.swift */; };
+		D60B33152A38855D008573EC /* ScrollableContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33142A38855D008573EC /* ScrollableContainerView.swift */; };
+		D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */; };
+		D60B33192A39A2B0008573EC /* CustomInfoWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */; };
+		D60B331B2A3B80E9008573EC /* CustomScrollableContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B331A2A3B80E9008573EC /* CustomScrollableContainerView.swift */; };
+		D60B331D2A3C0408008573EC /* PlaceTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B331C2A3C0408008573EC /* PlaceTableViewHeader.swift */; };
+		D60B333F2A3C383F008573EC /* CustomResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B333E2A3C383F008573EC /* CustomResultView.swift */; };
+		D60B33412A3C5AB2008573EC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */; };
+		D615720A2A3C61A000AA7041 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61572092A3C61A000AA7041 /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6634CE3C5FAEE57E22C0233C /* Pods_MapProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B3BA92F1DD89110BBFA0C92D /* Pods-MapProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.release.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.release.xcconfig"; sourceTree = "<group>"; };
 		D60B32AE2A32EDAF008573EC /* MapProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D60B32B12A32EDAF008573EC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D60B32B32A32EDAF008573EC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		D60B32B52A32EDAF008573EC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		D60B32B82A32EDAF008573EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D60B32BA2A32EDB0008573EC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D60B32BD2A32EDB0008573EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D60B32BF2A32EDB0008573EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D60B330B2A36D4CD008573EC /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		D60B330E2A36DC18008573EC /* NaverSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverSearchResult.swift; sourceTree = "<group>"; };
+		D60B33102A371682008573EC /* NaverLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverLocation.swift; sourceTree = "<group>"; };
+		D60B33122A38795F008573EC /* ThirdVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdVC.swift; sourceTree = "<group>"; };
+		D60B33142A38855D008573EC /* ScrollableContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableContainerView.swift; sourceTree = "<group>"; };
+		D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInfoWindowDataSource.swift; sourceTree = "<group>"; };
+		D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInfoWindowView.swift; sourceTree = "<group>"; };
+		D60B331A2A3B80E9008573EC /* CustomScrollableContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomScrollableContainerView.swift; sourceTree = "<group>"; };
+		D60B331C2A3C0408008573EC /* PlaceTableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceTableViewHeader.swift; sourceTree = "<group>"; };
+		D60B333E2A3C383F008573EC /* CustomResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomResultView.swift; sourceTree = "<group>"; };
+		D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D61572092A3C61A000AA7041 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,17 +57,37 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81DFA414E85E9886A030A6AF /* Pods_MapProject.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7B7A472997AE52BC42685C4B /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */,
+				B3BA92F1DD89110BBFA0C92D /* Pods-MapProject.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		9A2D3AB8CB5B17FD6497A85F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6634CE3C5FAEE57E22C0233C /* Pods_MapProject.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D60B32A52A32EDAF008573EC = {
 			isa = PBXGroup;
 			children = (
 				D60B32B02A32EDAF008573EC /* MapProject */,
 				D60B32AF2A32EDAF008573EC /* Products */,
+				7B7A472997AE52BC42685C4B /* Pods */,
+				9A2D3AB8CB5B17FD6497A85F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -56,15 +102,34 @@
 		D60B32B02A32EDAF008573EC /* MapProject */ = {
 			isa = PBXGroup;
 			children = (
+				D60B330D2A36DBF6008573EC /* Model */,
 				D60B32B12A32EDAF008573EC /* AppDelegate.swift */,
 				D60B32B32A32EDAF008573EC /* SceneDelegate.swift */,
 				D60B32B52A32EDAF008573EC /* ViewController.swift */,
-				D60B32B72A32EDAF008573EC /* Main.storyboard */,
 				D60B32BA2A32EDB0008573EC /* Assets.xcassets */,
 				D60B32BC2A32EDB0008573EC /* LaunchScreen.storyboard */,
 				D60B32BF2A32EDB0008573EC /* Info.plist */,
+				D60B330B2A36D4CD008573EC /* NetworkManager.swift */,
+				D60B33142A38855D008573EC /* ScrollableContainerView.swift */,
+				D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */,
+				D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */,
+				D60B331A2A3B80E9008573EC /* CustomScrollableContainerView.swift */,
+				D60B331C2A3C0408008573EC /* PlaceTableViewHeader.swift */,
+				D60B333E2A3C383F008573EC /* CustomResultView.swift */,
+				D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */,
 			);
 			path = MapProject;
+			sourceTree = "<group>";
+		};
+		D60B330D2A36DBF6008573EC /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D60B330E2A36DC18008573EC /* NaverSearchResult.swift */,
+				D60B33102A371682008573EC /* NaverLocation.swift */,
+				D60B33122A38795F008573EC /* ThirdVC.swift */,
+				D61572092A3C61A000AA7041 /* User.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -74,9 +139,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D60B32C22A32EDB0008573EC /* Build configuration list for PBXNativeTarget "MapProject" */;
 			buildPhases = (
+				055AD312BC2563FD65451EA0 /* [CP] Check Pods Manifest.lock */,
 				D60B32AA2A32EDAF008573EC /* Sources */,
 				D60B32AB2A32EDAF008573EC /* Frameworks */,
 				D60B32AC2A32EDAF008573EC /* Resources */,
+				98DEC718A95ECFF6C36C1564 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -127,34 +194,79 @@
 			files = (
 				D60B32BE2A32EDB0008573EC /* LaunchScreen.storyboard in Resources */,
 				D60B32BB2A32EDB0008573EC /* Assets.xcassets in Resources */,
-				D60B32B92A32EDAF008573EC /* Main.storyboard in Resources */,
+				D60B33412A3C5AB2008573EC /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		055AD312BC2563FD65451EA0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MapProject-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		98DEC718A95ECFF6C36C1564 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MapProject/Pods-MapProject-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MapProject/Pods-MapProject-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MapProject/Pods-MapProject-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D60B32AA2A32EDAF008573EC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D60B33152A38855D008573EC /* ScrollableContainerView.swift in Sources */,
 				D60B32B62A32EDAF008573EC /* ViewController.swift in Sources */,
 				D60B32B22A32EDAF008573EC /* AppDelegate.swift in Sources */,
+				D60B330C2A36D4CD008573EC /* NetworkManager.swift in Sources */,
+				D60B33132A38795F008573EC /* ThirdVC.swift in Sources */,
+				D60B33192A39A2B0008573EC /* CustomInfoWindowView.swift in Sources */,
+				D615720A2A3C61A000AA7041 /* User.swift in Sources */,
+				D60B333F2A3C383F008573EC /* CustomResultView.swift in Sources */,
+				D60B331D2A3C0408008573EC /* PlaceTableViewHeader.swift in Sources */,
+				D60B331B2A3B80E9008573EC /* CustomScrollableContainerView.swift in Sources */,
 				D60B32B42A32EDAF008573EC /* SceneDelegate.swift in Sources */,
+				D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */,
+				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,
+				D60B33112A371682008573EC /* NaverLocation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D60B32B72A32EDAF008573EC /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D60B32B82A32EDAF008573EC /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D60B32BC2A32EDB0008573EC /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -282,6 +394,7 @@
 		};
 		D60B32C32A32EDB0008573EC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -292,7 +405,6 @@
 				INFOPLIST_FILE = MapProject/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -310,6 +422,7 @@
 		};
 		D60B32C42A32EDB0008573EC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B3BA92F1DD89110BBFA0C92D /* Pods-MapProject.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -320,7 +433,6 @@
 				INFOPLIST_FILE = MapProject/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (

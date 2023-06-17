@@ -15,7 +15,7 @@ import FirebaseFirestore
 import FirebaseAuth
 
 enum ScrollViewPosition: CGFloat {
-//    case bottom = 0.87
+    //    case bottom = 0.87
     case bottom = 0.90
     case middle = 0.55
     case top = 0.085
@@ -66,7 +66,7 @@ class ViewController: UIViewController {
         return tb
     }()
     private lazy var naverMap = NMFMapView()
-       
+    
     
     private lazy var searchTF: UITextField = {
         let tf = UITextField()
@@ -116,16 +116,22 @@ class ViewController: UIViewController {
     }()
     
     private lazy var disappearingView: UIView = {
-       let myView = UIView()
+        let myView = UIView()
         myView.backgroundColor = .systemPink
         return myView
     }()
     
     private lazy var resultView: CustomResultView = {
-       let myView = CustomResultView()
+        let myView = CustomResultView()
         
         return myView
         
+    }()
+    
+    private lazy var favoriteView: UIView = {
+       let myView = UIView()
+        myView.isHidden = true
+        return myView
     }()
     let infoWindow = NMFInfoWindow()
     var customInfoWindowDataSource = CustomInfoWindowDataSource()
@@ -145,7 +151,7 @@ class ViewController: UIViewController {
         infoWindow.dataSource = customInfoWindowDataSource
         infoWindow.offsetX = -40
         infoWindow.offsetY = -5
-       
+        
         infoWindow.open(with: marker)
         
         infoWindow.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
@@ -157,24 +163,17 @@ class ViewController: UIViewController {
         let user = Auth.auth().currentUser!
         
         containerView.isHidden = true
-        Firestore.firestore().collection("User").document("\(user.uid)").collection("Category").getDocuments { querySnapshot, error in
-            if error != nil {
-                print(error)
-                return
-            }
-            let documents = querySnapshot?.documents
-            documents?.forEach({ snapshot in
-                print(snapshot.documentID)
-                let data = snapshot.data()
-                let lat = data["lat"] as! Double
-                let lon = data["lon"] as! Double
-                print(lat, lon)
-                let marker = NMFMarker()
-                marker.position = NMGLatLng(lat: lat, lng: lon)
+        FavoriteSerivce.fetchFavorite(category: "category") { places in
+            for place in places {
+                print(place)
+                let lat = place.lat
+                let lon = place.lon
+                let marker = NMFMarker(position: NMGLatLng(lat: lat, lng: lon))
+                marker.captionText = place.title
                 marker.mapView = self.naverMap
-                
-            })
+            }
         }
+
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -311,13 +310,43 @@ class ViewController: UIViewController {
         configureTableView()
         configureContainerView()
         configureResultView()
+        configureFavoriteView()
+        
+//        naverMap.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapInsde(_:))))
     }
+    
+//    @objc func tapInsde(_ gesture: UITapGestureRecognizer) {
+//        let location = gesture.location(in: self.view)
+//        if favoriteView.bounds.contains(location) == true {
+//            print("It is inside")
+//        } else {
+//            print("It is ouside")
+//        }
+//
+//    }
     
     private func configureMap() {
         view.addSubview(naverMap)
         
         naverMap.frame = view.bounds
         
+    }
+    
+    private func configureFavoriteView() {
+        
+        view.addSubview(favoriteView)
+        favoriteView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            favoriteView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            favoriteView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            favoriteView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            favoriteView.heightAnchor.constraint(equalToConstant: 500)
+        ])
+        let favoriteAddVC = FavoriteAddVC()
+        addChild(favoriteAddVC)
+        favoriteView.addSubview(favoriteAddVC.view)
+        favoriteAddVC.view.frame = favoriteView.frame
+        favoriteAddVC.didMove(toParent: self)
     }
     private func configureTableView() {
         view.addSubview(mytableView)
@@ -418,9 +447,9 @@ class ViewController: UIViewController {
         myTableView2.translatesAutoresizingMaskIntoConstraints = false
         myTableView2.dataSource = self
         myTableView2.delegate = self
-//        myTableView2.sectionHeaderHeight = 100
+        //        myTableView2.sectionHeaderHeight = 100
         myTableView2.sectionHeaderTopPadding = 0
-        myTableView2.register(PlaceTableViewHeader.self, forHeaderFooterViewReuseIdentifier: PlaceTableViewHeader.identifier)
+        //        myTableView2.register(PlaceTableViewHeader.self, forHeaderFooterViewReuseIdentifier: PlaceTableViewHeader.identifier)
         myTableView2.tableHeaderView?.isUserInteractionEnabled = false
         NSLayoutConstraint.activate([
             myTableView2.topAnchor.constraint(equalTo: upperView.bottomAnchor),
@@ -435,22 +464,22 @@ class ViewController: UIViewController {
     func converHTMLString(with HTMLString: String, targetString: String) -> NSMutableAttributedString {
         
         var mutableString = NSMutableAttributedString()
-         guard let data = HTMLString.data(using: .utf8) else {
-           return mutableString
-         }
-           
-         do {
-             mutableString = try NSMutableAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil)
-             mutableString.addAttributes([.foregroundColor: UIColor.black, .font: UIFont(name: "AppleSDGothicNeo-Regular", size: 15)!], range: NSRange(location: 0, length: mutableString.length))
-             
-             let range = (mutableString.string as NSString).range(of: targetString)
-             if (range.length > 0) {
-                 mutableString.addAttributes([.foregroundColor: UIColor.blue], range: range)
-             }
-
-         } catch {
-
-         }
+        guard let data = HTMLString.data(using: .utf8) else {
+            return mutableString
+        }
+        
+        do {
+            mutableString = try NSMutableAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil)
+            mutableString.addAttributes([.foregroundColor: UIColor.black, .font: UIFont(name: "AppleSDGothicNeo-Regular", size: 15)!], range: NSRange(location: 0, length: mutableString.length))
+            
+            let range = (mutableString.string as NSString).range(of: targetString)
+            if (range.length > 0) {
+                mutableString.addAttributes([.foregroundColor: UIColor.blue], range: range)
+            }
+            
+        } catch {
+            
+        }
         
         return mutableString
     }
@@ -506,7 +535,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
             cell.textLabel?.text = String(indexPath.row)
             return cell
         }
-       
+        
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -542,25 +571,26 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 extension ViewController: CustomResultViewDelegate {
     func favoriteButtonTapped() {
         print("Favorite image Tapped")
+        let vc = FavoriteViewController()
+        vc.modalPresentationStyle = .overFullScreen
+        
+        present(vc, animated: true)
         guard let currentUser = Auth.auth().currentUser else { return }
         let uid = currentUser.uid
-        let a = marker.position
-        let convertedText = converHTMLString(with: selectedItem.title, targetString: "")
+        let convertedString = converHTMLString(with: selectedItem.title, targetString: "").string
+        let address = selectedItem.address
         let user = User(email: currentUser.email!, uid: uid, nickname: "Leo")
-        Firestore.firestore().collection("User").document(uid).setData([
+        
+        COLLECTION_USERS.document(uid).setData([
             "email": user.email, "uid": uid, "nickname": user.nickname
         ])
-        Firestore.firestore().collection("User").document(uid).collection("Category").document("\(convertedText.string)").setData(["lat": marker.position.lat, "lon": marker.position.lng ])
+        FavoriteSerivce.uploadFavorite(title: convertedString, address: address, lat: self.marker.position.lat, lon: self.marker.position.lng)
         
-//        Firestore.firestore().collection("User").document(uid).collection("Category").document("Restaurant").setData(["lat": marker.position.lat, "lon": marker.position.lng ])
+
         
     }
     
     
 }
-
-
-
-
 
 

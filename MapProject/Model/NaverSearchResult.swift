@@ -14,24 +14,22 @@ struct NaverSearchResult: Codable {
 
 struct Place: Codable {
     let address: String
-    let category: String
+    
     let roadAddress: String
     let title: String
-    let link: String
-
-
 }
-//struct SearchData: Codable {
-//    let display: Int
-//    let total: Int
-//    let start: Int
-//    let items: [Item]
-//}
-//
-//struct Item: Codable {
-//    let title: String
-//    let address: String
-//    let mapx: String
-//    let mapy: String
-////    let mapy: Double
-//}
+
+struct FetchedPlace {
+    let address: String
+    let title: String
+    let lat: Double
+    let lon: Double
+    
+    init(dictionary: [String: Any]) {
+        self.title = dictionary["title"] as? String ?? ""
+        self.address = dictionary["address"] as? String ?? ""
+        self.lat = dictionary["lat"] as? Double ?? 0
+        self.lon = dictionary["lon"] as? Double ?? 0
+    }
+}
+

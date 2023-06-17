@@ -27,8 +27,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         Auth.auth().signIn(withEmail: email, password: password) {  authResult, error in
 //          guard let self = self else { return }
-            if error != nil { return }
+            if error != nil {
+                print(error)
+                return }
             print("Log in successfully")
+            
         }
         window = UIWindow(windowScene: windowScene)
 //        let navController = UINavigationController(rootViewController: ViewController())

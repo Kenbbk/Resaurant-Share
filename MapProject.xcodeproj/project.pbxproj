@@ -16,15 +16,16 @@
 		D60B330C2A36D4CD008573EC /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B330B2A36D4CD008573EC /* NetworkManager.swift */; };
 		D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B330E2A36DC18008573EC /* NaverSearchResult.swift */; };
 		D60B33112A371682008573EC /* NaverLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33102A371682008573EC /* NaverLocation.swift */; };
-		D60B33132A38795F008573EC /* ThirdVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33122A38795F008573EC /* ThirdVC.swift */; };
-		D60B33152A38855D008573EC /* ScrollableContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33142A38855D008573EC /* ScrollableContainerView.swift */; };
 		D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */; };
 		D60B33192A39A2B0008573EC /* CustomInfoWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */; };
-		D60B331B2A3B80E9008573EC /* CustomScrollableContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B331A2A3B80E9008573EC /* CustomScrollableContainerView.swift */; };
-		D60B331D2A3C0408008573EC /* PlaceTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B331C2A3C0408008573EC /* PlaceTableViewHeader.swift */; };
 		D60B333F2A3C383F008573EC /* CustomResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B333E2A3C383F008573EC /* CustomResultView.swift */; };
 		D60B33412A3C5AB2008573EC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */; };
 		D615720A2A3C61A000AA7041 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61572092A3C61A000AA7041 /* User.swift */; };
+		D66853222A3CCEAB000FFDFB /* FavoriteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853212A3CCEAB000FFDFB /* FavoriteService.swift */; };
+		D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */; };
+		D66853262A3D6A02000FFDFB /* FavoriteCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853252A3D6A02000FFDFB /* FavoriteCell.swift */; };
+		D66853482A3DAEFA000FFDFB /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */; };
+		D668534A2A3DD041000FFDFB /* SlideInPresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853492A3DD041000FFDFB /* SlideInPresentationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,15 +41,16 @@
 		D60B330B2A36D4CD008573EC /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		D60B330E2A36DC18008573EC /* NaverSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverSearchResult.swift; sourceTree = "<group>"; };
 		D60B33102A371682008573EC /* NaverLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverLocation.swift; sourceTree = "<group>"; };
-		D60B33122A38795F008573EC /* ThirdVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdVC.swift; sourceTree = "<group>"; };
-		D60B33142A38855D008573EC /* ScrollableContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollableContainerView.swift; sourceTree = "<group>"; };
 		D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInfoWindowDataSource.swift; sourceTree = "<group>"; };
 		D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomInfoWindowView.swift; sourceTree = "<group>"; };
-		D60B331A2A3B80E9008573EC /* CustomScrollableContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomScrollableContainerView.swift; sourceTree = "<group>"; };
-		D60B331C2A3C0408008573EC /* PlaceTableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceTableViewHeader.swift; sourceTree = "<group>"; };
 		D60B333E2A3C383F008573EC /* CustomResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomResultView.swift; sourceTree = "<group>"; };
 		D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D61572092A3C61A000AA7041 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		D66853212A3CCEAB000FFDFB /* FavoriteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteService.swift; sourceTree = "<group>"; };
+		D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteAddVC.swift; sourceTree = "<group>"; };
+		D66853252A3D6A02000FFDFB /* FavoriteCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteCell.swift; sourceTree = "<group>"; };
+		D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
+		D66853492A3DD041000FFDFB /* SlideInPresentationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideInPresentationManager.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -106,17 +108,17 @@
 				D60B32B12A32EDAF008573EC /* AppDelegate.swift */,
 				D60B32B32A32EDAF008573EC /* SceneDelegate.swift */,
 				D60B32B52A32EDAF008573EC /* ViewController.swift */,
-				D60B32BA2A32EDB0008573EC /* Assets.xcassets */,
 				D60B32BC2A32EDB0008573EC /* LaunchScreen.storyboard */,
-				D60B32BF2A32EDB0008573EC /* Info.plist */,
-				D60B330B2A36D4CD008573EC /* NetworkManager.swift */,
-				D60B33142A38855D008573EC /* ScrollableContainerView.swift */,
-				D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */,
-				D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */,
-				D60B331A2A3B80E9008573EC /* CustomScrollableContainerView.swift */,
-				D60B331C2A3C0408008573EC /* PlaceTableViewHeader.swift */,
+				D66853202A3CCE61000FFDFB /* Network */,
 				D60B333E2A3C383F008573EC /* CustomResultView.swift */,
+				D668531F2A3CCE1A000FFDFB /* CustomInfoView */,
 				D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */,
+				D60B32BA2A32EDB0008573EC /* Assets.xcassets */,
+				D60B32BF2A32EDB0008573EC /* Info.plist */,
+				D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */,
+				D66853252A3D6A02000FFDFB /* FavoriteCell.swift */,
+				D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */,
+				D66853492A3DD041000FFDFB /* SlideInPresentationManager.swift */,
 			);
 			path = MapProject;
 			sourceTree = "<group>";
@@ -126,10 +128,27 @@
 			children = (
 				D60B330E2A36DC18008573EC /* NaverSearchResult.swift */,
 				D60B33102A371682008573EC /* NaverLocation.swift */,
-				D60B33122A38795F008573EC /* ThirdVC.swift */,
 				D61572092A3C61A000AA7041 /* User.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		D668531F2A3CCE1A000FFDFB /* CustomInfoView */ = {
+			isa = PBXGroup;
+			children = (
+				D60B33162A39A1F5008573EC /* CustomInfoWindowDataSource.swift */,
+				D60B33182A39A2B0008573EC /* CustomInfoWindowView.swift */,
+			);
+			path = CustomInfoView;
+			sourceTree = "<group>";
+		};
+		D66853202A3CCE61000FFDFB /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				D60B330B2A36D4CD008573EC /* NetworkManager.swift */,
+				D66853212A3CCEAB000FFDFB /* FavoriteService.swift */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -247,17 +266,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D60B33152A38855D008573EC /* ScrollableContainerView.swift in Sources */,
+				D66853262A3D6A02000FFDFB /* FavoriteCell.swift in Sources */,
 				D60B32B62A32EDAF008573EC /* ViewController.swift in Sources */,
+				D66853482A3DAEFA000FFDFB /* FavoriteViewController.swift in Sources */,
+				D66853222A3CCEAB000FFDFB /* FavoriteService.swift in Sources */,
 				D60B32B22A32EDAF008573EC /* AppDelegate.swift in Sources */,
 				D60B330C2A36D4CD008573EC /* NetworkManager.swift in Sources */,
-				D60B33132A38795F008573EC /* ThirdVC.swift in Sources */,
 				D60B33192A39A2B0008573EC /* CustomInfoWindowView.swift in Sources */,
 				D615720A2A3C61A000AA7041 /* User.swift in Sources */,
 				D60B333F2A3C383F008573EC /* CustomResultView.swift in Sources */,
-				D60B331D2A3C0408008573EC /* PlaceTableViewHeader.swift in Sources */,
-				D60B331B2A3B80E9008573EC /* CustomScrollableContainerView.swift in Sources */,
 				D60B32B42A32EDAF008573EC /* SceneDelegate.swift in Sources */,
+				D668534A2A3DD041000FFDFB /* SlideInPresentationManager.swift in Sources */,
+				D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */,
 				D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */,
 				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,
 				D60B33112A371682008573EC /* NaverLocation.swift in Sources */,

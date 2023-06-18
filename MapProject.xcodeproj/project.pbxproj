@@ -25,7 +25,8 @@
 		D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */; };
 		D66853262A3D6A02000FFDFB /* FavoriteCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853252A3D6A02000FFDFB /* FavoriteCell.swift */; };
 		D66853482A3DAEFA000FFDFB /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */; };
-		D668534A2A3DD041000FFDFB /* SlideInPresentationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853492A3DD041000FFDFB /* SlideInPresentationManager.swift */; };
+		D668534C2A3EC9CF000FFDFB /* AddNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534B2A3EC9CF000FFDFB /* AddNameViewController.swift */; };
+		D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,7 +51,8 @@
 		D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteAddVC.swift; sourceTree = "<group>"; };
 		D66853252A3D6A02000FFDFB /* FavoriteCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteCell.swift; sourceTree = "<group>"; };
 		D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
-		D66853492A3DD041000FFDFB /* SlideInPresentationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideInPresentationManager.swift; sourceTree = "<group>"; };
+		D668534B2A3EC9CF000FFDFB /* AddNameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNameViewController.swift; sourceTree = "<group>"; };
+		D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorCollectionViewCell.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -118,7 +120,8 @@
 				D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */,
 				D66853252A3D6A02000FFDFB /* FavoriteCell.swift */,
 				D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */,
-				D66853492A3DD041000FFDFB /* SlideInPresentationManager.swift */,
+				D668534B2A3EC9CF000FFDFB /* AddNameViewController.swift */,
+				D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */,
 			);
 			path = MapProject;
 			sourceTree = "<group>";
@@ -276,10 +279,11 @@
 				D615720A2A3C61A000AA7041 /* User.swift in Sources */,
 				D60B333F2A3C383F008573EC /* CustomResultView.swift in Sources */,
 				D60B32B42A32EDAF008573EC /* SceneDelegate.swift in Sources */,
-				D668534A2A3DD041000FFDFB /* SlideInPresentationManager.swift in Sources */,
 				D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */,
+				D668534C2A3EC9CF000FFDFB /* AddNameViewController.swift in Sources */,
 				D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */,
 				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,
+				D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */,
 				D60B33112A371682008573EC /* NaverLocation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

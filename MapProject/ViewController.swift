@@ -173,6 +173,7 @@ class ViewController: UIViewController {
                 marker.mapView = self.naverMap
             }
         }
+        
 
     }
     
@@ -180,7 +181,9 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         
         topConstraint.constant = getHeight(position: startingPosition)
-        
+        let VC = AddNameViewController()
+        VC.modalPresentationStyle = .overFullScreen
+        present(VC, animated: true)
         
     }
     
@@ -311,6 +314,7 @@ class ViewController: UIViewController {
         configureContainerView()
         configureResultView()
         configureFavoriteView()
+       
         
 //        naverMap.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapInsde(_:))))
     }

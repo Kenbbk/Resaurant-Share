@@ -92,6 +92,12 @@ class FavoriteCell: UITableViewCell {
         label.attributedText = attributedText
     }
     
+    func setFirstIndexPathLabel() {
+        let attributedText = NSAttributedString(string: "Create list", attributes: [.foregroundColor: UIColor.systemGray])
+        
+        label.attributedText = attributedText
+    }
+    
     
     
     

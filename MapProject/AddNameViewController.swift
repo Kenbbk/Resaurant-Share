@@ -10,7 +10,13 @@ import UIKit
 class AddNameViewController: UIViewController {
     
     //MARK: - Properties
+    var colors = [CustomColor.red, CustomColor.yello, CustomColor.lightGreen, CustomColor.green, CustomColor.emerald, CustomColor.purple, CustomColor.pink, CustomColor.lightGray, CustomColor.blue, CustomColor.darkBlue, CustomColor.gray]
+
+    var activeTextField: UITextField?
+    
     let padding: CGFloat = 20
+    
+    let scrollableView = UIScrollView()
     
     private let wholeContainerView: UIView = {
        let myView = UIView()
@@ -146,6 +152,7 @@ class AddNameViewController: UIViewController {
         configureUI()
         addActionOnCancelImage()
         addActionOnSaveButton()
+        setupKeyboardHiding()
         
     }
     
@@ -160,6 +167,46 @@ class AddNameViewController: UIViewController {
         print("Save Button tapped")
     }
     
+    @objc func keyboarWillShow(sender: Notification) {
+//        guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
+//            let keyboardHeight = keyboardSize.height
+//        let keyboardDuration = sender.userInfo![UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
+//
+//           // Keyboard's animation curve
+//           let keyboardCurve = UIView.AnimationCurve(rawValue: sender.userInfo![UIResponder.keyboardAnimationCurveUserInfoKey] as! Int)!
+//        view.frame.origin.y = view.frame.origin.y - 330
+        
+        guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
+            
+            // if keyboard size is not available for some reason, dont do anything
+            return
+          }
+        print(keyboardSize.height)
+          var shouldMoveViewUp = false
+
+          // if active text field is not nil
+          if let activeTextField = activeTextField {
+
+            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY
+            
+              print(bottomOfTextField)
+            let topOfKeyboard = self.view.frame.height - keyboardSize.height
+
+            // if the bottom of Textfield is below the top of keyboard, move up
+            if bottomOfTextField > topOfKeyboard {
+              shouldMoveViewUp = true
+            }
+          }
+
+          if shouldMoveViewUp {
+            self.view.frame.origin.y = 0 - keyboardSize.height
+          }
+    }
+    
+    @objc func keyboardWillHide(sender: Notification) {
+        view.frame.origin.y = 0
+    }
+    
     //MARK: - Helpers
     
     private func addActionOnCancelImage() {
@@ -168,6 +215,11 @@ class AddNameViewController: UIViewController {
     
     private func addActionOnSaveButton() {
         saveButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(saveButtonTapped(_:))))
+    }
+    
+    private func setupKeyboardHiding() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboarWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     
@@ -184,6 +236,7 @@ class AddNameViewController: UIViewController {
         configureDescriptionContainerView()
         configureBottomContainerView()
     }
+    
     private func configureWholeContainerView() {
         view.addSubview(wholeContainerView)
         
@@ -299,8 +352,10 @@ class AddNameViewController: UIViewController {
         
         
         collectionView.dataSource = self
+        collectionView.delegate = self
         collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: ColorCollectionViewCell.identifier)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: selecColorLabel.bottomAnchor, constant: 10),
             collectionView.leadingAnchor.constraint(equalTo: colorContainverView.leadingAnchor),
@@ -420,6 +475,7 @@ class AddNameViewController: UIViewController {
 
 extension AddNameViewController: UITextFieldDelegate {
     func textFieldDidChangeSelection(_ textField: UITextField) {
+        
         if textField == nameTextField {
             guard let textFieldCount = textField.text?.count else { return }
             
@@ -436,11 +492,18 @@ extension AddNameViewController: UITextFieldDelegate {
         
     }
     
+    
+    
     func textFieldDidBeginEditing(_ textField: UITextField) {
+        activeTextField = textField
         if textField == descriptionTextField {
             enclosingDescriptionView.backgroundColor = .white
             enclosingDescriptionView.layer.borderColor = UIColor.blue.withAlphaComponent(0.8).cgColor
         }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        activeTextField = nil
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -468,19 +531,32 @@ extension AddNameViewController: UITextFieldDelegate {
 //MARK: - UICollectionViewDataSource
 extension AddNameViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        12
+        colors.count
+        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCollectionViewCell.identifier, for: indexPath) as! ColorCollectionViewCell
         
-        
+        cell.setUpInitialColor(with: colors[indexPath.row])
         return cell
     }
     
     
 }
 
-extension AddNameViewController: UICollectionViewDelegateFlowLayout {
-    
+//MARK: - UICollectionViewdelegate
+
+extension AddNameViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        
+
+        
+        
+        
+        
+        
+    }
 }
+

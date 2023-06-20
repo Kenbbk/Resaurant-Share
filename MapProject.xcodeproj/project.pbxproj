@@ -27,6 +27,8 @@
 		D66853482A3DAEFA000FFDFB /* FavoriteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */; };
 		D668534C2A3EC9CF000FFDFB /* AddNameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534B2A3EC9CF000FFDFB /* AddNameViewController.swift */; };
 		D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */; };
+		D66853522A418888000FFDFB /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853512A418888000FFDFB /* Constants.swift */; };
+		D66853552A41A652000FFDFB /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853542A41A652000FFDFB /* UIColor+Ext.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +55,8 @@
 		D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteViewController.swift; sourceTree = "<group>"; };
 		D668534B2A3EC9CF000FFDFB /* AddNameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNameViewController.swift; sourceTree = "<group>"; };
 		D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorCollectionViewCell.swift; sourceTree = "<group>"; };
+		D66853512A418888000FFDFB /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		D66853542A41A652000FFDFB /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -106,6 +110,7 @@
 		D60B32B02A32EDAF008573EC /* MapProject */ = {
 			isa = PBXGroup;
 			children = (
+				D66853532A41A62B000FFDFB /* Extensions */,
 				D60B330D2A36DBF6008573EC /* Model */,
 				D60B32B12A32EDAF008573EC /* AppDelegate.swift */,
 				D60B32B32A32EDAF008573EC /* SceneDelegate.swift */,
@@ -122,6 +127,7 @@
 				D66853472A3DAEFA000FFDFB /* FavoriteViewController.swift */,
 				D668534B2A3EC9CF000FFDFB /* AddNameViewController.swift */,
 				D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */,
+				D66853562A41A80B000FFDFB /* Utilities */,
 			);
 			path = MapProject;
 			sourceTree = "<group>";
@@ -152,6 +158,22 @@
 				D66853212A3CCEAB000FFDFB /* FavoriteService.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		D66853532A41A62B000FFDFB /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D66853542A41A652000FFDFB /* UIColor+Ext.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		D66853562A41A80B000FFDFB /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				D66853512A418888000FFDFB /* Constants.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -278,11 +300,13 @@
 				D60B33192A39A2B0008573EC /* CustomInfoWindowView.swift in Sources */,
 				D615720A2A3C61A000AA7041 /* User.swift in Sources */,
 				D60B333F2A3C383F008573EC /* CustomResultView.swift in Sources */,
+				D66853522A418888000FFDFB /* Constants.swift in Sources */,
 				D60B32B42A32EDAF008573EC /* SceneDelegate.swift in Sources */,
 				D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */,
 				D668534C2A3EC9CF000FFDFB /* AddNameViewController.swift in Sources */,
 				D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */,
 				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,
+				D66853552A41A652000FFDFB /* UIColor+Ext.swift in Sources */,
 				D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */,
 				D60B33112A371682008573EC /* NaverLocation.swift in Sources */,
 			);

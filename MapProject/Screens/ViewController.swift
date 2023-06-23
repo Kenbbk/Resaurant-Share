@@ -25,7 +25,8 @@ enum ScrollViewPosition: CGFloat {
 class ViewController: UIViewController {
     
     //MARK: - Properties
-    var selectedItem: Place!
+    var fetchedPlace: FetchedPlace?
+    
     var marker = NMFMarker()
     let padding: CGFloat = 15
     var topConstraint: NSLayoutConstraint!
@@ -143,7 +144,7 @@ class ViewController: UIViewController {
         
         configureUI()
         
-        
+       
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: 37.3588603, lng: 127.1052063)
         marker.mapView = naverMap
@@ -160,19 +161,20 @@ class ViewController: UIViewController {
             return true
         }
         infoWindow.open(with: marker)
-        let user = Auth.auth().currentUser!
+        
+        guard let user = Auth.auth().currentUser else { return }
         
         containerView.isHidden = true
-        FavoriteSerivce.fetchFavorite(category: "category") { places in
-            for place in places {
-                print(place)
-                let lat = place.lat
-                let lon = place.lon
-                let marker = NMFMarker(position: NMGLatLng(lat: lat, lng: lon))
-                marker.captionText = place.title
-                marker.mapView = self.naverMap
-            }
-        }
+//        FavoriteSerivce.fetchCategory(category: "category") { places in
+//            for place in places {
+//                print(place)
+//                let lat = place.lat
+//                let lon = place.lon
+//                let marker = NMFMarker(position: NMGLatLng(lat: lat, lng: lon))
+//                marker.captionText = place.title
+//                marker.mapView = self.naverMap
+//            }
+//        }
         
 
     }
@@ -181,9 +183,7 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         
         topConstraint.constant = getHeight(position: startingPosition)
-        let VC = AddNameViewController()
-        VC.modalPresentationStyle = .overFullScreen
-        present(VC, animated: true)
+        
         
     }
     
@@ -543,23 +543,29 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        selectedItem = searchResult[indexPath.row]
-        let originalText = self.searchResult[indexPath.row].title
+        let selectedPlace = searchResult[indexPath.row]
+        let originalText = selectedPlace.title
         let editedText = self.converHTMLString(with: originalText, targetString: "")
-        resultView.fillInTheText(title: editedText.string, address: selectedItem.address, distance: 50)
+        let roadAddress = selectedPlace.roadAddress
+        
+        
         resultView.isHidden = false
-        let address = searchResult[indexPath.row].roadAddress
-        NetworkManager.shared.getLatLon(with: address) { address in
-            guard let address else { return }
-            let LatLon = NMGLatLng(lat: Double(address.y)! , lng: Double(address.x)!)
+        
+        NetworkManager.shared.getLatLon(with: roadAddress) { LatLon in
+            guard let LatLon else { return }
+            guard let lat = Double(LatLon.y), let lon = Double(LatLon.x) else { return }
             
-            let cameraUpdate = NMFCameraUpdate(scrollTo: LatLon)
+            let searchedLocation = NMGLatLng(lat: lat, lng: lon)
+            let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
+            let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon)
             
+            self.fetchedPlace = fetchedPlace
+            self.resultView.fetchCategories()
             DispatchQueue.main.async {
-                self.marker.position = LatLon
+                self.marker.position = searchedLocation
                 self.marker.captionText = editedText.string
                 self.marker.mapView = self.naverMap
-                
+                self.resultView.setLabels(with: fetchedPlace)
                 self.naverMap.moveCamera(cameraUpdate)
                 self.placeTapped()
             }
@@ -575,21 +581,14 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 extension ViewController: CustomResultViewDelegate {
     func favoriteButtonTapped() {
         print("Favorite image Tapped")
-        let vc = FavoriteViewController()
+        
+        guard let fetchedPlace else { return }
+        let vc = FavoriteViewController(with: fetchedPlace)
         vc.modalPresentationStyle = .overFullScreen
         
         present(vc, animated: true)
-        guard let currentUser = Auth.auth().currentUser else { return }
-        let uid = currentUser.uid
-        let convertedString = converHTMLString(with: selectedItem.title, targetString: "").string
-        let address = selectedItem.address
-        let user = User(email: currentUser.email!, uid: uid, nickname: "Leo")
         
-        COLLECTION_USERS.document(uid).setData([
-            "email": user.email, "uid": uid, "nickname": user.nickname
-        ])
-        FavoriteSerivce.uploadFavorite(title: convertedString, address: address, lat: self.marker.position.lat, lon: self.marker.position.lng)
-        
+
 
         
     }

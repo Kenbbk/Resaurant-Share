@@ -25,6 +25,13 @@ struct FetchedPlace {
     let lat: Double
     let lon: Double
     
+    init(title: String, address: String, lat: Double, lon: Double) {
+        self.title = title
+        self.address = address
+        self.lat = lat
+        self.lon = lon
+    }
+    
     init(dictionary: [String: Any]) {
         self.title = dictionary["title"] as? String ?? ""
         self.address = dictionary["address"] as? String ?? ""

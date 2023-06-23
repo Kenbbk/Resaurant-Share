@@ -49,6 +49,8 @@ class ColorCollectionViewCell: UICollectionViewCell {
        
     }
     
+    
+    
 //    convenience init(with color: UIColor) {
 //        self.init(frame: .zero)
 //    }
@@ -66,6 +68,7 @@ class ColorCollectionViewCell: UICollectionViewCell {
     func didselectedChangeTheColor() {
         imageView.tintColor = .white
         backgroundColor = themeColor.withAlphaComponent(0.5)
+        
     }
     
     func notSelected() {

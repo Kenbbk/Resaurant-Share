@@ -17,6 +17,11 @@ class CustomResultView: UIView {
     
     static let identifier = "PlaceTableViewHeader"
     
+    var fetchedPlace: FetchedPlace?
+    
+    var categories: [Category] = []
+    var addPlaceCategories: [Category] = []
+    
     let padding: CGFloat = 10
     let titleNameLabel: UILabel = {
        let label = UILabel()
@@ -74,29 +79,54 @@ class CustomResultView: UIView {
         favoriteImageView.addGestureRecognizer(tapGesture)
     }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //MARK: - Actions
     @objc private func imageViewTapped(_ gesture: UITapGestureRecognizer) {
+        
         delegate?.favoriteButtonTapped()
         
     }
     
     //MARK: - Helpers
     
-    
-    
-    
-    
-    
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    func fetchCategories() {
+        guard let fetchedPlace = self.fetchedPlace else { return }
+        FavoriteSerivce.fetchCategory { categories in
+            let sortedCategories = categories.sorted(by: { $0.timeStamp.dateValue() > $1.timeStamp.dateValue()})
+            
+            for category in sortedCategories {
+                guard let categoryUID = category.categoryUID else { return }
+                let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(categoryUID).collection("places").whereField("title", isEqualTo: fetchedPlace.title)
+                
+                query.getDocuments { snapshot, error in
+                    guard let document = snapshot?.documents else { return }
+                    
+                    if document.isEmpty == false {
+                        
+                        self.addPlaceCategories.append(category)
+                        print(category.title)
+                    }
+                }
+            }
+        }
+
     }
     
-    func fillInTheText(title: String, address: String, distance: Int) {
-        titleNameLabel.text = title
-        addressLabel.text = address
-        distanceLabel.text = "\(distance)Km"
+    
+    
+    
+    
+    func setLabels(with fetchedPlace: FetchedPlace) {
+        self.fetchedPlace = fetchedPlace
+        titleNameLabel.text = fetchedPlace.title
+        addressLabel.text = fetchedPlace.address
+        distanceLabel.text = "50Km"
     }
+    
+
     private func configureSelf() {
         isHidden = true
         backgroundColor = .white

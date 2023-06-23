@@ -11,6 +11,14 @@ class FavoriteCell: UITableViewCell {
     
     static let identifier = "FavoriteCell"
     //MARK: - Properties
+//    override var isSelected: Bool {
+//        didSet {
+////            rightImageView.tintColor = isSelected ? .blue : .systemGray3
+//            print("Selection happened")
+//        }
+//    }
+    
+    let colors = CustomColor.colors
     
     private let leftImageView: UIImageView = {
        let iv = UIImageView()
@@ -26,29 +34,39 @@ class FavoriteCell: UITableViewCell {
         return label
     }()
     
-    private let rightImageView: UIImageView = {
+     let rightImageView: UIImageView = {
        let iv = UIImageView()
         iv.image = UIImage(systemName: "checkmark.circle")
         iv.tintColor = .systemGray3
         iv.clipsToBounds = true
+        iv.layer.cornerRadius = 10
         return iv
     }()
     
     //MARK: - Lifecycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
         configureUI()
         setLabelText()
+        
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+//        print("cell side selected")
+        rightImageView.tintColor = selected ? .blue.withAlphaComponent(0.8) : .systemGray3
+    }
     //MARK: - Actions
     
     
     //MARK: - Helpers
+    
+    
     
     private func configureUI() {
         let padding: CGFloat = 10
@@ -92,10 +110,18 @@ class FavoriteCell: UITableViewCell {
         label.attributedText = attributedText
     }
     
-    func setFirstIndexPathLabel() {
+    func configureFirstIndex() {
         let attributedText = NSAttributedString(string: "Create list", attributes: [.foregroundColor: UIColor.systemGray])
         
+        rightImageView.isHidden = true
         label.attributedText = attributedText
+    }
+    
+    func setOtherIndexPathLabel(with category: Category) {
+        let text = category.title
+        leftImageView.tintColor = CustomColor.colors[category.colorNumber]
+        
+        label.text = text
     }
     
     

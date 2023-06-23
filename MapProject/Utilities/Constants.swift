@@ -9,6 +9,8 @@ import UIKit
 
 enum CustomColor {
     
+    static let colors = [CustomColor.red, CustomColor.yello, CustomColor.lightGreen, CustomColor.green, CustomColor.emerald, CustomColor.purple, CustomColor.pink, CustomColor.lightGray, CustomColor.blue, CustomColor.darkBlue, CustomColor.gray]
+    
     static let red          = UIColor(237, 43, 108)
     static let yello        = UIColor(237, 169, 43)
     static let lightGreen   = UIColor(146, 201, 16)

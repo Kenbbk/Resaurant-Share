@@ -6,27 +6,43 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 class AddNameViewController: UIViewController {
     
     //MARK: - Properties
-    var colors = [CustomColor.red, CustomColor.yello, CustomColor.lightGreen, CustomColor.green, CustomColor.emerald, CustomColor.purple, CustomColor.pink, CustomColor.lightGray, CustomColor.blue, CustomColor.darkBlue, CustomColor.gray]
-
+    let colors = CustomColor.colors
+    
+    var isReadyToSave: Bool = false {
+        didSet {
+            
+            saveButton.backgroundColor = isReadyToSave ? .blue : .systemGray4
+            saveButton.isUserInteractionEnabled = isReadyToSave
+        }
+        
+    }
+    
     var activeTextField: UITextField?
     
     let padding: CGFloat = 20
     
     let scrollableView = UIScrollView()
     
+    private lazy var touchOutsideGesture: UITapGestureRecognizer = {
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(touchedOutside(_:)))
+        gesture.delegate = self
+        return gesture
+    }()
+    
     private let wholeContainerView: UIView = {
-       let myView = UIView()
+        let myView = UIView()
         myView.layer.cornerRadius = 20
         myView.backgroundColor = .white
         return myView
     }()
-
+    
     private let titleContainerView: UIView = {
-       let myView = UIView()
+        let myView = UIView()
         myView.layer.borderWidth = 0.5
         myView.layer.borderColor = UIColor.systemGray4.cgColor
         return myView
@@ -34,7 +50,7 @@ class AddNameViewController: UIViewController {
     private let TFContainerView = UIView()
     
     private let tfCountLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         
         let attributedText = NSMutableAttributedString(string: "0", attributes: [.font: UIFont.systemFont(ofSize: 13)])
         attributedText.append(NSAttributedString(string: "/20", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
@@ -43,7 +59,7 @@ class AddNameViewController: UIViewController {
     }()
     
     private let addListLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.text = "Add list"
         
         label.font = UIFont.boldSystemFont(ofSize: 20)
@@ -51,7 +67,7 @@ class AddNameViewController: UIViewController {
     }()
     
     private let cancelImageView: UIImageView = {
-       let iv = UIImageView()
+        let iv = UIImageView()
         iv.image = UIImage(systemName: "x.circle")
         iv.isUserInteractionEnabled = true
         iv.tintColor = .systemGray
@@ -62,7 +78,7 @@ class AddNameViewController: UIViewController {
     }()
     
     let nameTextField: UITextField = {
-       let tf = UITextField()
+        let tf = UITextField()
         
         tf.clearButtonMode = .whileEditing
         
@@ -70,10 +86,14 @@ class AddNameViewController: UIViewController {
         return tf
     }()
     
-    private let colorContainverView = UIView()
+    private let colorContainverView: UIView = {
+        let view = UIView()
+        
+        return view
+    }()
     
     private let selecColorLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.text = "Select color"
         label.font = UIFont.boldSystemFont(ofSize: 18)
         return label
@@ -81,14 +101,16 @@ class AddNameViewController: UIViewController {
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: configureFlowLayout())
+        
         collectionView.showsHorizontalScrollIndicator = false
+        
         return collectionView
     }()
     
     private let descriptionContainerView = UIView()
     
     private let descriptionLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         
         let attributedText = NSMutableAttributedString(string: "Description", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
         attributedText.append(NSAttributedString(string: " option", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
@@ -99,7 +121,7 @@ class AddNameViewController: UIViewController {
     }()
     
     private let enclosingDescriptionView: UIView = {
-       let myView = UIView()
+        let myView = UIView()
         myView.layer.borderWidth = 0.7
         myView.layer.borderColor = UIColor.systemGray6.cgColor
         myView.backgroundColor = .systemGray6
@@ -109,15 +131,15 @@ class AddNameViewController: UIViewController {
     
     private let descriptionCountLabel: UILabel = {
         let label = UILabel()
-         
-         let attributedText = NSMutableAttributedString(string: "0", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-         attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-         label.attributedText = attributedText
-         return label
+        
+        let attributedText = NSMutableAttributedString(string: "0", attributes: [.font: UIFont.systemFont(ofSize: 13)])
+        attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
+        label.attributedText = attributedText
+        return label
     }()
     
     private let descriptionTextField: UITextField = {
-       let tf = UITextField()
+        let tf = UITextField()
         
         
         tf.layer.cornerRadius = 5
@@ -130,7 +152,7 @@ class AddNameViewController: UIViewController {
     
     
     private let saveButton: UIButton = {
-       let button = UIButton()
+        let button = UIButton()
         button.backgroundColor = .systemGray4
         button.setTitle("Save", for: .normal)
         button.layer.cornerRadius = 8
@@ -138,7 +160,7 @@ class AddNameViewController: UIViewController {
     }()
     
     private let bottomContainerView: UIView = {
-       let myView = UIView()
+        let myView = UIView()
         myView.backgroundColor = .white
         myView.layer.borderWidth = 0.17
         myView.layer.borderColor = UIColor.systemGray4.cgColor
@@ -148,12 +170,16 @@ class AddNameViewController: UIViewController {
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGray6.withAlphaComponent(0.3)
+        
         configureUI()
         addActionOnCancelImage()
         addActionOnSaveButton()
         setupKeyboardHiding()
-        
+       
+    }
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        NotificationCenter.default.removeObserver(self)
     }
     
     //MARK: - Actions
@@ -164,47 +190,80 @@ class AddNameViewController: UIViewController {
     }
     
     @objc func saveButtonTapped(_ gesture: UITapGestureRecognizer) {
-        print("Save Button tapped")
+        guard let title = nameTextField.text else { return }
+        guard let colorNumber = collectionView.indexPathsForSelectedItems?.first?.row else { return }
+        
+        
+        let description = descriptionTextField.text!
+        let timeStamp = Timestamp(date: Date())
+        let category = Category(title: title, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
+        FavoriteSerivce.addCategory(with: category) {
+            guard let presentingVC = self.presentingViewController as? FavoriteViewController else { return }
+            presentingVC.fetchCategories()
+            self.dismiss(animated: true)
+            
+            
+            print("Saved")
+        }
+        
+        
+        
     }
     
     @objc func keyboarWillShow(sender: Notification) {
-//        guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
-//            let keyboardHeight = keyboardSize.height
-//        let keyboardDuration = sender.userInfo![UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
-//
-//           // Keyboard's animation curve
-//           let keyboardCurve = UIView.AnimationCurve(rawValue: sender.userInfo![UIResponder.keyboardAnimationCurveUserInfoKey] as! Int)!
-//        view.frame.origin.y = view.frame.origin.y - 330
+        //        guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
+        //            let keyboardHeight = keyboardSize.height
+        //        let keyboardDuration = sender.userInfo![UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
+        //
+        //           // Keyboard's animation curve
+        //           let keyboardCurve = UIView.AnimationCurve(rawValue: sender.userInfo![UIResponder.keyboardAnimationCurveUserInfoKey] as! Int)!
+        //        view.frame.origin.y = view.frame.origin.y - 330
         
         guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
             
             // if keyboard size is not available for some reason, dont do anything
             return
-          }
-        print(keyboardSize.height)
-          var shouldMoveViewUp = false
-
-          // if active text field is not nil
-          if let activeTextField = activeTextField {
-
-            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY
-            
-              print(bottomOfTextField)
-            let topOfKeyboard = self.view.frame.height - keyboardSize.height
-
-            // if the bottom of Textfield is below the top of keyboard, move up
-            if bottomOfTextField > topOfKeyboard {
-              shouldMoveViewUp = true
-            }
-          }
-
-          if shouldMoveViewUp {
-            self.view.frame.origin.y = 0 - keyboardSize.height
-          }
+        }
+        
+        var shouldMoveViewUp = false
+        view.addGestureRecognizer(touchOutsideGesture)
+        // if active text field is not nil
+        if activeTextField == descriptionTextField {
+            print(activeTextField)
+            view.frame.origin.y = 0 - 80
+        }
+        
+        //        view.frame.origin.y = -200
+        //        if let activeTextField = activeTextField {
+        //
+        //
+        //            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY
+        //
+        //            print(bottomOfTextField)
+        //            let topOfKeyboard = self.view.frame.height - keyboardSize.height
+        //
+        //            // if the bottom of Textfield is below the top of keyboard, move up
+        //            if bottomOfTextField > topOfKeyboard {
+        //                shouldMoveViewUp = true
+        //            }
+        //        }
+        //
+        //        if shouldMoveViewUp {
+        //            self.view.frame.origin.y = 0 - 40 - keyboardSize.height / 2
+        //        }
     }
     
+    
+    
     @objc func keyboardWillHide(sender: Notification) {
+        view.removeGestureRecognizer(touchOutsideGesture)
         view.frame.origin.y = 0
+    }
+    
+    @objc func touchedOutside(_ sender: UITapGestureRecognizer) {
+        
+        view.endEditing(true)
+        print("I am tapped")
     }
     
     //MARK: - Helpers
@@ -222,7 +281,20 @@ class AddNameViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    
+    private func setAttributedText(sender: UITextField) {
+        if sender == nameTextField {
+            guard let textFieldCount = sender.text?.count else { return }
+            let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
+            attributedText.append(NSAttributedString(string: "/20", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
+            tfCountLabel.attributedText = attributedText
+        } else {
+            guard let textFieldCount = sender.text?.count else { return }
+            
+            let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
+            attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
+            descriptionCountLabel.attributedText = attributedText
+        }
+    }
     
     
     
@@ -235,9 +307,12 @@ class AddNameViewController: UIViewController {
         configureColorContainerView()
         configureDescriptionContainerView()
         configureBottomContainerView()
+        
     }
     
     private func configureWholeContainerView() {
+        
+        
         view.addSubview(wholeContainerView)
         
         wholeContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -245,7 +320,7 @@ class AddNameViewController: UIViewController {
             wholeContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             wholeContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             wholeContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            wholeContainerView.heightAnchor.constraint(equalToConstant: 600)
+            wholeContainerView.heightAnchor.constraint(equalToConstant: 700)
         ])
     }
     
@@ -353,6 +428,7 @@ class AddNameViewController: UIViewController {
         
         collectionView.dataSource = self
         collectionView.delegate = self
+        
         collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: ColorCollectionViewCell.identifier)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -446,7 +522,7 @@ class AddNameViewController: UIViewController {
         ])
     }
     
-   
+    
     
     private func configureBottomContainerView() {
         wholeContainerView.addSubview(bottomContainerView)
@@ -474,28 +550,24 @@ class AddNameViewController: UIViewController {
 //MARK: - UITextFieldDelegate
 
 extension AddNameViewController: UITextFieldDelegate {
+    
+    
     func textFieldDidChangeSelection(_ textField: UITextField) {
         
         if textField == nameTextField {
-            guard let textFieldCount = textField.text?.count else { return }
-            
-            let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            attributedText.append(NSAttributedString(string: "/20", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-            tfCountLabel.attributedText = attributedText
-        } else {
-            guard let textFieldCount = textField.text?.count else { return }
-            
-            let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-            descriptionCountLabel.attributedText = attributedText
+            if let trimmedTextCount = textField.text?.trimmingCharacters(in: .whitespaces).count {
+                isReadyToSave = trimmedTextCount == 0 ? false : true
+            }
         }
         
+        setAttributedText(sender: textField)
     }
     
-    
-    
     func textFieldDidBeginEditing(_ textField: UITextField) {
+        
         activeTextField = textField
+        
+        
         if textField == descriptionTextField {
             enclosingDescriptionView.backgroundColor = .white
             enclosingDescriptionView.layer.borderColor = UIColor.blue.withAlphaComponent(0.8).cgColor
@@ -503,6 +575,13 @@ extension AddNameViewController: UITextFieldDelegate {
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
+        if let trimmedTextCount = textField.text?.trimmingCharacters(in: .whitespaces).count {
+            if trimmedTextCount == 0 {
+                textField.text = ""
+                setAttributedText(sender: textField)
+                
+            }
+        }
         activeTextField = nil
     }
     
@@ -515,17 +594,17 @@ extension AddNameViewController: UITextFieldDelegate {
         
         
         let currentText = textField.text ?? ""
-
+        
         // attempt to read the range they are trying to change, or exit if we can't
         guard let stringRange = Range(range, in: currentText) else { return false }
-
+        
         // add their new text to the existing text
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-
+        
         // make sure the result is under 16 characters
         return updatedText.count <= maxCount
     }
-
+    
 }
 
 //MARK: - UICollectionViewDataSource
@@ -537,25 +616,40 @@ extension AddNameViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCollectionViewCell.identifier, for: indexPath) as! ColorCollectionViewCell
+        if indexPath.row == 0 {
+            cell.setUpInitialColor(with: colors[indexPath.row])
+            cell.isSelected = true
+            
+        } else {
+            cell.setUpInitialColor(with: colors[indexPath.row])
+        }
         
-        cell.setUpInitialColor(with: colors[indexPath.row])
         return cell
     }
-    
-    
 }
 
 //MARK: - UICollectionViewdelegate
 
 extension AddNameViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        //add here
         
-        
+        let selectedIndexPath = IndexPath(item: 0, section: 0)
+        collectionView.selectItem(at: selectedIndexPath, animated: false, scrollPosition: [])
+    }
+}
 
+extension AddNameViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let location = gestureRecognizer.location(in: self.wholeContainerView)
         
+        let convertedRectBounds = collectionView.convert(collectionView.bounds, to: self.wholeContainerView)
         
-        
-        
+        if convertedRectBounds.contains(location) {
+            return false
+        } else {
+            return true
+        }
         
     }
 }

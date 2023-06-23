@@ -11,8 +11,8 @@ import FirebaseAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
-
+//    let userCategory = UserCategory.shared
+//    var categories: [Category] = []
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -20,19 +20,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let email = "ABC@gmail.com"
         let password = "111111"
-//        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-//            if error != nil { return }
-//            print("Seems like successful")
-//        }
         
-        Auth.auth().signIn(withEmail: email, password: password) {  authResult, error in
-//          guard let self = self else { return }
-            if error != nil {
-                print(error)
-                return }
-            print("Log in successfully")
-            
+        FavoriteSerivce.fetchCategory { categories in
+            UserCategory.shared.userCategories = categories
         }
+        
+        if let currentUser = Auth.auth().currentUser {
+            
+            COLLECTION_USERS.document(currentUser.uid).setData([
+                "email": currentUser.email!, "uid": currentUser.uid, "nickname": "LEO"
+            ])
+            print("Set document Successfully")
+        }
+        
+        
+        
         window = UIWindow(windowScene: windowScene)
 //        let navController = UINavigationController(rootViewController: ViewController())
         

@@ -27,7 +27,8 @@ class FavoriteViewController: UIViewController {
     var categories: [Category] = [] {
         didSet {
             DispatchQueue.main.async {
-                self.FavoriteTableView.reloadData()
+//                self.FavoriteTableView.reloadData()
+                print("Tableview reloaded")
             }
         }
     }
@@ -86,6 +87,8 @@ class FavoriteViewController: UIViewController {
     lazy var FavoriteTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(CreateCell.self, forCellReuseIdentifier: CreateCell.identifier)
+        tableView.dataSource = self
+        tableView.delegate = self
         tableView.allowsMultipleSelection = true
         return tableView
     }()
@@ -101,13 +104,18 @@ class FavoriteViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setCategoriesAndInitalCategories()
         setTitleLabel()
-        fetchCategories()
-        
         configureUI()
         addGesutreonView()
+
         
     }
+    override func viewWillAppear(_ animated: Bool) {
+        
+        markSelectedRow()
+    }
+    
     
     
     init(with place: FetchedPlace) {
@@ -139,8 +147,34 @@ class FavoriteViewController: UIViewController {
             finishedSelection.insert(category)
         }
         
-        removeCategories()
-        addCategories()
+        
+        let group = DispatchGroup()
+
+        group.enter()
+        self.removeCategories {
+            group.leave()
+        }
+
+        group.enter()
+        addCategories {
+            group.leave()
+        }
+        
+
+        
+        
+        guard let vc = presentingViewController as? ViewController else { return }
+        group.notify(queue: .main) {
+            
+            vc.resultView.resetCateogryViewAndSavedLabel()
+            vc.resultView.changelayOut()
+            print("Changelayout")
+            
+        }
+        view.backgroundColor = .clear
+        dismiss(animated: true)
+        
+        
         
     }
     
@@ -156,6 +190,26 @@ class FavoriteViewController: UIViewController {
     }
     //MARK: - Helpers
     
+    func setCategoriesAndInitalCategories() {
+        
+        
+        categories = UserInfo.shared.categories
+        initialSelection = Set(UserInfo.shared.addedCategories)
+        print("Categories reset")
+        
+    }
+    
+    func setCategoriesAndInitalCategoriesThenReload() {
+        
+        
+        categories = UserInfo.shared.categories
+//        initialSelection = Set(UserInfo.shared.addedCategories)
+        print("Categories reset")
+        FavoriteTableView.reloadData()
+        
+        markSelectedRow()
+    }
+    
     private func changeSaveButtonUIAccordingly() {
         switch initialSelection.isEmpty {
         case true:
@@ -169,22 +223,44 @@ class FavoriteViewController: UIViewController {
         
     }
     
-    private func removeCategories() {
+    private func removeCategories(completion: (() -> Void)? = nil) {
+        
         let shouldRemoved = initialSelection.subtracting(finishedSelection)
+        let group = DispatchGroup()
         for category in shouldRemoved {
-            
+            group.enter()
             FavoriteSerivce.deleteFavorite(category: category, place: fetchedPlace) {
+                defer { group.leave() }
+                UserInfo.shared.addedCategories.removeAll(where: { $0.categoryUID == category.categoryUID})
+                print("Removed Category done")
                 
             }
         }
+        group.notify(queue: .main) {
+            completion?()
+        }
     }
     
-    private func addCategories() {
+    private func addCategories(completion: (() -> Void)? = nil ) {
         let shouldAdded = finishedSelection.subtracting(initialSelection)
-        for category in shouldAdded {
-            FavoriteSerivce.addFavorite(category: category, place: fetchedPlace) {
+        print(shouldAdded)
+        print(fetchedPlace.title)
+        let group = DispatchGroup()
+        
+        for item in shouldAdded {
+            group.enter()
+            FavoriteSerivce.addFavorite(category: item, place: fetchedPlace) {
+                defer { group.leave() }
+                UserInfo.shared.addedCategories.append(item)
+//                print("Category is \(item.title)")
+                print("Adding Category Done")
+                
+                print(UserInfo.shared.addedCategories.contains(item))
                 
             }
+        }
+        group.notify(queue: .main) {
+            completion?()
         }
     }
     
@@ -192,7 +268,26 @@ class FavoriteViewController: UIViewController {
         topLabel.text = fetchedPlace.title
     }
     
+    func markSelectedRow() {
+        
+        for category in UserInfo.shared.addedCategories {
+            if let index = self.categories.firstIndex(where: { $0.categoryUID == category.categoryUID}) {
+                self.FavoriteTableView.selectRow(at: IndexPath(row: index + 1, section: 0), animated: true, scrollPosition: .none)
+                print("low highlighted")
+                self.currentSelected = self.FavoriteTableView.indexPathsForSelectedRows
+                
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
     func fetchCategories() {
+        
         FavoriteSerivce.fetchCategory { categories in
             self.categories = categories.sorted(by: { $0.timeStamp.dateValue() > $1.timeStamp.dateValue()})
             
@@ -207,6 +302,7 @@ class FavoriteViewController: UIViewController {
                         self.initialSelection.insert(category)
                         if let index = self.categories.firstIndex(where: { $0.categoryUID == category.categoryUID}) {
                             self.FavoriteTableView.selectRow(at: IndexPath(row: index + 1, section: 0), animated: true, scrollPosition: .none)
+                            
                             self.currentSelected = self.FavoriteTableView.indexPathsForSelectedRows
                         }
                     }
@@ -214,163 +310,163 @@ class FavoriteViewController: UIViewController {
             }
         }
     }
-    
-    private func addGesutreonView() {
-        view.addGestureRecognizer(outsideGesture)
-        outsideGesture.delegate = self
-    }
-    
-    private func configureUI() {
-        configureContainerView()
-        configureTopContainerView()
-        configureBottomContainerView()
-        configureTableView()
-    }
-    
-    private func configureContainerView() {
-        view.addSubview(containerView)
-        containerView.translatesAutoresizingMaskIntoConstraints = false
         
-        NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            containerView.heightAnchor.constraint(equalToConstant: 700)
-            
-        ])
-    }
-    
-    private func configureBottomContainerView() {
-        containerView.addSubview(bottomContainerView)
-        bottomContainerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            bottomContainerView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            bottomContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            bottomContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            bottomContainerView.heightAnchor.constraint(equalToConstant: 80)
-        ])
-        bottomContainerView.addSubview(saveButton)
-        saveButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            saveButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20),
-            saveButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
-            saveButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
-            saveButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
-        
-    }
-    
-    private func configureTableView() {
-        containerView.addSubview(FavoriteTableView)
-        FavoriteTableView.rowHeight = 50
-        FavoriteTableView.register(FavoriteCell.self, forCellReuseIdentifier: FavoriteCell.identifier)
-        FavoriteTableView.dataSource = self
-        FavoriteTableView.delegate = self
-        FavoriteTableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            FavoriteTableView.topAnchor.constraint(equalTo: topContainerView.bottomAnchor),
-            FavoriteTableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            FavoriteTableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            FavoriteTableView.bottomAnchor.constraint(equalTo: bottomContainerView.topAnchor)
-        ])
-    }
-    
-    private func configureTopContainerView() {
-        
-        let height: CGFloat = 20
-        containerView.addSubview(topContainerView)
-        topContainerView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            topContainerView.topAnchor.constraint(equalTo: containerView.topAnchor),
-            topContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
-            topContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
-            topContainerView.heightAnchor.constraint(equalToConstant: 60)
-        ])
-        
-        topContainerView.addSubview(topLeftImageView)
-        topLeftImageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topLeftImageView.centerYAnchor.constraint(equalTo: topContainerView.centerYAnchor),
-            topLeftImageView.leadingAnchor.constraint(equalTo: topContainerView.leadingAnchor, constant: 20),
-            topLeftImageView.widthAnchor.constraint(equalToConstant: 20),
-            topLeftImageView.heightAnchor.constraint(equalToConstant: height)
-        ])
-        
-        topContainerView.addSubview(topRightImageView)
-        topRightImageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topRightImageView.centerYAnchor.constraint(equalTo: topContainerView.centerYAnchor),
-            topRightImageView.trailingAnchor.constraint(equalTo: topContainerView.trailingAnchor, constant: -5),
-            topRightImageView.heightAnchor.constraint(equalToConstant: height),
-            topRightImageView.widthAnchor.constraint(equalToConstant: 20)
-        ])
-        
-        topContainerView.addSubview(topLabel)
-        
-        topLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            topLabel.centerYAnchor.constraint(equalTo: topContainerView.centerYAnchor),
-            topLabel.leadingAnchor.constraint(equalTo: topLeftImageView.leadingAnchor, constant: 25),
-            topLabel.heightAnchor.constraint(equalToConstant: height),
-            topLabel.trailingAnchor.constraint(equalTo: topRightImageView.leadingAnchor, constant: -10)
-        ])
-    }
-}
-
-//MARK: - UITableViewDataSource
-extension FavoriteViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count + 1
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        if indexPath.row == 0 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
-            return cell
-            
-        } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteCell.identifier, for: indexPath) as! FavoriteCell
-            cell.setOtherIndexPathLabel(with: categories[indexPath.row - 1])
-            return cell
-        }
-    }
-}
-
-//MARK: - UITableViewDelegate
-
-extension FavoriteViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        
-        if indexPath.row == 0 {
-            let VC = AddNameViewController()
-            VC.modalPresentationStyle = .overFullScreen
-            tableView.deselectRow(at: indexPath, animated: true)
-            present(VC, animated: true)
+        private func addGesutreonView() {
+            view.addGestureRecognizer(outsideGesture)
+            outsideGesture.delegate = self
         }
         
-        currentSelected = FavoriteTableView.indexPathsForSelectedRows
-    }
-    
-    func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-        currentSelected = FavoriteTableView.indexPathsForSelectedRows
-    }
-}
-
-//MARK: - UIGestureRecognizerDelegate
-
-extension FavoriteViewController: UIGestureRecognizerDelegate {
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer == outsideGesture {
-            let location = gestureRecognizer.location(in: view)
-            if containerView.frame.contains(location) {
+        private func configureUI() {
+            configureContainerView()
+            configureTopContainerView()
+            configureBottomContainerView()
+            configureTableView()
+        }
+        
+        private func configureContainerView() {
+            view.addSubview(containerView)
+            containerView.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                containerView.heightAnchor.constraint(equalToConstant: 700)
                 
-                return false
+            ])
+        }
+        
+        private func configureBottomContainerView() {
+            containerView.addSubview(bottomContainerView)
+            bottomContainerView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                bottomContainerView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+                bottomContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+                bottomContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+                bottomContainerView.heightAnchor.constraint(equalToConstant: 80)
+            ])
+            bottomContainerView.addSubview(saveButton)
+            saveButton.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                saveButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -20),
+                saveButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
+                saveButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
+                saveButton.heightAnchor.constraint(equalToConstant: 50)
+            ])
+            
+        }
+        
+        private func configureTableView() {
+            containerView.addSubview(FavoriteTableView)
+            FavoriteTableView.rowHeight = 50
+            FavoriteTableView.register(FavoriteCell.self, forCellReuseIdentifier: FavoriteCell.identifier)
+            FavoriteTableView.dataSource = self
+            FavoriteTableView.delegate = self
+            FavoriteTableView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                FavoriteTableView.topAnchor.constraint(equalTo: topContainerView.bottomAnchor),
+                FavoriteTableView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+                FavoriteTableView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+                FavoriteTableView.bottomAnchor.constraint(equalTo: bottomContainerView.topAnchor)
+            ])
+        }
+        
+        private func configureTopContainerView() {
+            
+            let height: CGFloat = 20
+            containerView.addSubview(topContainerView)
+            topContainerView.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                topContainerView.topAnchor.constraint(equalTo: containerView.topAnchor),
+                topContainerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
+                topContainerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
+                topContainerView.heightAnchor.constraint(equalToConstant: 60)
+            ])
+            
+            topContainerView.addSubview(topLeftImageView)
+            topLeftImageView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                topLeftImageView.centerYAnchor.constraint(equalTo: topContainerView.centerYAnchor),
+                topLeftImageView.leadingAnchor.constraint(equalTo: topContainerView.leadingAnchor, constant: 20),
+                topLeftImageView.widthAnchor.constraint(equalToConstant: 20),
+                topLeftImageView.heightAnchor.constraint(equalToConstant: height)
+            ])
+            
+            topContainerView.addSubview(topRightImageView)
+            topRightImageView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                topRightImageView.centerYAnchor.constraint(equalTo: topContainerView.centerYAnchor),
+                topRightImageView.trailingAnchor.constraint(equalTo: topContainerView.trailingAnchor, constant: -5),
+                topRightImageView.heightAnchor.constraint(equalToConstant: height),
+                topRightImageView.widthAnchor.constraint(equalToConstant: 20)
+            ])
+            
+            topContainerView.addSubview(topLabel)
+            
+            topLabel.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                topLabel.centerYAnchor.constraint(equalTo: topContainerView.centerYAnchor),
+                topLabel.leadingAnchor.constraint(equalTo: topLeftImageView.leadingAnchor, constant: 25),
+                topLabel.heightAnchor.constraint(equalToConstant: height),
+                topLabel.trailingAnchor.constraint(equalTo: topRightImageView.leadingAnchor, constant: -10)
+            ])
+        }
+    }
+    
+    //MARK: - UITableViewDataSource
+    extension FavoriteViewController: UITableViewDataSource {
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return categories.count + 1
+        }
+        
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            
+            if indexPath.row == 0 {
+                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+                return cell
+                
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteCell.identifier, for: indexPath) as! FavoriteCell
+                cell.setOtherIndexPathLabel(with: categories[indexPath.row - 1])
+                return cell
             }
         }
-        return true
     }
-}
-
+    
+    //MARK: - UITableViewDelegate
+    
+    extension FavoriteViewController: UITableViewDelegate {
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            
+            
+            if indexPath.row == 0 {
+                let VC = AddNameViewController()
+                VC.modalPresentationStyle = .overFullScreen
+                tableView.deselectRow(at: indexPath, animated: true)
+                present(VC, animated: true)
+            }
+            
+            currentSelected = FavoriteTableView.indexPathsForSelectedRows
+        }
+        
+        func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+            currentSelected = FavoriteTableView.indexPathsForSelectedRows
+        }
+    }
+    
+    //MARK: - UIGestureRecognizerDelegate
+    
+    extension FavoriteViewController: UIGestureRecognizerDelegate {
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            if gestureRecognizer == outsideGesture {
+                let location = gestureRecognizer.location(in: view)
+                if containerView.frame.contains(location) {
+                    
+                    return false
+                }
+            }
+            return true
+        }
+    }
+    

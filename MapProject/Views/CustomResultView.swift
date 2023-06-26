@@ -17,58 +17,71 @@ class CustomResultView: UIView {
     
     static let identifier = "PlaceTableViewHeader"
     
-    var fetchedPlace: FetchedPlace?
+    var fetchedPlace: FetchedPlace? {
+        didSet {
+            DispatchQueue.main.async {
+                self.setLabels()
+            }
+        }
+    }
     
-    var categories: [Category] = []
-    var addPlaceCategories: [Category] = []
     
-    let padding: CGFloat = 10
+    let padding: CGFloat                    = 10
+    
     let titleNameLabel: UILabel = {
        let label = UILabel()
         
-        label.text = "양산 물금한신더휴 아파트"
-        label.textColor = .blue.withAlphaComponent(0.60)
-        label.font = UIFont.boldSystemFont(ofSize: 17)
+        label.text                          = "양산 물금한신더휴 아파트"
+        label.textColor                     = .blue.withAlphaComponent(0.60)
+        label.font                          = UIFont.boldSystemFont(ofSize: 17)
         return label
     }()
     
     let addressLabel: UILabel = {
        let label = UILabel()
-        label.text = "경상남도 양산시 가촌서로 11 물금한신더휴 아파트"
-        label.font = UIFont.systemFont(ofSize: 14)
+        label.text                          = "경상남도 양산시 가촌서로 11 물금한신더휴 아파트"
+        label.font                          = UIFont.systemFont(ofSize: 14)
         return label
         
     }()
     
     let distanceLabel: UILabel = {
-       let label = UILabel()
-        label.text = "40km"
-        label.font = UIFont.systemFont(ofSize: 13)
+       let label                            = UILabel()
+        label.text                          = "40km"
+        label.font                          = UIFont.systemFont(ofSize: 13)
         return label
     }()
     
-    let lowerStackView = UIStackView()
-    
     let spacerView: UIView = {
-       let myView = UIView()
-        myView.backgroundColor = .systemGray3
+       let myView                           = UIView()
+        myView.backgroundColor              = .systemGray3
         return myView
     }()
     
     let favoriteImageView: UIImageView = {
-       let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "star")
-        imageView.tintColor = .gray
-        imageView.clipsToBounds = true
-        imageView.isUserInteractionEnabled = true
+       let imageView                        = UIImageView()
+        imageView.image                     = UIImage(systemName: "star")
+        imageView.tintColor                 = .gray
+        imageView.clipsToBounds             = true
+        imageView.isUserInteractionEnabled  = true
         return imageView
     }()
     
+    let categoryView: CustomCategoryView = {
+       let view = CustomCategoryView()
+        
+        return view
+    }()
+    
+    lazy var savedLabel: UILabel = {
+       let label                            = UILabel()
+        label.numberOfLines                 = 1
+        label.adjustsFontSizeToFitWidth     = true
+        label.text                          = "and 1 more"
+        return label
+    }()
+    
     var delegate: CustomResultViewDelegate?
-    
-    
-    
-
     
     //MARK: - Lifecycle
     override init(frame: CGRect) {
@@ -92,47 +105,97 @@ class CustomResultView: UIView {
     
     //MARK: - Helpers
     
-    func fetchCategories() {
-        guard let fetchedPlace = self.fetchedPlace else { return }
-        FavoriteSerivce.fetchCategory { categories in
-            let sortedCategories = categories.sorted(by: { $0.timeStamp.dateValue() > $1.timeStamp.dateValue()})
+    func changelayOut() {
+        let addedCategory = UserInfo.shared.addedCategories
+        
+        DispatchQueue.main.async {
+            switch addedCategory.isEmpty {
+            case true:
+                self.categoryView.isHidden                  = true
+                self.savedLabel.isHidden                    = true
+                self.favoriteImageView.image                = UIImage(systemName: "star")
+                self.favoriteImageView.tintColor            = .gray
+            case false:
+                self.categoryView.isHidden                  = false
+                self.savedLabel.isHidden                    = false
+                self.favoriteImageView.image                = UIImage(systemName: "star.fill")
+                self.favoriteImageView.tintColor            = .orange.withAlphaComponent(0.8)
+                guard let firstAddedCategory                = addedCategory.first else { print("I cannot grab firstAddedCategory"); return }
+                self.categoryView.label.text                = firstAddedCategory.title
+                self.categoryView.leftImageView.tintColor   = CustomColor.colors[firstAddedCategory.colorNumber]
+                self.savedLabel.text                        = addedCategory.count >= 2 ? "and \(addedCategory.count - 1) more" : " Saved"
+            }
             
-            for category in sortedCategories {
-                guard let categoryUID = category.categoryUID else { return }
-                let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(categoryUID).collection("places").whereField("title", isEqualTo: fetchedPlace.title)
+            self.categoryView.layer.cornerRadius            = self.categoryView.frame.height / 2
+            
+        }
+    }
+    func resetCateogryViewAndSavedLabel() {
+        DispatchQueue.main.async {
+            self.categoryView.isHidden              = true
+            self.savedLabel.isHidden                = true
+            self.favoriteImageView.image            = UIImage(named: "star")
+            self.favoriteImageView.tintColor        = .gray
+            let a = ["a"]
+            
+            
+        }
+    }
+    
+    func fetchCategories(completion:( () -> Void)? = nil) {
+
+        guard let fetchedPlace = self.fetchedPlace else {
+            print("There is no fetchedPlace")
+            return
+        }
+        let group = DispatchGroup()
+        var addedCategories: [Category] = []
+        for category in UserInfo.shared.categories {
+            group.enter()
+            print("Entering")
+            guard let categoryUID = category.categoryUID else { return }
+            
+            let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(categoryUID).collection("places").whereField("title", isEqualTo: fetchedPlace.title)
+            query.getDocuments { snapshot, error in
+                defer { group.leave() }
                 
-                query.getDocuments { snapshot, error in
-                    guard let document = snapshot?.documents else { return }
+                guard let document = snapshot?.documents else { return }
+                
+                if document.isEmpty == false {
                     
-                    if document.isEmpty == false {
-                        
-                        self.addPlaceCategories.append(category)
-                        print(category.title)
-                    }
+                    
+                    addedCategories.append(category)
+                    
                 }
             }
         }
-
+        group.notify(queue: .main) {
+            UserInfo.shared.addedCategories = addedCategories
+            completion?()
+        }
     }
     
-    
-    
-    
-    
-    func setLabels(with fetchedPlace: FetchedPlace) {
-        self.fetchedPlace = fetchedPlace
+    func setLabels() {
+        guard let fetchedPlace else { return }
+        
         titleNameLabel.text = fetchedPlace.title
-        addressLabel.text = fetchedPlace.address
-        distanceLabel.text = "50Km"
+        addressLabel.text   = fetchedPlace.address
+        distanceLabel.text  = "50Km"
+    }
+    
+    private func setSavedCategoryLabel() {
+        if UserInfo.shared.addedCategories.count >= 2 {
+            
+        }
     }
     
 
     private func configureSelf() {
-        isHidden = true
-        backgroundColor = .white
-        layer.cornerRadius = 6
-        layer.borderWidth = 0.2
-        layer.borderColor = UIColor.gray.cgColor
+        isHidden                = true
+        backgroundColor         = .white
+        layer.cornerRadius      = 6
+        layer.borderWidth       = 0.2
+        layer.borderColor       = UIColor.gray.cgColor
     }
     
     private func configureUI() {
@@ -145,30 +208,48 @@ class CustomResultView: UIView {
             titleNameLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: padding),
             titleNameLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             titleNameLabel.heightAnchor.constraint(equalToConstant: 35)
-//            titleNameLabel.heightAnchor.constraint(equalToConstant: 30)
+
         ])
         
-        addSubview(lowerStackView)
-        lowerStackView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(addressLabel)
+        addressLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            lowerStackView.topAnchor.constraint(equalTo: titleNameLabel.bottomAnchor),
-            lowerStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: padding),
-            lowerStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            lowerStackView.heightAnchor.constraint(equalToConstant: 42)
+            addressLabel.topAnchor.constraint(equalTo: titleNameLabel.bottomAnchor),
+            addressLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+            addressLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            addressLabel.heightAnchor.constraint(equalToConstant: 20)
         ])
 
-       
-        lowerStackView.addArrangedSubview(addressLabel)
-        lowerStackView.addArrangedSubview(distanceLabel)
-
+       addSubview(distanceLabel)
+        distanceLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            distanceLabel.topAnchor.constraint(equalTo: addressLabel.bottomAnchor),
+            distanceLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+            distanceLabel.widthAnchor.constraint(equalToConstant: 40),
+            distanceLabel.heightAnchor.constraint(equalToConstant: 20)
+        ])
         
-        lowerStackView.axis = .vertical
-        lowerStackView.distribution = .fillEqually
+        addSubview(categoryView)
+        categoryView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            categoryView.centerYAnchor.constraint(equalTo: distanceLabel.centerYAnchor),
+            categoryView.leadingAnchor.constraint(equalTo: distanceLabel.trailingAnchor, constant: 5),
+            
+        ])
         
+        addSubview(savedLabel)
+        savedLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            savedLabel.centerYAnchor.constraint(equalTo: distanceLabel.centerYAnchor),
+            savedLabel.leadingAnchor.constraint(equalTo: categoryView.trailingAnchor, constant: 5),
+            
+        ])
+        
+    
         addSubview(spacerView)
         spacerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            spacerView.topAnchor.constraint(equalTo: lowerStackView.bottomAnchor, constant: 4),
+            spacerView.topAnchor.constraint(equalTo: distanceLabel.bottomAnchor, constant: 4),
             spacerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             spacerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             spacerView.heightAnchor.constraint(equalToConstant: 0.7)
@@ -182,6 +263,9 @@ class CustomResultView: UIView {
             favoriteImageView.widthAnchor.constraint(equalToConstant: 20),
             favoriteImageView.heightAnchor.constraint(equalToConstant: 20)
         ])
+        
+        
+        
     }
 }
 

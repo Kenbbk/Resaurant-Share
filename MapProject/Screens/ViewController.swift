@@ -122,7 +122,7 @@ class ViewController: UIViewController {
         return myView
     }()
     
-    private lazy var resultView: CustomResultView = {
+    lazy var resultView: CustomResultView = {
         let myView = CustomResultView()
         
         return myView
@@ -130,7 +130,7 @@ class ViewController: UIViewController {
     }()
     
     private lazy var favoriteView: UIView = {
-       let myView = UIView()
+        let myView = UIView()
         myView.isHidden = true
         return myView
     }()
@@ -144,7 +144,7 @@ class ViewController: UIViewController {
         
         configureUI()
         
-       
+        
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: 37.3588603, lng: 127.1052063)
         marker.mapView = naverMap
@@ -162,21 +162,12 @@ class ViewController: UIViewController {
         }
         infoWindow.open(with: marker)
         
-        guard let user = Auth.auth().currentUser else { return }
+        guard let _ = Auth.auth().currentUser else { return }
         
         containerView.isHidden = true
-//        FavoriteSerivce.fetchCategory(category: "category") { places in
-//            for place in places {
-//                print(place)
-//                let lat = place.lat
-//                let lon = place.lon
-//                let marker = NMFMarker(position: NMGLatLng(lat: lat, lng: lon))
-//                marker.captionText = place.title
-//                marker.mapView = self.naverMap
-//            }
-//        }
         
-
+        
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -314,20 +305,12 @@ class ViewController: UIViewController {
         configureContainerView()
         configureResultView()
         configureFavoriteView()
-       
         
-//        naverMap.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(tapInsde(_:))))
+        
+        
     }
     
-//    @objc func tapInsde(_ gesture: UITapGestureRecognizer) {
-//        let location = gesture.location(in: self.view)
-//        if favoriteView.bounds.contains(location) == true {
-//            print("It is inside")
-//        } else {
-//            print("It is ouside")
-//        }
-//
-//    }
+    
     
     private func configureMap() {
         view.addSubview(naverMap)
@@ -502,7 +485,8 @@ extension ViewController: UITextFieldDelegate {
         guard let text = textField.text else { return }
         if text.isEmpty {
             isSearhcing = false
-            return }
+            return
+        }
         isSearhcing = true
         
         NetworkManager.shared.getSearchResult(query: text) { places in
@@ -543,11 +527,11 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         let selectedPlace = searchResult[indexPath.row]
         let originalText = selectedPlace.title
         let editedText = self.converHTMLString(with: originalText, targetString: "")
         let roadAddress = selectedPlace.roadAddress
-        
         
         resultView.isHidden = false
         
@@ -560,12 +544,18 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
             let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon)
             
             self.fetchedPlace = fetchedPlace
-            self.resultView.fetchCategories()
+            self.resultView.fetchedPlace = fetchedPlace
+            self.resultView.resetCateogryViewAndSavedLabel()
+            self.resultView.fetchCategories {
+                self.resultView.changelayOut()
+            }
+            
+            
+            
             DispatchQueue.main.async {
                 self.marker.position = searchedLocation
                 self.marker.captionText = editedText.string
                 self.marker.mapView = self.naverMap
-                self.resultView.setLabels(with: fetchedPlace)
                 self.naverMap.moveCamera(cameraUpdate)
                 self.placeTapped()
             }
@@ -580,20 +570,17 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 
 extension ViewController: CustomResultViewDelegate {
     func favoriteButtonTapped() {
-        print("Favorite image Tapped")
-        
         guard let fetchedPlace else { return }
         let vc = FavoriteViewController(with: fetchedPlace)
         vc.modalPresentationStyle = .overFullScreen
         
         present(vc, animated: true)
         
-
-
-        
+        print("Favorite image Tapped")
     }
-    
-    
 }
+
+
+
 
 

@@ -4,6 +4,10 @@
 <dict>
 	<key>NMFClientId</key>
 	<string>9wocr8t7k6</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Need Your Location</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Need Your Location</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

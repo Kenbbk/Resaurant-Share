@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let password = "111111"
         
         FavoriteSerivce.fetchCategory { categories in
-            UserCategory.shared.userCategories = categories
+            UserInfo.shared.categories = categories
         }
         
         if let currentUser = Auth.auth().currentUser {

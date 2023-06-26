@@ -32,7 +32,7 @@ struct FavoriteSerivce {
         }
     }
     
-    static func addCategory(with category: Category, completion: @escaping () -> Void) {
+    static func addCategory(with category: Category, completion: @escaping (Category) -> Void) {
         guard let user = Auth.auth().currentUser else { return }
         let uid = user.uid
         
@@ -46,7 +46,10 @@ struct FavoriteSerivce {
             "timeStamp": category.timeStamp,
             "categoryUID": documentPath.documentID
         ])
-        completion()
+        
+        var newCateogry = category
+        newCateogry.categoryUID = documentPath.documentID
+        completion(newCateogry)
     }
     
 //    static func deleteCategory(with category: Category, completion: @escaping () -> Void) {
@@ -67,8 +70,14 @@ struct FavoriteSerivce {
     //    }
     
     static func addFavorite(category: Category, place: FetchedPlace, completion: @escaping () -> Void) {
-        guard let uid else { return }
-        guard let categoryUID = category.categoryUID else { return }
+        guard let uid else {
+            print("UID doesn't exist")
+            return }
+        
+        guard let categoryUID = category.categoryUID else {
+            print("CategoryUID doesn't exist")
+            return }
+        
         COLLECTION_USERS.document(uid).collection("categories").document(categoryUID).collection("places").document(place.title).setData([
             "title": place.title,
             "address": place.address,

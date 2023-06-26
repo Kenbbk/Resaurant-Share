@@ -197,17 +197,16 @@ class AddNameViewController: UIViewController {
         let description = descriptionTextField.text!
         let timeStamp = Timestamp(date: Date())
         let category = Category(title: title, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
-        FavoriteSerivce.addCategory(with: category) {
+        FavoriteSerivce.addCategory(with: category) { categoryWithUID in
+            UserInfo.shared.categories.append(categoryWithUID)
             guard let presentingVC = self.presentingViewController as? FavoriteViewController else { return }
-            presentingVC.fetchCategories()
+            presentingVC.setCategoriesAndInitalCategoriesThenReload()
+            
             self.dismiss(animated: true)
             
             
             print("Saved")
         }
-        
-        
-        
     }
     
     @objc func keyboarWillShow(sender: Notification) {

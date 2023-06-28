@@ -13,6 +13,7 @@ import UIKit
 import NMapsMap
 import FirebaseFirestore
 import FirebaseAuth
+import CoreLocation
 
 enum ScrollViewPosition: CGFloat {
     //    case bottom = 0.87
@@ -25,6 +26,14 @@ enum ScrollViewPosition: CGFloat {
 class ViewController: UIViewController {
     
     //MARK: - Properties
+    
+    var lat: Double = 0 {
+        didSet {
+            print("Lat has been set ,\(lat)")
+            //            let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
+            //            self.naverMap.moveCamera(cameraUpdate)
+        }
+    }
     var fetchedPlace: FetchedPlace?
     
     var marker = NMFMarker()
@@ -137,11 +146,27 @@ class ViewController: UIViewController {
     let infoWindow = NMFInfoWindow()
     var customInfoWindowDataSource = CustomInfoWindowDataSource()
     
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.delegate = self
+        return manager
+    }()
+    
     //MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        locationManager.requestWhenInUseAuthorization()
+        //        locationManager.startUpdatingLocation()
+        //        if let location = locationManager.location {
+        //            print("There is location")
+        //            let lat = location.coordinate.latitude
+        //            let lon = location.coordinate.longitude
+        //            print("---------4-4-4-4-4-4-\(lat), \(lon)")
+        //        }
         configureUI()
         
         
@@ -295,6 +320,23 @@ class ViewController: UIViewController {
         searchTF.rightViewMode = .always
     }
     
+    private func moveCamera() {
+        
+        print("Moving Camera ka")
+        if let location = locationManager.location {
+            print("There is a location")
+            let lat = location.coordinate.latitude
+            let lon = location.coordinate.longitude
+            let naverLatLon = NMGLatLng(lat: lat, lng: lon)
+            print("______________________-\(lat), \(lon)")
+            let cameraUpdate = NMFCameraUpdate(scrollTo: naverLatLon)
+            self.naverMap.moveCamera(cameraUpdate)
+            let locationOverlay = naverMap.locationOverlay
+            locationOverlay.location = naverLatLon
+            locationOverlay.hidden = false
+        }
+    }
+    
     //MARK: - UI
     
     private func configureUI() {
@@ -309,8 +351,6 @@ class ViewController: UIViewController {
         
         
     }
-    
-    
     
     private func configureMap() {
         view.addSubview(naverMap)
@@ -492,6 +532,9 @@ extension ViewController: UITextFieldDelegate {
         NetworkManager.shared.getSearchResult(query: text) { places in
             guard let places else { return }
             print(places)
+//            for place in places {
+//                print("_________________________\(place.mapx), \(place.mapy)")
+//            }
             self.searchResult = places
         }
     }
@@ -535,17 +578,30 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         
         resultView.isHidden = false
         
-        NetworkManager.shared.getLatLon(with: roadAddress) { LatLon in
-            guard let LatLon else { return }
-            guard let lat = Double(LatLon.y), let lon = Double(LatLon.x) else { return }
+        
+        
+       
+        let currentLocation = locationManager.location
+        
+        
+        NetworkManager.shared.getLatLon(with: roadAddress, location: currentLocation) { coordinateAndDistance in
+            guard let coordinateAndDistance else { return }
+            let distance = coordinateAndDistance.distance
+            
+            
+            print("---------------------------------------\(distance)")
+            guard let lat = Double(coordinateAndDistance.y), let lon = Double(coordinateAndDistance.x) else { return }
+            
             
             let searchedLocation = NMGLatLng(lat: lat, lng: lon)
             let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
-            let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon)
+            
+            let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon, distance: distance )
             
             self.fetchedPlace = fetchedPlace
-            self.resultView.fetchedPlace = fetchedPlace
+            self.resultView.setPlaceAndLabels(fetchedPlace: fetchedPlace, thereIsUserLocation: currentLocation !== nil)
             self.resultView.resetCateogryViewAndSavedLabel()
+            
             self.resultView.fetchCategories {
                 self.resultView.changelayOut()
             }
@@ -580,7 +636,39 @@ extension ViewController: CustomResultViewDelegate {
     }
 }
 
-
+extension ViewController: CLLocationManagerDelegate {
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        //location5
+        switch status {
+        case .authorizedAlways, .authorizedWhenInUse:
+            print("GPS 권한 설정됨")
+//            self.locationManager.startUpdatingLocation() // 중요!
+            moveCamera()
+        case .restricted, .notDetermined:
+            print("GPS 권한 설정되지 않음")
+            locationManager.requestWhenInUseAuthorization()
+        case .denied:
+            print("GPS 권한 요청 거부됨")
+            locationManager.requestWhenInUseAuthorization()
+        default:
+            print("GPS: Default")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if locations.first == nil { return }
+        print("LocationManager didupdateLocations called")
+        
+//        let location = locations[locations.count - 1]
+//
+//        let lon = location.coordinate.longitude
+//        let lat = location.coordinate.latitude
+//        self.lat = lat
+//        print("0-0-0-0-0-0-0-0-0-0-0-0-\(lat), \(lon)")
+        
+    }
+}
 
 
 

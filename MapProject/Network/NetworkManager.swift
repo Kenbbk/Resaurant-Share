@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 class NetworkManager {
     static let shared = NetworkManager()
@@ -60,8 +61,21 @@ class NetworkManager {
     }
 
     
-    func getLatLon(with address: String, completion: @escaping (Address?) -> Void) {
-        let urlString = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=\(address)"
+    func getLatLon(with address: String, location: CLLocation?, completion: @escaping (Address?) -> Void) {
+        //coordinate=127.1054328,37.3595963
+//        let locationManager = CLLocationManager()
+//        locationManager.delegate = self
+//        if let location = locationManager.location
+        
+//        let lat = 127.1054328
+//        let lon = 37.3595963
+        var urlString = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=\(address)"
+        
+        if let location {
+            urlString = urlString + "&coordinate=\(location.coordinate.longitude),\(location.coordinate.latitude)"
+            
+        }
+        
         
         let encodedURL = urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         let url = URL(string: encodedURL )

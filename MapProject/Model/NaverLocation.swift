@@ -16,6 +16,7 @@ struct Address: Codable {
     let englishAddress: String
     let x: String
     let y: String
+    let distance: Double
     
 }
 

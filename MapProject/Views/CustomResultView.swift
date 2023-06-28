@@ -17,19 +17,13 @@ class CustomResultView: UIView {
     
     static let identifier = "PlaceTableViewHeader"
     
-    var fetchedPlace: FetchedPlace? {
-        didSet {
-            DispatchQueue.main.async {
-                self.setLabels()
-            }
-        }
-    }
+    var fetchedPlace: FetchedPlace?
     
     
     let padding: CGFloat                    = 10
     
     let titleNameLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         
         label.text                          = "양산 물금한신더휴 아파트"
         label.textColor                     = .blue.withAlphaComponent(0.60)
@@ -38,28 +32,29 @@ class CustomResultView: UIView {
     }()
     
     let addressLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.text                          = "경상남도 양산시 가촌서로 11 물금한신더휴 아파트"
         label.font                          = UIFont.systemFont(ofSize: 14)
+        label.adjustsFontSizeToFitWidth     = true
         return label
         
     }()
     
     let distanceLabel: UILabel = {
-       let label                            = UILabel()
+        let label                            = UILabel()
         label.text                          = "40km"
         label.font                          = UIFont.systemFont(ofSize: 13)
         return label
     }()
     
     let spacerView: UIView = {
-       let myView                           = UIView()
+        let myView                           = UIView()
         myView.backgroundColor              = .systemGray3
         return myView
     }()
     
     let favoriteImageView: UIImageView = {
-       let imageView                        = UIImageView()
+        let imageView                        = UIImageView()
         imageView.image                     = UIImage(systemName: "star")
         imageView.tintColor                 = .gray
         imageView.clipsToBounds             = true
@@ -68,13 +63,13 @@ class CustomResultView: UIView {
     }()
     
     let categoryView: CustomCategoryView = {
-       let view = CustomCategoryView()
+        let view = CustomCategoryView()
         
         return view
     }()
     
     lazy var savedLabel: UILabel = {
-       let label                            = UILabel()
+        let label                            = UILabel()
         label.numberOfLines                 = 1
         label.adjustsFontSizeToFitWidth     = true
         label.text                          = "and 1 more"
@@ -106,6 +101,8 @@ class CustomResultView: UIView {
     //MARK: - Helpers
     
     func changelayOut() {
+        
+        resetCateogryViewAndSavedLabel()
         let addedCategory = UserInfo.shared.addedCategories
         
         DispatchQueue.main.async {
@@ -136,14 +133,14 @@ class CustomResultView: UIView {
             self.savedLabel.isHidden                = true
             self.favoriteImageView.image            = UIImage(named: "star")
             self.favoriteImageView.tintColor        = .gray
-            let a = ["a"]
+            
             
             
         }
     }
     
     func fetchCategories(completion:( () -> Void)? = nil) {
-
+        
         guard let fetchedPlace = self.fetchedPlace else {
             print("There is no fetchedPlace")
             return
@@ -175,12 +172,30 @@ class CustomResultView: UIView {
         }
     }
     
-    func setLabels() {
+    func setPlaceAndLabels(fetchedPlace: FetchedPlace, thereIsUserLocation: Bool ) {
+        self.fetchedPlace = fetchedPlace
+        setLabels(thereIsUserLocation: thereIsUserLocation)
+    }
+    
+    func setLabels(thereIsUserLocation: Bool) {
         guard let fetchedPlace else { return }
         
-        titleNameLabel.text = fetchedPlace.title
-        addressLabel.text   = fetchedPlace.address
-        distanceLabel.text  = "50Km"
+        DispatchQueue.main.async {
+            self.titleNameLabel.text = fetchedPlace.title
+            self.addressLabel.text   = fetchedPlace.address
+            
+            if thereIsUserLocation {
+                if let distance = fetchedPlace.distance {
+                    let roundedDistance = Int( ( distance / 1000 ).rounded())
+                    self.distanceLabel.text  = "\(roundedDistance)Km"
+                }
+            } else {
+                self.distanceLabel.text = ""
+            }
+        }
+       
+       
+        
     }
     
     private func setSavedCategoryLabel() {
@@ -189,7 +204,7 @@ class CustomResultView: UIView {
         }
     }
     
-
+    
     private func configureSelf() {
         isHidden                = true
         backgroundColor         = .white
@@ -208,7 +223,7 @@ class CustomResultView: UIView {
             titleNameLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: padding),
             titleNameLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             titleNameLabel.heightAnchor.constraint(equalToConstant: 35)
-
+            
         ])
         
         addSubview(addressLabel)
@@ -219,13 +234,13 @@ class CustomResultView: UIView {
             addressLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
             addressLabel.heightAnchor.constraint(equalToConstant: 20)
         ])
-
-       addSubview(distanceLabel)
+        
+        addSubview(distanceLabel)
         distanceLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             distanceLabel.topAnchor.constraint(equalTo: addressLabel.bottomAnchor),
             distanceLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            distanceLabel.widthAnchor.constraint(equalToConstant: 40),
+//            distanceLabel.widthAnchor.constraint(equalToConstant: 45),
             distanceLabel.heightAnchor.constraint(equalToConstant: 20)
         ])
         
@@ -245,7 +260,7 @@ class CustomResultView: UIView {
             
         ])
         
-    
+        
         addSubview(spacerView)
         spacerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -269,3 +284,5 @@ class CustomResultView: UIView {
     }
 }
 
+
+// 내일배움단, 내일배움캠프

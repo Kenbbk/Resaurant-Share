@@ -17,6 +17,10 @@ struct Place: Codable {
     
     let roadAddress: String
     let title: String
+   
+    
+
+
 }
 
 struct FetchedPlace {
@@ -24,12 +28,24 @@ struct FetchedPlace {
     let title: String
     let lat: Double
     let lon: Double
+    var distance: Double?
+    
+    
     
     init(title: String, address: String, lat: Double, lon: Double) {
         self.title = title
         self.address = address
         self.lat = lat
         self.lon = lon
+        
+    }
+    
+    init(title: String, address: String, lat: Double, lon: Double, distance: Double?) {
+        self.title = title
+        self.address = address
+        self.lat = lat
+        self.lon = lon
+        self.distance = distance
     }
     
     init(dictionary: [String: Any]) {

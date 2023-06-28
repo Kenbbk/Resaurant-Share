@@ -140,33 +140,39 @@ class FavoriteViewController: UIViewController {
     //MARK: - Actions
     
     @objc private func buttonTapped() {
-        guard let selectedIndexPath = FavoriteTableView.indexPathsForSelectedRows else { return }
-        
-        for indexpath in selectedIndexPath {
-            let category = categories[indexpath.row - 1]
-            finishedSelection.insert(category)
-        }
-        
-        
         let group = DispatchGroup()
+        if let selectedIndexPath = FavoriteTableView.indexPathsForSelectedRows {
+            for indexpath in selectedIndexPath {
+                let category = categories[indexpath.row - 1]
+                finishedSelection.insert(category)
+            }
+            
+            group.enter()
+            self.removeCategories {
+                group.leave()
+            }
 
-        group.enter()
-        self.removeCategories {
-            group.leave()
+            group.enter()
+            addCategories {
+                group.leave()
+            }
+        } else {
+            if initialSelection.isEmpty {
+                
+                return
+            } else {
+                group.enter()
+                removeCategories {
+                    group.leave()
+                }
+                
+            }
         }
-
-        group.enter()
-        addCategories {
-            group.leave()
-        }
-        
-
-        
         
         guard let vc = presentingViewController as? ViewController else { return }
         group.notify(queue: .main) {
             
-            vc.resultView.resetCateogryViewAndSavedLabel()
+            
             vc.resultView.changelayOut()
             print("Changelayout")
             

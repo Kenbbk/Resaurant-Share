@@ -150,9 +150,9 @@ class CustomResultView: UIView {
         for category in UserInfo.shared.categories {
             group.enter()
             print("Entering")
-            guard let categoryUID = category.categoryUID else { return }
             
-            let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(categoryUID).collection("places").whereField("title", isEqualTo: fetchedPlace.title)
+            
+            let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(category.categoryUID).collection("places").whereField("placeID", isEqualTo: fetchedPlace.placeID)
             query.getDocuments { snapshot, error in
                 defer { group.leave() }
                 
@@ -172,31 +172,38 @@ class CustomResultView: UIView {
         }
     }
     
-    func setPlaceAndLabels(fetchedPlace: FetchedPlace, thereIsUserLocation: Bool ) {
+    func setPlaceAndLabels(fetchedPlace: FetchedPlace, distance: NSNumber ) {
         self.fetchedPlace = fetchedPlace
-        setLabels(thereIsUserLocation: thereIsUserLocation)
+        DispatchQueue.main.async {
+            self.titleNameLabel.text = fetchedPlace.name
+            self.addressLabel.text = fetchedPlace.address
+            self.distanceLabel.text = "\(Int(distance))"
+        }
+//        setLabels(thereIsUserLocation: thereIsUserLocation)
     }
     
-    func setLabels(thereIsUserLocation: Bool) {
-        guard let fetchedPlace else { return }
-        
-        DispatchQueue.main.async {
-            self.titleNameLabel.text = fetchedPlace.title
-            self.addressLabel.text   = fetchedPlace.address
-            
-            if thereIsUserLocation {
-                if let distance = fetchedPlace.distance {
-                    let roundedDistance = Int( ( distance / 1000 ).rounded())
-                    self.distanceLabel.text  = "\(roundedDistance)Km"
-                }
-            } else {
-                self.distanceLabel.text = ""
-            }
-        }
-       
-       
-        
-    }
+    
+    
+//    func setLabels(thereIsUserLocation: Bool) {
+//        guard let fetchedPlace else { return }
+//
+//        DispatchQueue.main.async {
+//            self.titleNameLabel.text = fetchedPlace.name
+//            self.addressLabel.text   = fetchedPlace.address
+//
+//            if thereIsUserLocation {
+//                if let distance = fetchedPlace.distance {
+//                    let roundedDistance = Int( ( distance / 1000 ).rounded())
+//                    self.distanceLabel.text  = "\(roundedDistance)Km"
+//                }
+//            } else {
+//                self.distanceLabel.text = ""
+//            }
+//        }
+//
+//
+//
+//    }
     
     private func setSavedCategoryLabel() {
         if UserInfo.shared.addedCategories.count >= 2 {
@@ -285,4 +292,4 @@ class CustomResultView: UIView {
 }
 
 
-// 내일배움단, 내일배움캠프
+

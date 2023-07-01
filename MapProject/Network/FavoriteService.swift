@@ -32,24 +32,22 @@ struct FavoriteSerivce {
         }
     }
     
-    static func addCategory(with category: Category, completion: @escaping (Category) -> Void) {
+    static func addCategory(with category: Category, completion: @escaping () -> Void) {
         guard let user = Auth.auth().currentUser else { return }
         let uid = user.uid
         
         
-        let documentPath = COLLECTION_USERS.document(uid).collection("categories").document()
+        let documentPath = COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID)
         
         documentPath.setData([
             "title": category.title,
             "colorNumber": category.colorNumber,
             "description": category.description,
             "timeStamp": category.timeStamp,
-            "categoryUID": documentPath.documentID
+            "categoryUID": category.categoryUID
         ])
         
-        var newCateogry = category
-        newCateogry.categoryUID = documentPath.documentID
-        completion(newCateogry)
+        completion()
     }
     
 //    static func deleteCategory(with category: Category, completion: @escaping () -> Void) {
@@ -74,15 +72,15 @@ struct FavoriteSerivce {
             print("UID doesn't exist")
             return }
         
-        guard let categoryUID = category.categoryUID else {
-            print("CategoryUID doesn't exist")
-            return }
+       
         
-        COLLECTION_USERS.document(uid).collection("categories").document(categoryUID).collection("places").document(place.title).setData([
-            "title": place.title,
+        COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID).collection("places").document(place.placeID).setData([
+            
+            "title": place.name,
             "address": place.address,
             "lat": place.lat,
-            "lon": place.lon
+            "lon": place.lon,
+            "placeID": place.placeID
         ])
             completion()
        
@@ -90,8 +88,8 @@ struct FavoriteSerivce {
     
     static func deleteFavorite(category: Category, place: FetchedPlace, completion: @escaping () -> Void) {
         guard let uid else { return }
-        guard let categoryUID = category.categoryUID else { return }
-        COLLECTION_USERS.document(uid).collection("categories").document(categoryUID).collection("places").document(place.title).delete { _ in
+        
+        COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID).collection("places").document(place.placeID).delete { _ in
             completion()
         }
           

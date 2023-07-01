@@ -21,9 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let email = "ABC@gmail.com"
         let password = "111111"
         
-        FavoriteSerivce.fetchCategory { categories in
-            UserInfo.shared.categories = categories
-        }
+        
         
         if let currentUser = Auth.auth().currentUser {
             
@@ -38,8 +36,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
 //        let navController = UINavigationController(rootViewController: ViewController())
         
-        window?.rootViewController = ViewController()
-//        window?.rootViewController = ViewController()
+        window?.rootViewController = MapViewController()
         window?.makeKeyAndVisible()
     }
 

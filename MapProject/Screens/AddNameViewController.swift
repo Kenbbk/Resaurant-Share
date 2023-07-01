@@ -66,13 +66,14 @@ class AddNameViewController: UIViewController {
         return label
     }()
     
-    private let cancelImageView: UIImageView = {
+    private lazy var cancelImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "x.circle")
         iv.isUserInteractionEnabled = true
         iv.tintColor = .systemGray
         iv.isUserInteractionEnabled = true
         iv.clipsToBounds = true
+        iv.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(cancelImageTapped(_:))))
         
         return iv
     }()
@@ -103,7 +104,8 @@ class AddNameViewController: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: configureFlowLayout())
         
         collectionView.showsHorizontalScrollIndicator = false
-        
+        collectionView.dataSource = self
+        collectionView.delegate = self
         return collectionView
     }()
     
@@ -148,11 +150,9 @@ class AddNameViewController: UIViewController {
         return tf
     }()
     
-    
-    
-    
-    private let saveButton: UIButton = {
+    private lazy var saveButton: UIButton = {
         let button = UIButton()
+        button.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(saveButtonTapped(_:))))
         button.backgroundColor = .systemGray4
         button.setTitle("Save", for: .normal)
         button.layer.cornerRadius = 8
@@ -172,8 +172,6 @@ class AddNameViewController: UIViewController {
         super.viewDidLoad()
         
         configureUI()
-        addActionOnCancelImage()
-        addActionOnSaveButton()
         setupKeyboardHiding()
        
     }
@@ -196,63 +194,31 @@ class AddNameViewController: UIViewController {
         
         let description = descriptionTextField.text!
         let timeStamp = Timestamp(date: Date())
+        
+        
         let category = Category(title: title, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
-        FavoriteSerivce.addCategory(with: category) { categoryWithUID in
-            UserInfo.shared.categories.append(categoryWithUID)
+        FavoriteSerivce.addCategory(with: category) { 
+            UserInfo.shared.categories.append(category)
             guard let presentingVC = self.presentingViewController as? FavoriteViewController else { return }
             presentingVC.setCategoriesAndInitalCategoriesThenReload()
             
             self.dismiss(animated: true)
-            
             
             print("Saved")
         }
     }
     
     @objc func keyboarWillShow(sender: Notification) {
-        //        guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
-        //            let keyboardHeight = keyboardSize.height
-        //        let keyboardDuration = sender.userInfo![UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
-        //
-        //           // Keyboard's animation curve
-        //           let keyboardCurve = UIView.AnimationCurve(rawValue: sender.userInfo![UIResponder.keyboardAnimationCurveUserInfoKey] as! Int)!
-        //        view.frame.origin.y = view.frame.origin.y - 330
         
-        guard let keyboardSize = (sender.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
-            
-            // if keyboard size is not available for some reason, dont do anything
-            return
-        }
         
-        var shouldMoveViewUp = false
-        view.addGestureRecognizer(touchOutsideGesture)
+       view.addGestureRecognizer(touchOutsideGesture)
         // if active text field is not nil
         if activeTextField == descriptionTextField {
-            print(activeTextField)
+            print(activeTextField!)
             view.frame.origin.y = 0 - 80
         }
-        
-        //        view.frame.origin.y = -200
-        //        if let activeTextField = activeTextField {
-        //
-        //
-        //            let bottomOfTextField = activeTextField.convert(activeTextField.bounds, to: self.view).maxY
-        //
-        //            print(bottomOfTextField)
-        //            let topOfKeyboard = self.view.frame.height - keyboardSize.height
-        //
-        //            // if the bottom of Textfield is below the top of keyboard, move up
-        //            if bottomOfTextField > topOfKeyboard {
-        //                shouldMoveViewUp = true
-        //            }
-        //        }
-        //
-        //        if shouldMoveViewUp {
-        //            self.view.frame.origin.y = 0 - 40 - keyboardSize.height / 2
-        //        }
+       
     }
-    
-    
     
     @objc func keyboardWillHide(sender: Notification) {
         view.removeGestureRecognizer(touchOutsideGesture)
@@ -267,14 +233,7 @@ class AddNameViewController: UIViewController {
     
     //MARK: - Helpers
     
-    private func addActionOnCancelImage() {
-        cancelImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(cancelImageTapped(_:))))
-    }
-    
-    private func addActionOnSaveButton() {
-        saveButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(saveButtonTapped(_:))))
-    }
-    
+   
     private func setupKeyboardHiding() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboarWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -296,7 +255,6 @@ class AddNameViewController: UIViewController {
     }
     
     
-    
     //MARK: - UI
     
     private func configureUI() {
@@ -310,7 +268,6 @@ class AddNameViewController: UIViewController {
     }
     
     private func configureWholeContainerView() {
-        
         
         view.addSubview(wholeContainerView)
         
@@ -398,8 +355,6 @@ class AddNameViewController: UIViewController {
             spacer.trailingAnchor.constraint(equalTo: TFContainerView.trailingAnchor),
             spacer.heightAnchor.constraint(equalToConstant: 1)
         ])
-        
-        
     }
     
     private func configureColorContainerView() {
@@ -423,13 +378,12 @@ class AddNameViewController: UIViewController {
         ])
         
         colorContainverView.addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         
         
-        collectionView.dataSource = self
-        collectionView.delegate = self
         
         collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: ColorCollectionViewCell.identifier)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        
         
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: selecColorLabel.bottomAnchor, constant: 10),

@@ -14,26 +14,20 @@ import NMapsMap
 import FirebaseFirestore
 import FirebaseAuth
 import CoreLocation
+import GooglePlaces
 
 enum ScrollViewPosition: CGFloat {
-    //    case bottom = 0.87
-    case bottom = 0.90
+    
+    case bottom = 0.85
     case middle = 0.55
-    case top = 0.085
+    case top = 0.08
     
 }
 
-class ViewController: UIViewController {
+class MapViewController: UIViewController {
     
     //MARK: - Properties
     
-    var lat: Double = 0 {
-        didSet {
-            print("Lat has been set ,\(lat)")
-            //            let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
-            //            self.naverMap.moveCamera(cameraUpdate)
-        }
-    }
     var fetchedPlace: FetchedPlace?
     
     var marker = NMFMarker()
@@ -72,6 +66,8 @@ class ViewController: UIViewController {
     
     private lazy var mytableView: UITableView = {
         let tb = UITableView()
+        tb.delegate = self
+        tb.dataSource = self
         tb.isHidden = true
         return tb
     }()
@@ -120,11 +116,6 @@ class ViewController: UIViewController {
         return myView
     }()
     
-    private lazy var myTableView2: UITableView = {
-        let tableView = UITableView()
-        return tableView
-    }()
-    
     private lazy var disappearingView: UIView = {
         let myView = UIView()
         myView.backgroundColor = .systemPink
@@ -160,13 +151,6 @@ class ViewController: UIViewController {
         
         
         locationManager.requestWhenInUseAuthorization()
-        //        locationManager.startUpdatingLocation()
-        //        if let location = locationManager.location {
-        //            print("There is location")
-        //            let lat = location.coordinate.latitude
-        //            let lon = location.coordinate.longitude
-        //            print("---------4-4-4-4-4-4-\(lat), \(lon)")
-        //        }
         configureUI()
         
         
@@ -188,10 +172,38 @@ class ViewController: UIViewController {
         infoWindow.open(with: marker)
         
         guard let _ = Auth.auth().currentUser else { return }
+        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
         
-        containerView.isHidden = true
+        //        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
+        //        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt(GMSPlaceField.name.rawValue) |
+        //                                                  UInt(GMSPlaceField.placeID.rawValue))!
         
         
+//        GMSPlacesClient().findPlaceLikelihoodsFromCurrentLocation(withPlaceFields: fields, callback: {
+//            (placeLikelihoodList: Array<GMSPlaceLikelihood>?, error: Error?) in
+//            if let error = error {
+//                print("An error occurred: \(error.localizedDescription)")
+//                return
+//            }
+//
+//            if let placeLikelihoodList = placeLikelihoodList {
+//                for likelihood in placeLikelihoodList {
+//                    let place = likelihood.place
+//
+//                    print("Current Place name \(String(describing: place.name)) at likelihood \(likelihood.likelihood)")
+//                    print("Current PlaceID \(String(describing: place.placeID))")
+//                }
+//            }
+//        })
+        
+        //        containerView.isHidden = true
+        //        GooglePlacesManager.shared.getNearbyrestaurant()
+        //        GooglePlacesManager.shared.resolveLocation { image in
+        //            print("Image has been set")
+        //            self.leftImageView.image = image
+        //        }
+        
+        //MARK: - Google
         
     }
     
@@ -209,18 +221,11 @@ class ViewController: UIViewController {
     }
     
     @objc func leftButtonTapped(_ sender: UITapGestureRecognizer) {
-        if mytableView.isHidden {
-            
-            mytableView.isHidden = false
-            naverMap.isHidden = true
-            searchTF.rightViewMode = .never
-        } else {
-            mytableView.isHidden = true
-            naverMap.isHidden = false
-            leftImageView.image = UIImage(systemName: "map.circle")
-            
-            searchTF.rightViewMode = .whileEditing
-        }
+        
+        naverMap.isHidden = false
+        leftImageView.image = UIImage(systemName: "map.circle")
+        searchTF.rightViewMode = .whileEditing
+        mytableView.isHidden = true
         searchTF.endEditing(true)
         searchTF.text = ""
         isSearhcing = false
@@ -316,7 +321,6 @@ class ViewController: UIViewController {
         searchTF.endEditing(true)
         mytableView.isHidden = true
         naverMap.isHidden = false
-        //        leftImageView.image = UIImage(systemName: "map.circle")
         searchTF.rightViewMode = .always
     }
     
@@ -346,39 +350,18 @@ class ViewController: UIViewController {
         configureTableView()
         configureContainerView()
         configureResultView()
-        configureFavoriteView()
-        
-        
         
     }
     
     private func configureMap() {
         view.addSubview(naverMap)
-        
         naverMap.frame = view.bounds
         
     }
     
-    private func configureFavoriteView() {
-        
-        view.addSubview(favoriteView)
-        favoriteView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            favoriteView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            favoriteView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            favoriteView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            favoriteView.heightAnchor.constraint(equalToConstant: 500)
-        ])
-        let favoriteAddVC = FavoriteAddVC()
-        addChild(favoriteAddVC)
-        favoriteView.addSubview(favoriteAddVC.view)
-        favoriteAddVC.view.frame = favoriteView.frame
-        favoriteAddVC.didMove(toParent: self)
-    }
     private func configureTableView() {
         view.addSubview(mytableView)
-        mytableView.delegate = self
-        mytableView.dataSource = self
+        
         mytableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             mytableView.topAnchor.constraint(equalTo: searchTF.bottomAnchor, constant: 0),
@@ -447,13 +430,14 @@ class ViewController: UIViewController {
         
         containerView.addSubview(upperView)
         upperView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             upperView.topAnchor.constraint(equalTo: containerView.topAnchor),
             upperView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             upperView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            upperView.heightAnchor.constraint(equalToConstant: 20)
+            upperView.heightAnchor.constraint(equalToConstant: 40)
         ])
-        upperView.backgroundColor = .black
+        
         
         upperView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(bottomViewBeenScrolled(_:))))
         
@@ -466,24 +450,21 @@ class ViewController: UIViewController {
             dragIcon.heightAnchor.constraint(equalToConstant: 5)
         ])
         
-        
-        
-        
-        
-        containerView.addSubview(myTableView2)
-        myTableView2.translatesAutoresizingMaskIntoConstraints = false
-        myTableView2.dataSource = self
-        myTableView2.delegate = self
-        //        myTableView2.sectionHeaderHeight = 100
-        myTableView2.sectionHeaderTopPadding = 0
-        //        myTableView2.register(PlaceTableViewHeader.self, forHeaderFooterViewReuseIdentifier: PlaceTableViewHeader.identifier)
-        myTableView2.tableHeaderView?.isUserInteractionEnabled = false
+        containerView.addSubview(lowerView)
+        lowerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            myTableView2.topAnchor.constraint(equalTo: upperView.bottomAnchor),
-            myTableView2.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            myTableView2.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            myTableView2.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+            lowerView.topAnchor.constraint(equalTo: upperView.bottomAnchor),
+            lowerView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            lowerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            lowerView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
+        let myTabBarController = TabBarController()
+        myTabBarController.view.frame = lowerView.frame
+        addChild(myTabBarController)
+        lowerView.addSubview(myTabBarController.view)
+        myTabBarController.didMove(toParent: self)
+        
+        
         
         
     }
@@ -514,7 +495,7 @@ class ViewController: UIViewController {
 
 //MARK: - UITextFieldDelegate
 
-extension ViewController: UITextFieldDelegate {
+extension MapViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         leftImageView.image = UIImage(systemName: "chevron.backward")
         mytableView.isHidden = false
@@ -529,20 +510,32 @@ extension ViewController: UITextFieldDelegate {
         }
         isSearhcing = true
         
-        NetworkManager.shared.getSearchResult(query: text) { places in
-            guard let places else { return }
-            print(places)
-//            for place in places {
-//                print("_________________________\(place.mapx), \(place.mapy)")
-//            }
-            self.searchResult = places
+        //        NetworkManager.shared.getSearchResult(query: text) { places in
+        //            guard let places else { return }
+        //            print(places)
+        //
+        //            self.searchResult = places
+        //        }
+        
+        GooglePlacesManager.shared.findPlaces(query: text) { result in
+            print("----------------------------------")
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let places):
+                self.searchResult = places
+                
+                
+                
+            }
+            
         }
     }
     
 }
 
 //MARK: - UITableViewDataSource, UITableViewDelegate
-extension ViewController: UITableViewDataSource, UITableViewDelegate {
+extension MapViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == mytableView {
             return searchResult.count
@@ -553,80 +546,104 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if tableView == mytableView {
-            let cell = UITableViewCell()
-            let originalText = searchResult[indexPath.row].title
-            let editedText = converHTMLString(with: originalText, targetString: searchTF.text!)
-            
-            cell.textLabel?.attributedText = editedText
-            
-            return cell
-        } else {
-            let cell = UITableViewCell()
-            cell.textLabel?.text = String(indexPath.row)
-            return cell
-        }
         
+        //            let cell = UITableViewCell()
+        //            let originalText = searchResult[indexPath.row].title
+        //            let editedText = converHTMLString(with: originalText, targetString: searchTF.text!)
+        //
+        //            cell.textLabel?.attributedText = editedText
+        
+        
+        
+        let cell = UITableViewCell()
+        let selectedItem = searchResult[indexPath.row]
+        cell.textLabel?.text = selectedItem.name
+        return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let selectedPlace = searchResult[indexPath.row]
-        let originalText = selectedPlace.title
-        let editedText = self.converHTMLString(with: originalText, targetString: "")
-        let roadAddress = selectedPlace.roadAddress
-        
+        print(selectedPlace.identifier)
+//        print(selectedPlace.distance)
+//        print(selectedPlace.name)
+        //        let originalText = selectedPlace.title
+        //        let editedText = self.converHTMLString(with: originalText, targetString: "")
+        //        let roadAddress = selectedPlace.roadAddress
+        //
         resultView.isHidden = false
+        //
+        let distance = selectedPlace.distance
         
         
-        
-       
-        let currentLocation = locationManager.location
-        
-        
-        NetworkManager.shared.getLatLon(with: roadAddress, location: currentLocation) { coordinateAndDistance in
-            guard let coordinateAndDistance else { return }
-            let distance = coordinateAndDistance.distance
-            
-            
-            print("---------------------------------------\(distance)")
-            guard let lat = Double(coordinateAndDistance.y), let lon = Double(coordinateAndDistance.x) else { return }
-            
-            
-            let searchedLocation = NMGLatLng(lat: lat, lng: lon)
-            let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
-            
-            let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon, distance: distance )
-            
-            self.fetchedPlace = fetchedPlace
-            self.resultView.setPlaceAndLabels(fetchedPlace: fetchedPlace, thereIsUserLocation: currentLocation !== nil)
-            self.resultView.resetCateogryViewAndSavedLabel()
-            
-            self.resultView.fetchCategories {
-                self.resultView.changelayOut()
-            }
-            
-            
-            
-            DispatchQueue.main.async {
-                self.marker.position = searchedLocation
-                self.marker.captionText = editedText.string
-                self.marker.mapView = self.naverMap
-                self.naverMap.moveCamera(cameraUpdate)
-                self.placeTapped()
+        GooglePlacesManager.shared.resolveLocation(with: selectedPlace.identifier) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+                return
+            case .success(let place):
+                print(place.placeID)
+                self.fetchedPlace = place
+                let location = NMGLatLng(lat: place.lat, lng: place.lon)
+                let cameraUpdate = NMFCameraUpdate(scrollTo: location)
+                self.resultView.setPlaceAndLabels(fetchedPlace: place, distance: distance)
+                self.resultView.fetchCategories {
+                    self.resultView.changelayOut()
+                }
+                
+                DispatchQueue.main.async {
+                    self.marker.position = location
+                    self.marker.captionText = place.name
+                    self.marker.mapView = self.naverMap
+                    self.naverMap.moveCamera(cameraUpdate)
+                    self.placeTapped()
+                }
             }
         }
         
-        searchTF.resignFirstResponder()
-        tableView.deselectRow(at: indexPath, animated: true)
         
+        
+        
+        //
+        //        NetworkManager.shared.getLatLon(with: roadAddress, location: currentLocation) { coordinateAndDistance in
+        //            guard let coordinateAndDistance else { return }
+        //            let distance = coordinateAndDistance.distance
+        //
+        //            guard let lat = Double(coordinateAndDistance.y), let lon = Double(coordinateAndDistance.x) else { return }
+        //
+        //
+        //            let searchedLocation = NMGLatLng(lat: lat, lng: lon)
+        //            let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
+        //
+        //            let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon, distance: distance )
+        //
+        //            self.fetchedPlace = fetchedPlace
+        //            self.resultView.setPlaceAndLabels(fetchedPlace: fetchedPlace, thereIsUserLocation: currentLocation !== nil)
+        //            self.resultView.resetCateogryViewAndSavedLabel()
+        //
+        //            self.resultView.fetchCategories {
+        //                self.resultView.changelayOut()
+        //            }
+        //
+        //            DispatchQueue.main.async {
+        //                self.marker.position = searchedLocation
+        //                self.marker.captionText = editedText.string
+        //                self.marker.mapView = self.naverMap
+        //                self.naverMap.moveCamera(cameraUpdate)
+        //                self.placeTapped()
+        //            }
+        //        }
+        //
+        //        searchTF.resignFirstResponder()
+        //        tableView.deselectRow(at: indexPath, animated: true)
     }
-    
 }
 
-extension ViewController: CustomResultViewDelegate {
+extension MapViewController: CustomResultViewDelegate {
     func favoriteButtonTapped() {
-        guard let fetchedPlace else { return }
+        guard let fetchedPlace else {
+            print("There is no fetched Place")
+            return }
         let vc = FavoriteViewController(with: fetchedPlace)
         vc.modalPresentationStyle = .overFullScreen
         
@@ -636,14 +653,14 @@ extension ViewController: CustomResultViewDelegate {
     }
 }
 
-extension ViewController: CLLocationManagerDelegate {
+extension MapViewController: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         //location5
         switch status {
         case .authorizedAlways, .authorizedWhenInUse:
             print("GPS 권한 설정됨")
-//            self.locationManager.startUpdatingLocation() // 중요!
+            //            self.locationManager.startUpdatingLocation() // 중요!
             moveCamera()
         case .restricted, .notDetermined:
             print("GPS 권한 설정되지 않음")
@@ -660,12 +677,6 @@ extension ViewController: CLLocationManagerDelegate {
         if locations.first == nil { return }
         print("LocationManager didupdateLocations called")
         
-//        let location = locations[locations.count - 1]
-//
-//        let lon = location.coordinate.longitude
-//        let lat = location.coordinate.latitude
-//        self.lat = lat
-//        print("0-0-0-0-0-0-0-0-0-0-0-0-\(lat), \(lon)")
         
     }
 }

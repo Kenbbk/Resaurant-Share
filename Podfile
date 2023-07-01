@@ -8,6 +8,7 @@ target 'MapProject' do
   # Pods for MapProject
 
 
+  pod 'GooglePlaces', '8.0.0'
     pod 'NMapsMap'
 pod 'FirebaseAuth'
 pod 'FirebaseFirestore'

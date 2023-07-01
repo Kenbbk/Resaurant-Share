@@ -8,11 +8,19 @@
 import Foundation
 
 class UserInfo {
+    let categoryChangedIdentifier = "categoryChanged"
+    
     static let shared = UserInfo()
     
     private init() {}
     
-    private var _categories: [Category] = []
+    private var _categories: [Category] = [] {
+        didSet {
+            let name = Notification.Name(categoryChangedIdentifier)
+            NotificationCenter.default.post(name: name, object: nil)
+            print(_categories)
+        }
+    }
     
     var categories: [Category] {
         

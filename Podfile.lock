@@ -636,6 +636,7 @@ PODS:
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
+  - GooglePlaces (8.0.0)
   - GoogleUtilities/AppDelegateSwizzler (7.7.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -723,6 +724,7 @@ PODS:
 DEPENDENCIES:
   - FirebaseAuth
   - FirebaseFirestore
+  - GooglePlaces (= 8.0.0)
   - NMapsMap
 
 SPEC REPOS:
@@ -735,6 +737,7 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseFirestore
     - GoogleDataTransport
+    - GooglePlaces
     - GoogleUtilities
     - "gRPC-C++"
     - gRPC-Core
@@ -755,6 +758,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: a13302b0088fbf5f38b79b6ece49c2af7d3e05d6
   FirebaseFirestore: 945196dd78f4e92de6fc47b38569a1e7088af81f
   GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
+  GooglePlaces: 46231f49e2dc52aa9a604f99e2e6b29996f30cc7
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
   "gRPC-C++": 9675f953ace2b3de7c506039d77be1f2e77a8db2
   gRPC-Core: 943e491cb0d45598b0b0eb9e910c88080369290b
@@ -766,6 +770,6 @@ SPEC CHECKSUMS:
   NMapsMap: aaa64717249b06ae82c3a3addb3a01f0e33100ab
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
 
-PODFILE CHECKSUM: 4d92d7650daa84b3f99b246cf893d7d93e52e942
+PODFILE CHECKSUM: c25c8f30f60477e78c535c4fcd4b4fed6658e07b
 
 COCOAPODS: 1.11.3

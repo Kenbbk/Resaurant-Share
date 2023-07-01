@@ -169,7 +169,7 @@ class FavoriteViewController: UIViewController {
             }
         }
         
-        guard let vc = presentingViewController as? ViewController else { return }
+        guard let vc = presentingViewController as? MapViewController else { return }
         group.notify(queue: .main) {
             
             
@@ -250,7 +250,7 @@ class FavoriteViewController: UIViewController {
     private func addCategories(completion: (() -> Void)? = nil ) {
         let shouldAdded = finishedSelection.subtracting(initialSelection)
         print(shouldAdded)
-        print(fetchedPlace.title)
+        print(fetchedPlace.name)
         let group = DispatchGroup()
         
         for item in shouldAdded {
@@ -271,7 +271,7 @@ class FavoriteViewController: UIViewController {
     }
     
     private func setTitleLabel() {
-        topLabel.text = fetchedPlace.title
+        topLabel.text = fetchedPlace.name
     }
     
     func markSelectedRow() {
@@ -286,20 +286,19 @@ class FavoriteViewController: UIViewController {
         }
     }
     
-    
-    
-    
-    
-    
+
     
     func fetchCategories() {
+        
+        
         
         FavoriteSerivce.fetchCategory { categories in
             self.categories = categories.sorted(by: { $0.timeStamp.dateValue() > $1.timeStamp.dateValue()})
             
             for category in categories {
-                guard let categoryUID = category.categoryUID else { return }
-                let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(categoryUID).collection("places").whereField("title", isEqualTo: self.fetchedPlace.title)
+                
+                
+                let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(category.categoryUID).collection("places").whereField("placeID", isEqualTo: self.fetchedPlace.placeID)
                 
                 query.getDocuments { snapshot, error in
                     guard let document = snapshot?.documents else { return }

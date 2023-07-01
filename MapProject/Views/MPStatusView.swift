@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CustomStatusView: UIView {
+class MPStatusView: UIView {
     
     private let leftImageView: UIImageView = {
         let iv = UIImageView()

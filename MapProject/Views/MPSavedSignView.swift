@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CustomCategoryView: UIView {
+class MPSavedSignView: UIView {
     
     lazy var leftImageView: UIImageView = {
        let iv = UIImageView()
@@ -42,7 +42,6 @@ class CustomCategoryView: UIView {
     
     private func configureleftImageView() {
         
-        let padding = 5
         addSubview(leftImageView)
         leftImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

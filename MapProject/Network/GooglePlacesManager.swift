@@ -53,12 +53,11 @@ class GooglePlacesManager {
     
     func getNearbyrestaurant() {
         let urlString = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants%20in%20Busan&language=ko&key=\(apiKey)"
-//        let urlString = "https://maps.googleapis.com/maps/api/place/textsearch/json?location=42.3675294%2C-71.186966&query=123%20main%20street&radius=10000&key=\(apiKey)"
-        print(urlString)
+
         let url = URL(string: urlString)
         
         let request = URLRequest(url: url!)
-        let session = URLSession.shared.dataTask(with: request) { data, _, error in
+        let task = URLSession.shared.dataTask(with: request) { data, _, error in
             if let error {
                 print(error)
                 return
@@ -68,7 +67,8 @@ class GooglePlacesManager {
             let stringData = String(data: data, encoding: .utf8)
             print(stringData)
             
-        }.resume()
+        }
+        task.resume()
         
     }
     

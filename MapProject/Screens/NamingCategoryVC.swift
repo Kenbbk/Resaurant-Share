@@ -8,9 +8,10 @@
 import UIKit
 import FirebaseFirestore
 
-class AddNameViewController: UIViewController {
+class NamingCategoryVC: UIViewController {
     
     //MARK: - Properties
+    
     let colors = CustomColor.colors
     
     var isReadyToSave: Bool = false {
@@ -19,14 +20,11 @@ class AddNameViewController: UIViewController {
             saveButton.backgroundColor = isReadyToSave ? .blue : .systemGray4
             saveButton.isUserInteractionEnabled = isReadyToSave
         }
-        
     }
     
     var activeTextField: UITextField?
     
     let padding: CGFloat = 20
-    
-    let scrollableView = UIScrollView()
     
     private lazy var touchOutsideGesture: UITapGestureRecognizer = {
         let gesture = UITapGestureRecognizer(target: self, action: #selector(touchedOutside(_:)))
@@ -47,6 +45,7 @@ class AddNameViewController: UIViewController {
         myView.layer.borderColor = UIColor.systemGray4.cgColor
         return myView
     }()
+    
     private let TFContainerView = UIView()
     
     private let tfCountLabel: UILabel = {
@@ -143,7 +142,6 @@ class AddNameViewController: UIViewController {
     private let descriptionTextField: UITextField = {
         let tf = UITextField()
         
-        
         tf.layer.cornerRadius = 5
         tf.clearButtonMode = .whileEditing
         tf.attributedPlaceholder = NSAttributedString(string: "Enter a note", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
@@ -188,18 +186,17 @@ class AddNameViewController: UIViewController {
     }
     
     @objc func saveButtonTapped(_ gesture: UITapGestureRecognizer) {
-        guard let title = nameTextField.text else { return }
+        guard let categoryTitle = nameTextField.text else { return }
         guard let colorNumber = collectionView.indexPathsForSelectedItems?.first?.row else { return }
-        
         
         let description = descriptionTextField.text!
         let timeStamp = Timestamp(date: Date())
         
-        
-        let category = Category(title: title, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
-        FavoriteSerivce.addCategory(with: category) { 
+        let category = Category(title: categoryTitle, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
+        FavoriteSerivce.shared.addCategory(with: category) { 
             UserInfo.shared.categories.append(category)
-            guard let presentingVC = self.presentingViewController as? FavoriteViewController else { return }
+            
+            guard let presentingVC = self.presentingViewController as? CategoryVC else { return }
             presentingVC.setCategoriesAndInitalCategoriesThenReload()
             
             self.dismiss(animated: true)
@@ -475,8 +472,6 @@ class AddNameViewController: UIViewController {
         ])
     }
     
-    
-    
     private func configureBottomContainerView() {
         wholeContainerView.addSubview(bottomContainerView)
         bottomContainerView.translatesAutoresizingMaskIntoConstraints = false
@@ -494,15 +489,12 @@ class AddNameViewController: UIViewController {
             saveButton.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor, constant: -padding),
             saveButton.heightAnchor.constraint(equalToConstant: 50)
         ])
-        
     }
-    
-    
 }
 
 //MARK: - UITextFieldDelegate
 
-extension AddNameViewController: UITextFieldDelegate {
+extension NamingCategoryVC: UITextFieldDelegate {
     
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
@@ -512,14 +504,12 @@ extension AddNameViewController: UITextFieldDelegate {
                 isReadyToSave = trimmedTextCount == 0 ? false : true
             }
         }
-        
         setAttributedText(sender: textField)
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
         
         activeTextField = textField
-        
         
         if textField == descriptionTextField {
             enclosingDescriptionView.backgroundColor = .white
@@ -532,7 +522,6 @@ extension AddNameViewController: UITextFieldDelegate {
             if trimmedTextCount == 0 {
                 textField.text = ""
                 setAttributedText(sender: textField)
-                
             }
         }
         activeTextField = nil
@@ -561,7 +550,7 @@ extension AddNameViewController: UITextFieldDelegate {
 }
 
 //MARK: - UICollectionViewDataSource
-extension AddNameViewController: UICollectionViewDataSource {
+extension NamingCategoryVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         colors.count
         
@@ -583,16 +572,15 @@ extension AddNameViewController: UICollectionViewDataSource {
 
 //MARK: - UICollectionViewdelegate
 
-extension AddNameViewController: UICollectionViewDelegate {
+extension NamingCategoryVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        //add here
         
         let selectedIndexPath = IndexPath(item: 0, section: 0)
         collectionView.selectItem(at: selectedIndexPath, animated: false, scrollPosition: [])
     }
 }
 
-extension AddNameViewController: UIGestureRecognizerDelegate {
+extension NamingCategoryVC: UIGestureRecognizerDelegate {
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         let location = gestureRecognizer.location(in: self.wholeContainerView)
         

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HomeController: UIViewController {
+class ScrollCategoryVC: UIViewController {
     
     
     //MARK: - Properties
@@ -23,17 +23,29 @@ class HomeController: UIViewController {
         return tb
     }()
     
-    
-    
     //MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        FavoriteSerivce.fetchCategory { categories in
-            UserInfo.shared.categories = categories
-            print("------------------------------------- debug UserInfo.shared.categories has been set from sean dealege")
-//            let header = self.placeTableView.headerView(forSection: 0) as! BlackTableViewHeaderFooterView
-//            header.textLabel?.text = "Hello There"
+        FavoriteSerivce.shared.fetchCategory { categories in
+            
+            for category in categories {
+                FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+                    switch result {
+                    case .failure(let error):
+                        print(error)
+                    case.success(let fetchedPlaces):
+                        
+                        var newCategory = category
+                        newCategory.addedPlaces = fetchedPlaces
+                        UserInfo.shared.categories.append(newCategory)
+                        
+                    }
+                }
+            }
+            
+            
+            print("debug UserInfo.shared.categories has been set")
         }
         configureUI()
         createObserver()
@@ -45,8 +57,6 @@ class HomeController: UIViewController {
         print("DEBUG: user.info's category changed yay!")
         placeTableView.reloadData()
     }
-    
-   
     
     //MARK: - Helpers
     
@@ -65,7 +75,7 @@ class HomeController: UIViewController {
     }
 }
 
-extension HomeController: UITableViewDataSource, UITableViewDelegate {
+extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         UserInfo.shared.categories.count + 1
     }
@@ -78,7 +88,7 @@ extension HomeController: UITableViewDataSource, UITableViewDelegate {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
         let category = UserInfo.shared.categories[indexPath.row - 1]
-        cell.setLabel(colorNumber: category.colorNumber, title: category.title, numberOfPlaces: 1)
+        cell.setLabel(colorNumber: category.colorNumber, title: category.title, numberOfPlaces: category.addedPlaces.count)
         
         return cell
         
@@ -87,13 +97,12 @@ extension HomeController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: BlackTableViewHeaderFooterView.identifier) as! BlackTableViewHeaderFooterView
-        header.textLabel?.text = "All lists \(UserInfo.shared.categories.count)"
+        header.setTextLabel()
         print("------------------------------ debug UserInfo.shared.categories.count has been printed")
-        header.textLabel?.font = .boldSystemFont(ofSize: 24)
-        header.textLabel?.textColor = .black
+        
         return header
     }
-
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         50
     }
@@ -104,22 +113,25 @@ extension HomeController: UITableViewDataSource, UITableViewDelegate {
 }
 
 class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
-
-    static let identifier = "BlackTableViewHeaderFooterView"
     
-    private var numberOfCategories: Int?
+    static let identifier = "BlackTableViewHeaderFooterView"
     
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
-
+        
         contentView.backgroundColor = .white
-
-        textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
+        
         textLabel?.numberOfLines = 0
-        textLabel?.textColor = .white
+        
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setTextLabel() {
+        textLabel?.text = UserInfo.shared.categories.isEmpty ? "All lists" : "All lists \(UserInfo.shared.categories.count)"
+        textLabel?.font = .boldSystemFont(ofSize: 24)
+        textLabel?.textColor = .black
     }
 }

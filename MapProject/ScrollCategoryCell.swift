@@ -10,7 +10,7 @@ import UIKit
 class FavoriteStoreageCell: UITableViewCell {
     
     //MARK: - Properties
-    static let identifier = "FavoriteStoreageCell"
+    static let identifier = "ScrollCategoryCell"
     
     private let leftImageView: UIImageView = {
        let iv = UIImageView()
@@ -33,8 +33,8 @@ class FavoriteStoreageCell: UITableViewCell {
         return label
     }()
     
-    private let statusView: CustomStatusView = {
-       let view = CustomStatusView()
+    private let statusView: MPStatusView = {
+       let view = MPStatusView()
         return view
     }()
     

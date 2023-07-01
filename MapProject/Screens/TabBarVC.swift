@@ -7,20 +7,19 @@
 
 import UIKit
 
-class TabBarController: UITabBarController {
+class TabBarVC: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabs()
-        // Do any additional setup after loading the view.
+        
         tabBar.barTintColor = .systemGray
         tabBar.isTranslucent = false
     }
     
-
     private func setupTabs() {
         
-        let home = createTab(title: "Hello", image: UIImage(systemName: "house")!, vc: HomeController())
+        let home = createTab(title: "Hello", image: UIImage(systemName: "house")!, vc: ScrollCategoryVC())
         setViewControllers([home], animated: true)
     }
     

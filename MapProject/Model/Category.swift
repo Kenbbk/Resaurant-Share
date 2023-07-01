@@ -17,17 +17,12 @@ struct Category: Equatable, Hashable {
         hasher.combine(categoryUID)
     }
     
-    
-    
-    
-    
-    
     let title: String
     let colorNumber: Int
     let description: String
     let timeStamp: Timestamp
     var categoryUID: String
-    var addedPlaces: [FetchedPlace]?
+    var addedPlaces: [FetchedPlace] = []
     
     init(title: String, colorNumber: Int, description: String, timeStamp: Timestamp) {
         self.title = title

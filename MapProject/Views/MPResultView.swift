@@ -11,14 +11,11 @@ protocol CustomResultViewDelegate: AnyObject {
     func favoriteButtonTapped()
 }
 
-class CustomResultView: UIView {
+class MPResultView: UIView {
     
     //MARK: - Properties
     
-    static let identifier = "PlaceTableViewHeader"
-    
     var fetchedPlace: FetchedPlace?
-    
     
     let padding: CGFloat                    = 10
     
@@ -62,8 +59,8 @@ class CustomResultView: UIView {
         return imageView
     }()
     
-    let categoryView: CustomCategoryView = {
-        let view = CustomCategoryView()
+    let categoryView: MPSavedSignView = {
+        let view = MPSavedSignView()
         
         return view
     }()
@@ -134,12 +131,10 @@ class CustomResultView: UIView {
             self.favoriteImageView.image            = UIImage(named: "star")
             self.favoriteImageView.tintColor        = .gray
             
-            
-            
         }
     }
     
-    func fetchCategories(completion:( () -> Void)? = nil) {
+    func fetchCategories(completion: @escaping () -> Void) {
         
         guard let fetchedPlace = self.fetchedPlace else {
             print("There is no fetchedPlace")
@@ -148,18 +143,16 @@ class CustomResultView: UIView {
         let group = DispatchGroup()
         var addedCategories: [Category] = []
         for category in UserInfo.shared.categories {
+            
             group.enter()
-            print("Entering")
             
-            
-            let query = COLLECTION_USERS.document(FavoriteSerivce.uid!).collection("categories").document(category.categoryUID).collection("places").whereField("placeID", isEqualTo: fetchedPlace.placeID)
+            let query = COLLECTION_USERS.document(UserInfo.shared.userID!).collection("categories").document(category.categoryUID).collection("places").whereField("placeID", isEqualTo: fetchedPlace.placeID)
             query.getDocuments { snapshot, error in
                 defer { group.leave() }
                 
                 guard let document = snapshot?.documents else { return }
                 
                 if document.isEmpty == false {
-                    
                     
                     addedCategories.append(category)
                     
@@ -168,7 +161,7 @@ class CustomResultView: UIView {
         }
         group.notify(queue: .main) {
             UserInfo.shared.addedCategories = addedCategories
-            completion?()
+            completion()
         }
     }
     
@@ -179,38 +172,13 @@ class CustomResultView: UIView {
             self.addressLabel.text = fetchedPlace.address
             self.distanceLabel.text = "\(Int(distance))"
         }
-//        setLabels(thereIsUserLocation: thereIsUserLocation)
     }
-    
-    
-    
-//    func setLabels(thereIsUserLocation: Bool) {
-//        guard let fetchedPlace else { return }
-//
-//        DispatchQueue.main.async {
-//            self.titleNameLabel.text = fetchedPlace.name
-//            self.addressLabel.text   = fetchedPlace.address
-//
-//            if thereIsUserLocation {
-//                if let distance = fetchedPlace.distance {
-//                    let roundedDistance = Int( ( distance / 1000 ).rounded())
-//                    self.distanceLabel.text  = "\(roundedDistance)Km"
-//                }
-//            } else {
-//                self.distanceLabel.text = ""
-//            }
-//        }
-//
-//
-//
-//    }
     
     private func setSavedCategoryLabel() {
         if UserInfo.shared.addedCategories.count >= 2 {
             
         }
     }
-    
     
     private func configureSelf() {
         isHidden                = true
@@ -247,7 +215,7 @@ class CustomResultView: UIView {
         NSLayoutConstraint.activate([
             distanceLabel.topAnchor.constraint(equalTo: addressLabel.bottomAnchor),
             distanceLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-//            distanceLabel.widthAnchor.constraint(equalToConstant: 45),
+            //            distanceLabel.widthAnchor.constraint(equalToConstant: 45),
             distanceLabel.heightAnchor.constraint(equalToConstant: 20)
         ])
         
@@ -285,9 +253,6 @@ class CustomResultView: UIView {
             favoriteImageView.widthAnchor.constraint(equalToConstant: 20),
             favoriteImageView.heightAnchor.constraint(equalToConstant: 20)
         ])
-        
-        
-        
     }
 }
 

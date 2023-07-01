@@ -9,16 +9,10 @@ import UIKit
 
 class FavoriteCell: UITableViewCell {
     
-    static let identifier = "FavoriteCell"
+    static let identifier = "CategoryCell"
     //MARK: - Properties
-//    override var isSelected: Bool {
-//        didSet {
-////            rightImageView.tintColor = isSelected ? .blue : .systemGray3
-//            print("Selection happened")
-//        }
-//    }
-    
-    let colors = CustomColor.colors
+
+    private let colors = CustomColor.colors
     
     private let leftImageView: UIImageView = {
        let iv = UIImageView()
@@ -58,15 +52,13 @@ class FavoriteCell: UITableViewCell {
     
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-//        print("cell side selected")
+
         rightImageView.tintColor = selected ? .blue.withAlphaComponent(0.8) : .systemGray3
     }
     //MARK: - Actions
     
     
     //MARK: - Helpers
-    
-    
     
     private func configureUI() {
         let padding: CGFloat = 10

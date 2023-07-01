@@ -24,7 +24,7 @@ enum ScrollViewPosition: CGFloat {
     
 }
 
-class MapViewController: UIViewController {
+class MapVC: UIViewController {
     
     //MARK: - Properties
     
@@ -37,12 +37,7 @@ class MapViewController: UIViewController {
     var currentHeight: CGFloat!
     var startingPosition: ScrollViewPosition = .bottom
     
-    let dragIcon: UIView = {
-        let myView = UIView()
-        myView.layer.cornerRadius = 2.5
-        myView.backgroundColor = .systemGray3
-        return myView
-    }()
+    
     
     var searchResult: [Place] = [] {
         didSet {
@@ -76,6 +71,8 @@ class MapViewController: UIViewController {
     
     private lazy var searchTF: UITextField = {
         let tf = UITextField()
+        tf.delegate = self
+        tf.backgroundColor = .white
         tf.layer.cornerRadius = 10
         tf.layer.borderWidth = 1
         tf.layer.borderColor = UIColor.systemGray4.cgColor
@@ -110,32 +107,29 @@ class MapViewController: UIViewController {
         return myView
     }()
     
+    let dragIcon: UIView = {
+        let myView = UIView()
+        myView.layer.cornerRadius = 2.5
+        myView.backgroundColor = .systemGray3
+        return myView
+    }()
+    
     private lazy var lowerView: UIView = {
         let myView = UIView()
         
         return myView
     }()
     
-    private lazy var disappearingView: UIView = {
-        let myView = UIView()
-        myView.backgroundColor = .systemPink
-        return myView
-    }()
-    
-    lazy var resultView: CustomResultView = {
-        let myView = CustomResultView()
+    lazy var resultView: MPResultView = {
+        let myView = MPResultView()
         
         return myView
         
     }()
     
-    private lazy var favoriteView: UIView = {
-        let myView = UIView()
-        myView.isHidden = true
-        return myView
-    }()
     let infoWindow = NMFInfoWindow()
-    var customInfoWindowDataSource = CustomInfoWindowDataSource()
+    
+//    var customInfoWindowDataSource = CustomInfoWindowDataSource()
     
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
@@ -157,22 +151,22 @@ class MapViewController: UIViewController {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: 37.3588603, lng: 127.1052063)
         marker.mapView = naverMap
-        infoWindow.anchor = CGPoint(x: 0, y: 1)
-        infoWindow.dataSource = customInfoWindowDataSource
-        infoWindow.offsetX = -40
-        infoWindow.offsetY = -5
-        
-        infoWindow.open(with: marker)
-        
-        infoWindow.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
-            //            customInfoWindowDataSource.rootView.
-            //            print("I am")
-            return true
-        }
-        infoWindow.open(with: marker)
+//        infoWindow.anchor = CGPoint(x: 0, y: 1)
+//        infoWindow.dataSource = customInfoWindowDataSource
+//        infoWindow.offsetX = -40
+//        infoWindow.offsetY = -5
+//
+//        infoWindow.open(with: marker)
+//
+//        infoWindow.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
+//            //            customInfoWindowDataSource.rootView.
+//            //            print("I am")
+//            return true
+//        }
+//        infoWindow.open(with: marker)
         
         guard let _ = Auth.auth().currentUser else { return }
-        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
+//        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
         
         //        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
         //        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt(GMSPlaceField.name.rawValue) |
@@ -216,10 +210,7 @@ class MapViewController: UIViewController {
     }
     
     //MARK: - Actions
-    @objc func customViewTapped() {
-        print("Custom View Tapped")
-    }
-    
+   
     @objc func leftButtonTapped(_ sender: UITapGestureRecognizer) {
         
         naverMap.isHidden = false
@@ -376,8 +367,7 @@ class MapViewController: UIViewController {
         
         view.addSubview(searchTF)
         view.bringSubviewToFront(searchTF)
-        searchTF.delegate = self
-        searchTF.backgroundColor = .white
+        
         searchTF.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             searchTF.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
@@ -458,7 +448,7 @@ class MapViewController: UIViewController {
             lowerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             lowerView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
-        let myTabBarController = TabBarController()
+        let myTabBarController = TabBarVC()
         myTabBarController.view.frame = lowerView.frame
         addChild(myTabBarController)
         lowerView.addSubview(myTabBarController.view)
@@ -469,33 +459,33 @@ class MapViewController: UIViewController {
         
     }
     
-    func converHTMLString(with HTMLString: String, targetString: String) -> NSMutableAttributedString {
-        
-        var mutableString = NSMutableAttributedString()
-        guard let data = HTMLString.data(using: .utf8) else {
-            return mutableString
-        }
-        
-        do {
-            mutableString = try NSMutableAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil)
-            mutableString.addAttributes([.foregroundColor: UIColor.black, .font: UIFont(name: "AppleSDGothicNeo-Regular", size: 15)!], range: NSRange(location: 0, length: mutableString.length))
-            
-            let range = (mutableString.string as NSString).range(of: targetString)
-            if (range.length > 0) {
-                mutableString.addAttributes([.foregroundColor: UIColor.blue], range: range)
-            }
-            
-        } catch {
-            
-        }
-        
-        return mutableString
-    }
+//    func converHTMLString(with HTMLString: String, targetString: String) -> NSMutableAttributedString {
+//
+//        var mutableString = NSMutableAttributedString()
+//        guard let data = HTMLString.data(using: .utf8) else {
+//            return mutableString
+//        }
+//
+//        do {
+//            mutableString = try NSMutableAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil)
+//            mutableString.addAttributes([.foregroundColor: UIColor.black, .font: UIFont(name: "AppleSDGothicNeo-Regular", size: 15)!], range: NSRange(location: 0, length: mutableString.length))
+//
+//            let range = (mutableString.string as NSString).range(of: targetString)
+//            if (range.length > 0) {
+//                mutableString.addAttributes([.foregroundColor: UIColor.blue], range: range)
+//            }
+//
+//        } catch {
+//
+//        }
+//
+//        return mutableString
+//    }
 }
 
 //MARK: - UITextFieldDelegate
 
-extension MapViewController: UITextFieldDelegate {
+extension MapVC: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         leftImageView.image = UIImage(systemName: "chevron.backward")
         mytableView.isHidden = false
@@ -510,22 +500,13 @@ extension MapViewController: UITextFieldDelegate {
         }
         isSearhcing = true
         
-        //        NetworkManager.shared.getSearchResult(query: text) { places in
-        //            guard let places else { return }
-        //            print(places)
-        //
-        //            self.searchResult = places
-        //        }
-        
-        GooglePlacesManager.shared.findPlaces(query: text) { result in
+      GooglePlacesManager.shared.findPlaces(query: text) { result in
             print("----------------------------------")
             switch result {
             case .failure(let error):
                 print(error)
             case .success(let places):
                 self.searchResult = places
-                
-                
                 
             }
             
@@ -535,7 +516,7 @@ extension MapViewController: UITextFieldDelegate {
 }
 
 //MARK: - UITableViewDataSource, UITableViewDelegate
-extension MapViewController: UITableViewDataSource, UITableViewDelegate {
+extension MapVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == mytableView {
             return searchResult.count
@@ -547,14 +528,6 @@ extension MapViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        //            let cell = UITableViewCell()
-        //            let originalText = searchResult[indexPath.row].title
-        //            let editedText = converHTMLString(with: originalText, targetString: searchTF.text!)
-        //
-        //            cell.textLabel?.attributedText = editedText
-        
-        
-        
         let cell = UITableViewCell()
         let selectedItem = searchResult[indexPath.row]
         cell.textLabel?.text = selectedItem.name
@@ -564,17 +537,10 @@ extension MapViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let selectedPlace = searchResult[indexPath.row]
-        print(selectedPlace.identifier)
-//        print(selectedPlace.distance)
-//        print(selectedPlace.name)
-        //        let originalText = selectedPlace.title
-        //        let editedText = self.converHTMLString(with: originalText, targetString: "")
-        //        let roadAddress = selectedPlace.roadAddress
-        //
-        resultView.isHidden = false
-        //
+        
         let distance = selectedPlace.distance
         
+        resultView.isHidden = false
         
         GooglePlacesManager.shared.resolveLocation(with: selectedPlace.identifier) { result in
             switch result {
@@ -582,7 +548,7 @@ extension MapViewController: UITableViewDataSource, UITableViewDelegate {
                 print(error)
                 return
             case .success(let place):
-                print(place.placeID)
+                
                 self.fetchedPlace = place
                 let location = NMGLatLng(lat: place.lat, lng: place.lon)
                 let cameraUpdate = NMFCameraUpdate(scrollTo: location)
@@ -639,12 +605,12 @@ extension MapViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension MapViewController: CustomResultViewDelegate {
+extension MapVC: CustomResultViewDelegate {
     func favoriteButtonTapped() {
         guard let fetchedPlace else {
             print("There is no fetched Place")
             return }
-        let vc = FavoriteViewController(with: fetchedPlace)
+        let vc = CategoryVC(with: fetchedPlace)
         vc.modalPresentationStyle = .overFullScreen
         
         present(vc, animated: true)
@@ -653,7 +619,7 @@ extension MapViewController: CustomResultViewDelegate {
     }
 }
 
-extension MapViewController: CLLocationManagerDelegate {
+extension MapVC: CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         //location5

@@ -6,16 +6,20 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 class UserInfo {
     let categoryChangedIdentifier = "categoryChanged"
     
+    let userID = Auth.auth().currentUser?.uid
+    
     static let shared = UserInfo()
     
-    private init() {}
+    private init() { }
     
     private var _categories: [Category] = [] {
         didSet {
+            
             let name = Notification.Name(categoryChangedIdentifier)
             NotificationCenter.default.post(name: name, object: nil)
             print(_categories)
@@ -33,5 +37,5 @@ class UserInfo {
     
     var addedCategories: [Category] = []
     
-    var user: User!
+    
 }

@@ -43,9 +43,7 @@ class MapVC: UIViewController {
     var upperViewConstraint: NSLayoutConstraint!
     var startingHeight: CGFloat!
     lazy var currentHeight: CGFloat = getHeight(position: .bottom)
-    var startingPosition: ScrollViewPosition = .bottom
-    
-    
+    var currentPosition: ScrollViewPosition = .bottom
     
     var searchResult: [Place] = [] {
         didSet {
@@ -54,6 +52,7 @@ class MapVC: UIViewController {
             }
         }
     }
+    
     var isSearhcing = false {
         didSet {
             if isSearhcing {
@@ -156,14 +155,13 @@ class MapVC: UIViewController {
         
         locationManager.requestWhenInUseAuthorization()
         configureUI()
-//        let tableView = ((self.children.first as! TabBarVC).viewControllers![0] as! ScrollCategoryVC).placeTableView
-//        tableView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(bottomViewBeenScrolled(_:))))
+
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        topConstraint.constant = getHeight(position: startingPosition)
+        topConstraint.constant = getHeight(position: .bottom)
         
     }
     
@@ -199,8 +197,8 @@ class MapVC: UIViewController {
         if sender.state == .began {
             let tableView = ((self.children.first as! TabBarVC).viewControllers![0] as! ScrollCategoryVC).placeTableView
             tableView.contentOffset.y = 0
-            startingHeight = getHeight(position: startingPosition)
-            print("Began")
+            startingHeight = getHeight(position: currentPosition)
+            
         } else if sender.state == .changed {
             let translation = sender.translation(in: self.view)
             
@@ -209,11 +207,11 @@ class MapVC: UIViewController {
             makeSureHeightIsInTheRange()
             
             topConstraint.constant = currentHeight
-            print("Changed")
+            
         } else if sender.state == .ended {
             
             changeTheHeightAtTheEnd()
-            print("Ended")
+            
         }
     }
     //MARK: - Helpers
@@ -306,37 +304,37 @@ class MapVC: UIViewController {
     }
     
     func changeTheHeightAtTheEnd() {
-        switch startingPosition {
+        switch currentPosition {
         case .bottom:
             
             if currentHeight < getHeight(position: .middle) {
-                startingPosition = .top
+                currentPosition = .top
             } else if currentHeight < getHeight(position: .bottom) {
-                startingPosition = .middle
+                currentPosition = .middle
             } else {
-                startingPosition = .bottom
+                currentPosition = .bottom
             }
-            topConstraint.constant = getHeight(position: startingPosition)
+            topConstraint.constant = getHeight(position: currentPosition)
             
         case .middle:
             if currentHeight < getHeight(position: .middle) {
-                startingPosition = .top
+                currentPosition = .top
             } else if currentHeight > getHeight(position: .middle) {
-                startingPosition = .bottom
+                currentPosition = .bottom
             } else {
-                startingPosition = .middle
+                currentPosition = .middle
             }
-            topConstraint.constant = getHeight(position: startingPosition)
+            topConstraint.constant = getHeight(position: currentPosition)
             
         case .top:
             if currentHeight > getHeight(position: .middle) {
-                startingPosition = .bottom
+                currentPosition = .bottom
             } else if currentHeight > getHeight(position: .top) {
-                startingPosition = .middle
+                currentPosition = .middle
             } else {
-                startingPosition = .top
+                currentPosition = .top
             }
-            topConstraint.constant = getHeight(position: startingPosition)
+            topConstraint.constant = getHeight(position: currentPosition)
             
         }
     }

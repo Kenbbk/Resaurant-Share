@@ -154,7 +154,7 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
             let vc = self.getTopHierarchyViewController() as! MapVC
             vc.topConstraint.constant = vc.getHeight(position: .bottom)
             vc.currentHeight = vc.getHeight(position: .bottom)
-            vc.startingPosition = .bottom
+            vc.currentPosition = .bottom
             vc.makeMarker(with: selectedCategory)
             
 
@@ -200,17 +200,19 @@ class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
         textLabel?.font = .boldSystemFont(ofSize: 24)
         textLabel?.textColor = .black
     }
+    
 }
 
 extension ScrollCategoryVC: UIGestureRecognizerDelegate {
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer == tableViewGestureRecognizer {
+            
             let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: placeTableView)
             let parentVC = self.getTopHierarchyViewController() as! MapVC
             // check if it is at top postion
             
-            if parentVC.topConstraint.constant == parentVC.getHeight(position: .top) {
+            if parentVC.currentPosition == .top {
                 if placeTableView.contentOffset.y > 0 {
                     print("TableView should scroll")
                     return false
@@ -230,44 +232,10 @@ extension ScrollCategoryVC: UIGestureRecognizerDelegate {
                 return true
             }
             
-        } else {
-            return true
         }
         
-//
-//        if gestureRecognizer == tableViewGestureRecognizer {
-//
-//            let gesutre = gestureRecognizer as! UIPanGestureRecognizer
-//            let translation = gesutre.translation(in: placeTableView)
-//            if translation.y < 0 {
-//                print("TableView should scroll")
-//                return false
-//            } else {
-//                print("We should notify to parent Vc")
-//                return true
-//            }
-//
-//
-//        } else {
-//            return true
-//        }
-//
-        
-        
-        
-        
-//        if placeTableView.contentOffset.y > 0 {
-//            print("placeTableview is not at the top")
-//            return false
-//        } else {
-//            print("Is is at the top")
-//            return true
-//        }
-//        if placeTableView.contentOffset.y > 0 {
-//            print("Now tableview is at the top")
-//            return false
-//        } else {
-//            return true
-//        }
+        return true
+
+
     }
 }

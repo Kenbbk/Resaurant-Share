@@ -106,7 +106,7 @@ class MapVC: UIViewController {
         return imageView
     }()
     
-    private lazy var containerView: UIView = {
+    lazy var containerView: UIView = {
         let myView = UIView()
         myView.backgroundColor = .white
         myView.layer.cornerRadius = 30
@@ -156,6 +156,8 @@ class MapVC: UIViewController {
         
         locationManager.requestWhenInUseAuthorization()
         configureUI()
+//        let tableView = ((self.children.first as! TabBarVC).viewControllers![0] as! ScrollCategoryVC).placeTableView
+//        tableView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(bottomViewBeenScrolled(_:))))
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -192,14 +194,13 @@ class MapVC: UIViewController {
     }
     
     @objc func bottomViewBeenScrolled(_ sender: UIPanGestureRecognizer) {
+        
+        
         if sender.state == .began {
-            
-            startingHeight = getHeight(position: startingPosition)
-            print(self.children)
             let tableView = ((self.children.first as! TabBarVC).viewControllers![0] as! ScrollCategoryVC).placeTableView
-            if tableView.contentOffset.y != 0 {
-                tableView.contentOffset.y = 0
-            }
+            tableView.contentOffset.y = 0
+            startingHeight = getHeight(position: startingPosition)
+            print("Began")
         } else if sender.state == .changed {
             let translation = sender.translation(in: self.view)
             
@@ -208,11 +209,11 @@ class MapVC: UIViewController {
             makeSureHeightIsInTheRange()
             
             topConstraint.constant = currentHeight
-            
+            print("Changed")
         } else if sender.state == .ended {
             
             changeTheHeightAtTheEnd()
-            
+            print("Ended")
         }
     }
     //MARK: - Helpers
@@ -468,7 +469,7 @@ class MapVC: UIViewController {
         ])
         
         upperView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(bottomViewBeenScrolled(_:))))
-        
+
         upperView.addSubview(dragIcon)
         dragIcon.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

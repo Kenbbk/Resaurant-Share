@@ -18,7 +18,7 @@ class MPSavedSignView: UIView {
     
     let label: UILabel = {
        let label = UILabel()
-        label.text = "HELLO There"
+//        label.text = "HELLO There"
         label.numberOfLines = 1
         label.adjustsFontSizeToFitWidth = true
         return label

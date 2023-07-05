@@ -18,7 +18,7 @@ class MPStatusView: UIView {
     
      let label: UILabel = {
         let label = UILabel()
-        label.text = "1"
+//        label.text = "1"
         return label
     }()
     

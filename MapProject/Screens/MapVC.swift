@@ -24,17 +24,25 @@ enum ScrollViewPosition: CGFloat {
     
 }
 
+enum UpperViewConstraint: CGFloat {
+    case exist = 40
+    case none = 0
+}
+
 class MapVC: UIViewController {
     
     //MARK: - Properties
     
-    var fetchedPlace: FetchedPlace?
     
+    
+    var fetchedPlace: FetchedPlace?
+    var markers: [NMFMarker] = []
     var marker = NMFMarker()
     let padding: CGFloat = 15
     var topConstraint: NSLayoutConstraint!
+    var upperViewConstraint: NSLayoutConstraint!
     var startingHeight: CGFloat!
-    var currentHeight: CGFloat!
+    lazy var currentHeight: CGFloat = getHeight(position: .bottom)
     var startingPosition: ScrollViewPosition = .bottom
     
     
@@ -50,11 +58,14 @@ class MapVC: UIViewController {
         didSet {
             if isSearhcing {
                 rightImageView.isHidden = false
+                
+                
             } else {
                 searchResult.removeAll()
                 rightImageView.isHidden = true
                 marker.mapView = nil
                 resultView.isHidden = true
+                
             }
         }
     }
@@ -97,12 +108,14 @@ class MapVC: UIViewController {
     
     private lazy var containerView: UIView = {
         let myView = UIView()
-        myView.backgroundColor = .systemPink
+        myView.backgroundColor = .white
+        myView.layer.cornerRadius = 30
         return myView
     }()
     
-    private lazy var upperView: UIView = {
+    let upperView: UIView = {
         let myView = UIView()
+        myView.layer.cornerRadius = 80
         myView.backgroundColor = .white
         return myView
     }()
@@ -129,8 +142,6 @@ class MapVC: UIViewController {
     
     let infoWindow = NMFInfoWindow()
     
-//    var customInfoWindowDataSource = CustomInfoWindowDataSource()
-    
     private lazy var locationManager: CLLocationManager = {
         let manager = CLLocationManager()
         manager.desiredAccuracy = kCLLocationAccuracyBest
@@ -143,62 +154,8 @@ class MapVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         locationManager.requestWhenInUseAuthorization()
         configureUI()
-        
-        
-        let marker = NMFMarker()
-        marker.position = NMGLatLng(lat: 37.3588603, lng: 127.1052063)
-        marker.mapView = naverMap
-//        infoWindow.anchor = CGPoint(x: 0, y: 1)
-//        infoWindow.dataSource = customInfoWindowDataSource
-//        infoWindow.offsetX = -40
-//        infoWindow.offsetY = -5
-//
-//        infoWindow.open(with: marker)
-//
-//        infoWindow.touchHandler = { [weak self] (overlay: NMFOverlay) -> Bool in
-//            //            customInfoWindowDataSource.rootView.
-//            //            print("I am")
-//            return true
-//        }
-//        infoWindow.open(with: marker)
-        
-        guard let _ = Auth.auth().currentUser else { return }
-//        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
-        
-        //        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt64(UInt(GMSPlaceField.name.rawValue)))
-        //        let fields: GMSPlaceField = GMSPlaceField(rawValue: UInt(GMSPlaceField.name.rawValue) |
-        //                                                  UInt(GMSPlaceField.placeID.rawValue))!
-        
-        
-//        GMSPlacesClient().findPlaceLikelihoodsFromCurrentLocation(withPlaceFields: fields, callback: {
-//            (placeLikelihoodList: Array<GMSPlaceLikelihood>?, error: Error?) in
-//            if let error = error {
-//                print("An error occurred: \(error.localizedDescription)")
-//                return
-//            }
-//
-//            if let placeLikelihoodList = placeLikelihoodList {
-//                for likelihood in placeLikelihoodList {
-//                    let place = likelihood.place
-//
-//                    print("Current Place name \(String(describing: place.name)) at likelihood \(likelihood.likelihood)")
-//                    print("Current PlaceID \(String(describing: place.placeID))")
-//                }
-//            }
-//        })
-        
-        //        containerView.isHidden = true
-        //        GooglePlacesManager.shared.getNearbyrestaurant()
-        //        GooglePlacesManager.shared.resolveLocation { image in
-        //            print("Image has been set")
-        //            self.leftImageView.image = image
-        //        }
-        
-        //MARK: - Google
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -206,11 +163,10 @@ class MapVC: UIViewController {
         
         topConstraint.constant = getHeight(position: startingPosition)
         
-        
     }
     
     //MARK: - Actions
-   
+    
     @objc func leftButtonTapped(_ sender: UITapGestureRecognizer) {
         
         naverMap.isHidden = false
@@ -220,6 +176,7 @@ class MapVC: UIViewController {
         searchTF.endEditing(true)
         searchTF.text = ""
         isSearhcing = false
+        containerView.isHidden = false
         
     }
     
@@ -227,18 +184,22 @@ class MapVC: UIViewController {
         if mytableView.isHidden == true {
             
             leftImageView.image = UIImage(systemName: "map.circle")
-            
         }
         
         isSearhcing = false
         searchTF.text = ""
+        containerView.isHidden = false
     }
     
     @objc func bottomViewBeenScrolled(_ sender: UIPanGestureRecognizer) {
         if sender.state == .began {
             
             startingHeight = getHeight(position: startingPosition)
-            
+            print(self.children)
+            let tableView = ((self.children.first as! TabBarVC).viewControllers![0] as! ScrollCategoryVC).placeTableView
+            if tableView.contentOffset.y != 0 {
+                tableView.contentOffset.y = 0
+            }
         } else if sender.state == .changed {
             let translation = sender.translation(in: self.view)
             
@@ -255,6 +216,83 @@ class MapVC: UIViewController {
         }
     }
     //MARK: - Helpers
+    func scrollCategoryViewFilledTheSuperView(bool: Bool) {
+        upperViewConstraint.constant = bool ? view.safeAreaInsets.top : 40
+        topConstraint.constant = bool ? -(view.safeAreaInsets.top) : currentHeight
+        dragIcon.isHidden = bool
+        
+        self.loadViewIfNeeded()
+    }
+    
+    private func resetMarkers() {
+        guard !markers.isEmpty else { return }
+        
+        markers.forEach { marker in
+            marker.mapView = nil
+            
+            self.markers = []
+            print("Marker Reset")
+        }
+    }
+    
+    func makeMarker(with category: Category) {
+        resetMarkers()
+        
+        guard !category.addedPlaces.isEmpty else { return }
+        
+        for place in category.addedPlaces {
+            
+            let marker = NMFMarker(position: NMGLatLng(lat: place.lat, lng: place.lon))
+            
+            marker.captionText = place.name
+            marker.mapView = naverMap
+            markers.append(marker)
+            print("current markers count = \(self.markers.count)")
+            
+            marker.touchHandler = { (overlay: NMFOverlay) -> Bool in
+                print(place.name)
+                print("오버레이 터치됨")
+                self.resultView.isHidden = false
+                
+                self.fetchedPlace = place
+                let myLocation = self.locationManager.location
+                let distance = myLocation?.distance(from: CLLocation(latitude: place.lat, longitude: place.lon))
+                
+                GooglePlacesManager.shared.resolveLocation(with: place.placeID) { result in
+                    switch result {
+                    case .failure(let error):
+                        print(error)
+                        
+                    case .success(let fetchedPlace):
+                        print("Success")
+                        self.fetchedPlace = fetchedPlace
+                        self.resultView.setPlaceAndLabels(fetchedPlace: fetchedPlace, distance: NSNumber(floatLiteral: distance!))
+                        self.resultView.fetchCategories()
+                        self.resultView.changelayOut()
+                        
+                    }
+                }
+                return true
+            }
+        }
+        
+        DispatchQueue.main.async {
+            
+            self.marker.mapView = self.naverMap
+            print("markers.count =\(self.markers.count)")
+            let categoryLatAndLone: [NMGLatLng] = self.markers.compactMap({ $0.position})
+            
+            print("categoryLatAndLone count = \(categoryLatAndLone.count)")
+            let bounds = NMGLatLngBounds(latLngs: categoryLatAndLone)
+            
+            let cameraUpdate = NMFCameraUpdate(fit: bounds, paddingInsets: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100))
+            
+            self.naverMap.moveCamera(cameraUpdate)
+            
+        }
+        
+        
+    }
     
     func makeSureHeightIsInTheRange() {
         if currentHeight <= getHeight(position: .top) {
@@ -313,6 +351,8 @@ class MapVC: UIViewController {
         mytableView.isHidden = true
         naverMap.isHidden = false
         searchTF.rightViewMode = .always
+        containerView.isHidden = true
+        resetMarkers()
     }
     
     private func moveCamera() {
@@ -325,6 +365,7 @@ class MapVC: UIViewController {
             let naverLatLon = NMGLatLng(lat: lat, lng: lon)
             print("______________________-\(lat), \(lon)")
             let cameraUpdate = NMFCameraUpdate(scrollTo: naverLatLon)
+            
             self.naverMap.moveCamera(cameraUpdate)
             let locationOverlay = naverMap.locationOverlay
             locationOverlay.location = naverLatLon
@@ -341,13 +382,11 @@ class MapVC: UIViewController {
         configureTableView()
         configureContainerView()
         configureResultView()
-        
     }
     
     private func configureMap() {
         view.addSubview(naverMap)
         naverMap.frame = view.bounds
-        
     }
     
     private func configureTableView() {
@@ -360,7 +399,6 @@ class MapVC: UIViewController {
             mytableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             mytableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
     }
     
     private func configureTextField() {
@@ -421,13 +459,13 @@ class MapVC: UIViewController {
         containerView.addSubview(upperView)
         upperView.translatesAutoresizingMaskIntoConstraints = false
         
+        upperViewConstraint = upperView.heightAnchor.constraint(equalToConstant: UpperViewConstraint.exist.rawValue)
         NSLayoutConstraint.activate([
             upperView.topAnchor.constraint(equalTo: containerView.topAnchor),
             upperView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             upperView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            upperView.heightAnchor.constraint(equalToConstant: 40)
+            upperViewConstraint
         ])
-        
         
         upperView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(bottomViewBeenScrolled(_:))))
         
@@ -454,33 +492,7 @@ class MapVC: UIViewController {
         lowerView.addSubview(myTabBarController.view)
         myTabBarController.didMove(toParent: self)
         
-        
-        
-        
     }
-    
-//    func converHTMLString(with HTMLString: String, targetString: String) -> NSMutableAttributedString {
-//
-//        var mutableString = NSMutableAttributedString()
-//        guard let data = HTMLString.data(using: .utf8) else {
-//            return mutableString
-//        }
-//
-//        do {
-//            mutableString = try NSMutableAttributedString(data: data, options: [.documentType: NSAttributedString.DocumentType.html, .characterEncoding:String.Encoding.utf8.rawValue], documentAttributes: nil)
-//            mutableString.addAttributes([.foregroundColor: UIColor.black, .font: UIFont(name: "AppleSDGothicNeo-Regular", size: 15)!], range: NSRange(location: 0, length: mutableString.length))
-//
-//            let range = (mutableString.string as NSString).range(of: targetString)
-//            if (range.length > 0) {
-//                mutableString.addAttributes([.foregroundColor: UIColor.blue], range: range)
-//            }
-//
-//        } catch {
-//
-//        }
-//
-//        return mutableString
-//    }
 }
 
 //MARK: - UITextFieldDelegate
@@ -490,6 +502,7 @@ extension MapVC: UITextFieldDelegate {
         leftImageView.image = UIImage(systemName: "chevron.backward")
         mytableView.isHidden = false
         naverMap.isHidden = true
+        containerView.isHidden = true
     }
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
@@ -500,7 +513,7 @@ extension MapVC: UITextFieldDelegate {
         }
         isSearhcing = true
         
-      GooglePlacesManager.shared.findPlaces(query: text) { result in
+        GooglePlacesManager.shared.findPlaces(query: text) { result in
             print("----------------------------------")
             switch result {
             case .failure(let error):
@@ -509,10 +522,8 @@ extension MapVC: UITextFieldDelegate {
                 self.searchResult = places
                 
             }
-            
         }
     }
-    
 }
 
 //MARK: - UITableViewDataSource, UITableViewDelegate
@@ -553,9 +564,9 @@ extension MapVC: UITableViewDataSource, UITableViewDelegate {
                 let location = NMGLatLng(lat: place.lat, lng: place.lon)
                 let cameraUpdate = NMFCameraUpdate(scrollTo: location)
                 self.resultView.setPlaceAndLabels(fetchedPlace: place, distance: distance)
-                self.resultView.fetchCategories {
-                    self.resultView.changelayOut()
-                }
+                self.resultView.fetchCategories()
+                self.resultView.changelayOut()
+                
                 
                 DispatchQueue.main.async {
                     self.marker.position = location
@@ -566,42 +577,6 @@ extension MapVC: UITableViewDataSource, UITableViewDelegate {
                 }
             }
         }
-        
-        
-        
-        
-        //
-        //        NetworkManager.shared.getLatLon(with: roadAddress, location: currentLocation) { coordinateAndDistance in
-        //            guard let coordinateAndDistance else { return }
-        //            let distance = coordinateAndDistance.distance
-        //
-        //            guard let lat = Double(coordinateAndDistance.y), let lon = Double(coordinateAndDistance.x) else { return }
-        //
-        //
-        //            let searchedLocation = NMGLatLng(lat: lat, lng: lon)
-        //            let cameraUpdate = NMFCameraUpdate(scrollTo: searchedLocation)
-        //
-        //            let fetchedPlace = FetchedPlace(title: editedText.string, address: roadAddress, lat: lat, lon: lon, distance: distance )
-        //
-        //            self.fetchedPlace = fetchedPlace
-        //            self.resultView.setPlaceAndLabels(fetchedPlace: fetchedPlace, thereIsUserLocation: currentLocation !== nil)
-        //            self.resultView.resetCateogryViewAndSavedLabel()
-        //
-        //            self.resultView.fetchCategories {
-        //                self.resultView.changelayOut()
-        //            }
-        //
-        //            DispatchQueue.main.async {
-        //                self.marker.position = searchedLocation
-        //                self.marker.captionText = editedText.string
-        //                self.marker.mapView = self.naverMap
-        //                self.naverMap.moveCamera(cameraUpdate)
-        //                self.placeTapped()
-        //            }
-        //        }
-        //
-        //        searchTF.resignFirstResponder()
-        //        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 

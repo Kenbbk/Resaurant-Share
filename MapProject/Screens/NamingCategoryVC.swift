@@ -196,8 +196,7 @@ class NamingCategoryVC: UIViewController {
         FavoriteSerivce.shared.addCategory(with: category) { 
             UserInfo.shared.categories.append(category)
             
-            guard let presentingVC = self.presentingViewController as? CategoryVC else { return }
-            presentingVC.setCategoriesAndInitalCategoriesThenReload()
+
             
             self.dismiss(animated: true)
             
@@ -255,6 +254,7 @@ class NamingCategoryVC: UIViewController {
     //MARK: - UI
     
     private func configureUI() {
+        
         configureWholeContainerView()
         configureTopContainerView()
         configureTFContainerView()

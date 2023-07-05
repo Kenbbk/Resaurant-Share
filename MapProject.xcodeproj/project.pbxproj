@@ -27,6 +27,8 @@
 		D637FD582A4D4D5D000D3B10 /* MPStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D637FD572A4D4D5D000D3B10 /* MPStatusView.swift */; };
 		D637FD5E2A4E766E000D3B10 /* GooglePlacesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D637FD5D2A4E766E000D3B10 /* GooglePlacesManager.swift */; };
 		D637FD612A5024B7000D3B10 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = D637FD602A5024B7000D3B10 /* Place.swift */; };
+		D637FD652A52B211000D3B10 /* NSNumber+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = D637FD642A52B211000D3B10 /* NSNumber+Ext.swift */; };
+		D637FD672A53E836000D3B10 /* NoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D637FD662A53E835000D3B10 /* NoViewController.swift */; };
 		D66853222A3CCEAB000FFDFB /* FavoriteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853212A3CCEAB000FFDFB /* FavoriteService.swift */; };
 		D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */; };
 		D66853262A3D6A02000FFDFB /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853252A3D6A02000FFDFB /* CategoryCell.swift */; };
@@ -67,6 +69,8 @@
 		D637FD572A4D4D5D000D3B10 /* MPStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPStatusView.swift; sourceTree = "<group>"; };
 		D637FD5D2A4E766E000D3B10 /* GooglePlacesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesManager.swift; sourceTree = "<group>"; };
 		D637FD602A5024B7000D3B10 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
+		D637FD642A52B211000D3B10 /* NSNumber+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSNumber+Ext.swift"; sourceTree = "<group>"; };
+		D637FD662A53E835000D3B10 /* NoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoViewController.swift; sourceTree = "<group>"; };
 		D66853212A3CCEAB000FFDFB /* FavoriteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteService.swift; sourceTree = "<group>"; };
 		D66853232A3D48A7000FFDFB /* FavoriteAddVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteAddVC.swift; sourceTree = "<group>"; };
 		D66853252A3D6A02000FFDFB /* CategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
@@ -198,6 +202,7 @@
 				D66853542A41A652000FFDFB /* UIColor+Ext.swift */,
 				D66853772A42ABA4000FFDFB /* UIViewController+Ext.swift */,
 				D66853792A42AD36000FFDFB /* UIView+Ext.swift */,
+				D637FD642A52B211000D3B10 /* NSNumber+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -229,6 +234,7 @@
 				D668534B2A3EC9CF000FFDFB /* NamingCategoryVC.swift */,
 				D61610982A4C2BBA00671127 /* TabBarVC.swift */,
 				D616109A2A4C2CF700671127 /* ScrollCategoryVC.swift */,
+				D637FD662A53E835000D3B10 /* NoViewController.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -389,6 +395,7 @@
 				D66853262A3D6A02000FFDFB /* CategoryCell.swift in Sources */,
 				D60B32B62A32EDAF008573EC /* MapVC.swift in Sources */,
 				D66853482A3DAEFA000FFDFB /* CategoryVC.swift in Sources */,
+				D637FD652A52B211000D3B10 /* NSNumber+Ext.swift in Sources */,
 				D66853222A3CCEAB000FFDFB /* FavoriteService.swift in Sources */,
 				D60B32B22A32EDAF008573EC /* AppDelegate.swift in Sources */,
 				D616109B2A4C2CF700671127 /* ScrollCategoryVC.swift in Sources */,
@@ -397,6 +404,7 @@
 				D637FD612A5024B7000D3B10 /* Place.swift in Sources */,
 				D66853C62A47106C000FFDFB /* MPSavedSignView.swift in Sources */,
 				D60B33192A39A2B0008573EC /* CustomInfoWindowView.swift in Sources */,
+				D637FD672A53E836000D3B10 /* NoViewController.swift in Sources */,
 				D615720A2A3C61A000AA7041 /* User.swift in Sources */,
 				D60B333F2A3C383F008573EC /* MPResultView.swift in Sources */,
 				D66853A42A45A27A000FFDFB /* UserInfo.swift in Sources */,

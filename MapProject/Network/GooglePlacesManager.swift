@@ -65,7 +65,7 @@ class GooglePlacesManager {
             
             guard let data else { return }
             let stringData = String(data: data, encoding: .utf8)
-            print(stringData)
+//            print(stringData)
             
         }
         task.resume()
@@ -75,22 +75,15 @@ class GooglePlacesManager {
     func resolveLocation(with placeID: String, completion: @escaping (Result<FetchedPlace, Error>) -> Void) {
         
         
-        client.fetchPlace(fromPlaceID: placeID, placeFields: [.name, .formattedAddress, .coordinate, .placeID, .rating], sessionToken: nil) { resolvedPlace, error in
+        client.fetchPlace(fromPlaceID: placeID, placeFields: [.name, .formattedAddress, .coordinate, .placeID, .rating, .photos, .types], sessionToken: nil) { resolvedPlace, error in
             guard let resolvedPlace else {
                 completion(.failure(PlacesError.failedToFind))
                 return }
+           
             
-            let place = FetchedPlace(name: resolvedPlace.name!, address: resolvedPlace.formattedAddress! , placeID: resolvedPlace.placeID!, rating: resolvedPlace.rating, lat: resolvedPlace.coordinate.latitude, lon: resolvedPlace.coordinate.longitude)
+            let place = FetchedPlace(name: resolvedPlace.name!, address: resolvedPlace.formattedAddress! , placeID: resolvedPlace.placeID!, rating: resolvedPlace.rating, lat: resolvedPlace.coordinate.latitude, lon: resolvedPlace.coordinate.longitude, type: resolvedPlace.types?.first ?? "", image: resolvedPlace.photos?.first)
             completion(.success(place))
-//            self.client.loadPlacePhoto(photoMetadata) { photo, error in
-//                if let error {
-//                    print(error)
-//                    return
-//                } else {
-//                    guard let photo else { return }
-//                    completion(photo)
-//                }
-//            }
+
         }
         
         

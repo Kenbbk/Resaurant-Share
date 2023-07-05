@@ -6,15 +6,17 @@
 //
 
 import UIKit
+import NMapsMap
 
 class ScrollCategoryVC: UIViewController {
     
     
     //MARK: - Properties
     
-    private lazy var placeTableView: UITableView = {
-        let tb = UITableView(frame: .zero, style: .grouped)
+    lazy var placeTableView: UITableView = {
+        let tb = UITableView(frame: CGRect(x: 0, y: 0, width: Int(view.frame.size.height), height: Int(view.frame.size.height - tabBarController!.tabBar.frame.height)), style: .grouped)
         tb.backgroundColor = .white
+        
         tb.dataSource = self
         tb.delegate = self
         tb.register(CreateCell.self, forCellReuseIdentifier: CreateCell.identifier)
@@ -27,6 +29,24 @@ class ScrollCategoryVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        fetchcategories()
+        configureUI()
+        createObserver()
+        
+        
+        
+    }
+    
+    //MARK: - Actions
+    
+    @objc func categoryChanged() {
+        print("DEBUG: user.info's category changed yay!")
+        placeTableView.reloadData()
+    }
+    
+    //MARK: - Helpers
+    
+    private func fetchcategories() {
         FavoriteSerivce.shared.fetchCategory { categories in
             
             for category in categories {
@@ -44,21 +64,10 @@ class ScrollCategoryVC: UIViewController {
                 }
             }
             
-            
             print("debug UserInfo.shared.categories has been set")
         }
-        configureUI()
-        createObserver()
     }
     
-    //MARK: - Actions
-    
-    @objc func categoryChanged() {
-        print("DEBUG: user.info's category changed yay!")
-        placeTableView.reloadData()
-    }
-    
-    //MARK: - Helpers
     
     private func createObserver() {
         NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name(UserInfo.shared.categoryChangedIdentifier), object: nil)
@@ -71,9 +80,18 @@ class ScrollCategoryVC: UIViewController {
     private func configureTB() {
         
         view.addSubview(placeTableView)
-        placeTableView.frame = view.bounds
-    }
+        placeTableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            placeTableView.topAnchor.constraint(equalTo: view.topAnchor),
+            placeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            placeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            placeTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: tabBarController?.tabBar.frame.size.height ?? 0)
+        ])
+        }
 }
+
+//MARK: - TableView Data Source, TableView Delegate
 
 extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -93,6 +111,22 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
         return cell
         
         
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row == 0 {
+            let vc = NamingCategoryVC()
+            vc.modalPresentationStyle = .overFullScreen
+            present(vc, animated: true)
+        } else {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+            let selectedCategory = UserInfo.shared.categories[indexPath.row - 1]
+            let vc = self.getTopHierarchyViewController() as! MapVC
+            vc.topConstraint.constant = vc.getHeight(position: .middle)
+            vc.makeMarker(with: selectedCategory)
+            
+
+        }
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

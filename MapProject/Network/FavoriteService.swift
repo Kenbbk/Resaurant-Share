@@ -89,7 +89,8 @@ struct FavoriteSerivce {
             "lat": place.lat,
             "lon": place.lon,
             "placeID": place.placeID,
-            "rating": place.rating
+            "rating": place.rating,
+            "type": place.type
         ])
         completion()
         

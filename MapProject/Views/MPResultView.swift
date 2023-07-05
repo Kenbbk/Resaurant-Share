@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GooglePlaces
 
 protocol CustomResultViewDelegate: AnyObject {
     func favoriteButtonTapped()
@@ -19,12 +20,20 @@ class MPResultView: UIView {
     
     let padding: CGFloat                    = 10
     
-    let titleNameLabel: UILabel = {
+    private let titleNameLabel: UILabel = {
         let label = UILabel()
         
         label.text                          = "양산 물금한신더휴 아파트"
         label.textColor                     = .blue.withAlphaComponent(0.60)
         label.font                          = UIFont.boldSystemFont(ofSize: 17)
+        return label
+    }()
+    
+    private let typeLabel: UILabel = {
+       let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 13)
+        label.textColor = UIColor.systemGray
+        label.text = "Cafe"
         return label
     }()
     
@@ -68,9 +77,14 @@ class MPResultView: UIView {
     lazy var savedLabel: UILabel = {
         let label                            = UILabel()
         label.numberOfLines                 = 1
-        label.adjustsFontSizeToFitWidth     = true
-        label.text                          = "and 1 more"
         return label
+    }()
+    
+    lazy var placePhotoImageView: UIImageView = {
+       let iv = UIImageView()
+        
+        iv.clipsToBounds = true
+        return iv
     }()
     
     var delegate: CustomResultViewDelegate?
@@ -134,43 +148,57 @@ class MPResultView: UIView {
         }
     }
     
-    func fetchCategories(completion: @escaping () -> Void) {
+    func fetchCategories() {
         
         guard let fetchedPlace = self.fetchedPlace else {
             print("There is no fetchedPlace")
             return
         }
-        let group = DispatchGroup()
+
         var addedCategories: [Category] = []
         for category in UserInfo.shared.categories {
             
-            group.enter()
-            
-            let query = COLLECTION_USERS.document(UserInfo.shared.userID!).collection("categories").document(category.categoryUID).collection("places").whereField("placeID", isEqualTo: fetchedPlace.placeID)
-            query.getDocuments { snapshot, error in
-                defer { group.leave() }
-                
-                guard let document = snapshot?.documents else { return }
-                
-                if document.isEmpty == false {
-                    
-                    addedCategories.append(category)
-                    
-                }
+            if category.addedPlaces.contains(where: { $0.placeID == fetchedPlace.placeID }) {
+                addedCategories.append(category)
             }
         }
-        group.notify(queue: .main) {
-            UserInfo.shared.addedCategories = addedCategories
-            completion()
-        }
+       
+        UserInfo.shared.addedCategories = addedCategories
+        
+        
     }
     
     func setPlaceAndLabels(fetchedPlace: FetchedPlace, distance: NSNumber ) {
+        placePhotoImageView.image = UIImage()
         self.fetchedPlace = fetchedPlace
-        DispatchQueue.main.async {
-            self.titleNameLabel.text = fetchedPlace.name
-            self.addressLabel.text = fetchedPlace.address
-            self.distanceLabel.text = "\(Int(distance))"
+       
+        if let photoData = fetchedPlace.image {
+            
+            GMSPlacesClient.shared().loadPlacePhoto(photoData) { image, error in
+                
+                if let error {
+                    print(error)
+                    return
+                }
+               
+                
+                DispatchQueue.main.async {
+                    self.placePhotoImageView.image = image
+                    self.titleNameLabel.text = fetchedPlace.name
+                    self.typeLabel.text = fetchedPlace.type
+                    self.addressLabel.text = fetchedPlace.address
+                    self.distanceLabel.text = distance.getDistanceString()
+                    
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                self.titleNameLabel.text = fetchedPlace.name
+                self.typeLabel.text = fetchedPlace.type
+                self.addressLabel.text = fetchedPlace.address
+                self.distanceLabel.text = distance.getDistanceString()
+            }
+            
         }
     }
     
@@ -191,14 +219,31 @@ class MPResultView: UIView {
     private func configureUI() {
         configureSelf()
         
+        addSubview(placePhotoImageView)
+        placePhotoImageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            placePhotoImageView.topAnchor.constraint(equalTo: topAnchor, constant: 7),
+            placePhotoImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -7),
+            placePhotoImageView.heightAnchor.constraint(equalToConstant: 75),
+            placePhotoImageView.widthAnchor.constraint(equalToConstant: 75)
+        ])
+        
         addSubview(titleNameLabel)
         titleNameLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             titleNameLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: padding),
             titleNameLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: padding),
-            titleNameLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+//            titleNameLabel.trailingAnchor.constraint(equalTo: placePhotoImageView.leadingAnchor),
             titleNameLabel.heightAnchor.constraint(equalToConstant: 35)
             
+        ])
+        
+        addSubview(typeLabel)
+        typeLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            typeLabel.centerYAnchor.constraint(equalTo: titleNameLabel.centerYAnchor),
+            typeLabel.leadingAnchor.constraint(equalTo: titleNameLabel.trailingAnchor, constant: 5),
+            typeLabel.heightAnchor.constraint(equalToConstant: 35)
         ])
         
         addSubview(addressLabel)
@@ -206,7 +251,7 @@ class MPResultView: UIView {
         NSLayoutConstraint.activate([
             addressLabel.topAnchor.constraint(equalTo: titleNameLabel.bottomAnchor),
             addressLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            addressLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            addressLabel.trailingAnchor.constraint(equalTo: placePhotoImageView.leadingAnchor, constant: -10),
             addressLabel.heightAnchor.constraint(equalToConstant: 20)
         ])
         
@@ -232,7 +277,7 @@ class MPResultView: UIView {
         NSLayoutConstraint.activate([
             savedLabel.centerYAnchor.constraint(equalTo: distanceLabel.centerYAnchor),
             savedLabel.leadingAnchor.constraint(equalTo: categoryView.trailingAnchor, constant: 5),
-            
+            savedLabel.trailingAnchor.constraint(lessThanOrEqualTo: placePhotoImageView.leadingAnchor, constant: -5)
         ])
         
         
@@ -255,6 +300,5 @@ class MPResultView: UIView {
         ])
     }
 }
-
 
 

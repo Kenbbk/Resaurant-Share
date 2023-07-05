@@ -18,5 +18,16 @@ extension UIViewController {
     @objc private func dismissKeyboardTouchOutside() {
         view.endEditing(true)
     }
+    
+    func getTopHierarchyViewController() -> UIViewController? {
+        var vc = self
+        
+        while vc.parent != nil {
+            vc = vc.parent!
+        }
+        
+        return vc == self ? nil: vc
+        
+        
+    }
 }
-

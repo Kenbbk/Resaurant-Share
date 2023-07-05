@@ -106,6 +106,7 @@ class CategoryVC: UIViewController {
         setTitleLabel()
         configureUI()
         addGesutreonView()
+        createObserver()
         
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -117,6 +118,10 @@ class CategoryVC: UIViewController {
         self.fetchedPlace = place
         super.init(nibName: nil, bundle: nil)
         
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: Notification.Name(UserInfo.shared.categoryChangedIdentifier), object: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -186,7 +191,21 @@ class CategoryVC: UIViewController {
         view.backgroundColor = .clear
         dismiss(animated: true)
     }
+    
+    @objc private func categoryChanged() {
+        categories = UserInfo.shared.categories
+        print("Categories reset")
+        FavoriteTableView.reloadData()
+        
+        HighlightAddedCategories()
+    }
+    
+    
     //MARK: - Helpers
+    
+    private func createObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name(UserInfo.shared.categoryChangedIdentifier), object: nil)
+    }
     
     func setCategoriesAndInitalCategories() {
         
@@ -194,15 +213,6 @@ class CategoryVC: UIViewController {
         initialSelection = Set(UserInfo.shared.addedCategories)
         print("Categories reset")
         
-    }
-    
-    func setCategoriesAndInitalCategoriesThenReload() {
-        
-        categories = UserInfo.shared.categories
-        print("Categories reset")
-        FavoriteTableView.reloadData()
-        
-        HighlightAddedCategories()
     }
     
     private func ModifySaveButtonUIAccordingly() {

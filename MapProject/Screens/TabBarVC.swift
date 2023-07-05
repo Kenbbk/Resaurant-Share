@@ -8,19 +8,23 @@
 import UIKit
 
 class TabBarVC: UITabBarController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabs()
         
-        tabBar.barTintColor = .systemGray
+        //        tabBar.barTintColor = .systemGray
         tabBar.isTranslucent = false
+        
     }
     
     private func setupTabs() {
         
         let home = createTab(title: "Hello", image: UIImage(systemName: "house")!, vc: ScrollCategoryVC())
-        setViewControllers([home], animated: true)
+        let share = createTab(title: "Share", image: UIImage(systemName: "star")!, vc: NoViewController())
+        let nav = UINavigationController(rootViewController: share)
+        
+        setViewControllers([home, nav], animated: true)
     }
     
     private func createTab(title: String, image: UIImage, vc: UIViewController) -> UIViewController {
@@ -29,6 +33,18 @@ class TabBarVC: UITabBarController {
         
         return vc
     }
-
+    
+    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+        let vc = self.getTopHierarchyViewController() as! MapVC
+        
+        vc.scrollCategoryViewFilledTheSuperView(bool: item.title == "Share")
+        
+    }
+    
+    
 }
+
+
+
+
 

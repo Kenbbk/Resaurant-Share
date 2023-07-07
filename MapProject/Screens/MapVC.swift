@@ -15,6 +15,7 @@ import FirebaseFirestore
 import FirebaseAuth
 import CoreLocation
 import GooglePlaces
+import SnapKit
 
 enum ScrollViewPosition: CGFloat {
     
@@ -76,8 +77,8 @@ class MapVC: UIViewController {
         tb.isHidden = true
         return tb
     }()
-    private lazy var naverMap = NMFMapView()
     
+    private lazy var naverMap = NMFMapView()
     
     private lazy var searchTF: UITextField = {
         let tf = UITextField()
@@ -89,6 +90,7 @@ class MapVC: UIViewController {
         
         return tf
     }()
+    
     private lazy var leftImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.clipsToBounds = true
@@ -100,6 +102,7 @@ class MapVC: UIViewController {
     private lazy var rightImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.clipsToBounds = true
+        
         imageView.image = UIImage(systemName: "x.circle")
         imageView.tintColor = .gray
         return imageView
@@ -112,21 +115,21 @@ class MapVC: UIViewController {
         return myView
     }()
     
-    let upperView: UIView = {
+    private let upperView: UIView = {
         let myView = UIView()
         myView.layer.cornerRadius = 80
         myView.backgroundColor = .white
         return myView
     }()
     
-    let dragIcon: UIView = {
+    private let dragIcon: UIView = {
         let myView = UIView()
         myView.layer.cornerRadius = 2.5
         myView.backgroundColor = .systemGray3
         return myView
     }()
     
-    private lazy var lowerView: UIView = {
+    private let lowerView: UIView = {
         let myView = UIView()
         
         return myView
@@ -137,6 +140,34 @@ class MapVC: UIViewController {
         
         return myView
         
+    }()
+    
+    lazy var resultScrollableView: MPScrollableView = {
+       let view = MPScrollableView()
+        view.isHidden = true
+        return view
+    }()
+    
+    private let rightCancelImageView: UIImageView = {
+       let iv = UIImageView()
+        iv.isHidden = true
+        iv.layer.cornerRadius = 15
+        iv.tintColor = .systemGray3
+        iv.backgroundColor = .systemGray6
+        iv.image = UIImage(systemName: "x.circle.fill")
+        iv.clipsToBounds = true
+        return iv
+    }()
+    
+    private let leftBackImageView: UIImageView = {
+        let iv = UIImageView()
+         iv.isHidden = true
+         iv.layer.cornerRadius = 15
+         iv.tintColor = .systemGray3
+         iv.backgroundColor = .systemGray6
+         iv.image = UIImage(systemName: "chevron.backward.circle.fill")
+         iv.clipsToBounds = true
+         return iv
     }()
     
     let infoWindow = NMFInfoWindow()
@@ -155,6 +186,7 @@ class MapVC: UIViewController {
         
         locationManager.requestWhenInUseAuthorization()
         configureUI()
+        
 
     }
     
@@ -196,6 +228,7 @@ class MapVC: UIViewController {
         
         if sender.state == .began {
             let tableView = ((self.children.first as! TabBarVC).viewControllers![0] as! ScrollCategoryVC).placeTableView
+//            let tableView = (((self.children.first as! TabBarVC).viewControllers![0] as! UINavigationController).viewControllers[0] as! ScrollCategoryVC).placeTableView
             tableView.contentOffset.y = 0
             startingHeight = getHeight(position: currentPosition)
             
@@ -217,7 +250,8 @@ class MapVC: UIViewController {
     //MARK: - Helpers
     func scrollCategoryViewFilledTheSuperView(bool: Bool) {
         upperViewConstraint.constant = bool ? view.safeAreaInsets.top : 40
-        topConstraint.constant = bool ? -(view.safeAreaInsets.top) : currentHeight
+//        topConstraint.constant = bool ? -(view.safeAreaInsets.top) : currentHeight
+        topConstraint.constant = bool ? -(view.safeAreaInsets.top) : getHeight(position: currentPosition)
         dragIcon.isHidden = bool
         
         self.loadViewIfNeeded()
@@ -232,6 +266,13 @@ class MapVC: UIViewController {
             self.markers = []
             print("Marker Reset")
         }
+    }
+    
+    func hideTextFieldAndShowCancelButton() {
+        searchTF.isHidden = true
+        containerView.isHidden = true
+        resultScrollableView.isHidden = false
+        rightCancelImageView.isHidden = false
     }
     
     func makeMarker(with category: Category) {
@@ -339,6 +380,8 @@ class MapVC: UIViewController {
         }
     }
     
+    
+    
     func getHeight(position: ScrollViewPosition) -> CGFloat {
         let ratio = position.rawValue
         let height = (view.safeAreaLayoutGuide.layoutFrame.height - view.safeAreaInsets.bottom) * ratio
@@ -381,6 +424,9 @@ class MapVC: UIViewController {
         configureTableView()
         configureContainerView()
         configureResultView()
+        configureResultScrollableView()
+        configureRightCancelImageView()
+        configureLeftBackImageView()
     }
     
     private func configureMap() {
@@ -388,59 +434,54 @@ class MapVC: UIViewController {
         naverMap.frame = view.bounds
     }
     
-    private func configureTableView() {
-        view.addSubview(mytableView)
-        
-        mytableView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            mytableView.topAnchor.constraint(equalTo: searchTF.bottomAnchor, constant: 0),
-            mytableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            mytableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            mytableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
+    
     
     private func configureTextField() {
         
         view.addSubview(searchTF)
         view.bringSubviewToFront(searchTF)
+        searchTF.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.left.right.equalToSuperview().inset(padding)
+            make.height.equalTo(40)
+        }
         
-        searchTF.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            searchTF.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            searchTF.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            searchTF.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
-            searchTF.heightAnchor.constraint(equalToConstant: 40)
-        ])
-        
-        leftImageView.translatesAutoresizingMaskIntoConstraints = false
-        leftImageView.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        leftImageView.widthAnchor.constraint(equalToConstant: 25).isActive = true
+        leftImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(25)
+        }
         
         searchTF.leftView = leftImageView
         searchTF.leftViewMode = .always
         searchTF.leftView?.isUserInteractionEnabled = true
         leftImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(leftButtonTapped(_:))))
         
-        rightImageView.translatesAutoresizingMaskIntoConstraints = false
-        rightImageView.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        rightImageView.widthAnchor.constraint(equalToConstant: 25).isActive = true
+        rightImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(25)
+        }
+
         searchTF.rightView = rightImageView
         searchTF.rightViewMode = .whileEditing
         searchTF.rightView?.isUserInteractionEnabled = true
         searchTF.rightView?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(rightButtonTapped(_:))))
     }
     
+    private func configureTableView() {
+        view.addSubview(mytableView)
+        mytableView.snp.makeConstraints { make in
+            make.top.equalTo(searchTF.snp.bottom)
+            make.left.right.bottom.equalToSuperview()
+        }
+    }
+    
     private func configureResultView() {
         view.addSubview(resultView)
         resultView.translatesAutoresizingMaskIntoConstraints = false
         resultView.delegate = self
-        NSLayoutConstraint.activate([
-            resultView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            resultView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            resultView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            resultView.heightAnchor.constraint(equalToConstant: 122)
-        ])
+        resultView.snp.makeConstraints { make in
+            make.left.right.bottom.equalToSuperview()
+            make.height.equalTo(122)
+        }
+
     }
     
     private func configureContainerView() {
@@ -485,12 +526,47 @@ class MapVC: UIViewController {
             lowerView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             lowerView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
         ])
+        
+        
         let myTabBarController = TabBarVC()
         myTabBarController.view.frame = lowerView.frame
         addChild(myTabBarController)
         lowerView.addSubview(myTabBarController.view)
         myTabBarController.didMove(toParent: self)
         
+    }
+    
+    private func configureResultScrollableView() {
+        view.addSubview(resultScrollableView)
+        resultScrollableView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            resultScrollableView.topAnchor.constraint(equalTo: view.topAnchor),
+            resultScrollableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            resultScrollableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            resultScrollableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+    
+    private func configureRightCancelImageView() {
+        view.addSubview(rightCancelImageView)
+        rightCancelImageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            rightCancelImageView.centerYAnchor.constraint(equalTo: searchTF.centerYAnchor),
+            rightCancelImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            rightCancelImageView.heightAnchor.constraint(equalToConstant: 30),
+            rightCancelImageView.widthAnchor.constraint(equalToConstant: 30)
+        ])
+    }
+    
+    private func configureLeftBackImageView() {
+        view.addSubview(leftBackImageView)
+        leftBackImageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            leftBackImageView.centerYAnchor.constraint(equalTo: searchTF.centerYAnchor),
+            leftBackImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            leftBackImageView.heightAnchor.constraint(equalToConstant: 30),
+            leftBackImageView.widthAnchor.constraint(equalToConstant: 30)
+        ])
     }
 }
 

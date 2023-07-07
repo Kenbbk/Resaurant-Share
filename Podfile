@@ -10,6 +10,7 @@ target 'MapProject' do
 
   pod 'GooglePlaces', '8.0.0'
     pod 'NMapsMap'
+  pod 'SnapKit'
 pod 'FirebaseAuth'
 pod 'FirebaseFirestore'
 post_install do |installer|

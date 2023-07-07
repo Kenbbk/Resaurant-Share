@@ -32,13 +32,7 @@ class ScrollCategoryVC: UIViewController {
         let vc = self.getTopHierarchyViewController() as! MapVC
         return vc
     }()
-//    private lazy var tableViewGestureRecognizer: UIPanGestureRecognizer = {
-//        let vc = self.getTopHierarchyViewController() as! MapVC
-//        let gesutre = UIPanGestureRecognizer(target: self, action: #selector(vc.bottomViewBeenScrolled(_:)))
-//
-//        gesutre.delegate = self
-//        return gesutre
-//    }()
+
         
     
     //MARK: - Lifecycle
@@ -48,13 +42,15 @@ class ScrollCategoryVC: UIViewController {
         fetchcategories()
         configureUI()
         createObserver()
-        
+        navigationController?.isNavigationBarHidden = true
+       
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-//        let vc = self.getTopHierarchyViewController() as! MapVC
+        print("View did apeear")
+        if tableViewGestureRecognizer != nil { return }
         tableViewGestureRecognizer = UIPanGestureRecognizer(target: mapVC, action: #selector(mapVC.bottomViewBeenScrolled(_:)))
         placeTableView.addGestureRecognizer(tableViewGestureRecognizer)
                 tableViewGestureRecognizer.delegate = self
@@ -74,6 +70,8 @@ class ScrollCategoryVC: UIViewController {
     }
     
     //MARK: - Helpers
+    
+   
     
     private func fetchcategories() {
         FavoriteSerivce.shared.fetchCategory { categories in
@@ -151,11 +149,13 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
         } else {
             tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
             let selectedCategory = UserInfo.shared.categories[indexPath.row - 1]
-            let vc = self.getTopHierarchyViewController() as! MapVC
-            vc.topConstraint.constant = vc.getHeight(position: .bottom)
-            vc.currentHeight = vc.getHeight(position: .bottom)
-            vc.currentPosition = .bottom
-            vc.makeMarker(with: selectedCategory)
+            
+            mapVC.topConstraint.constant = mapVC.getHeight(position: .bottom)
+            mapVC.currentHeight = mapVC.getHeight(position: .bottom)
+            mapVC.currentPosition = .bottom
+            mapVC.makeMarker(with: selectedCategory)
+            mapVC.hideTextFieldAndShowCancelButton()
+            
             
 
         }
@@ -207,20 +207,27 @@ extension ScrollCategoryVC: UIGestureRecognizerDelegate {
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer == tableViewGestureRecognizer {
+//            let gesture =  gestureRecognizer as! UIPanGestureRecognizer
             
             let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: placeTableView)
             let parentVC = self.getTopHierarchyViewController() as! MapVC
             // check if it is at top postion
             
             if parentVC.currentPosition == .top {
+                print(parentVC.currentPosition)
                 if placeTableView.contentOffset.y > 0 {
+                    print(translation.y)
                     print("TableView should scroll")
                     return false
                 } else {
                     if translation.y < 0 {
-                        print("TableView should scrool")
+                        print(translation.y)
+                        
+                        print("TableView should scrool-----")
+                        print("It is returning false")
                         return false
                     } else {
+                        print(translation.y)
                         print("We should notify to parent Vc to adjust its size")
                         return true
                     }

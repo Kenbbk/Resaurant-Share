@@ -43,6 +43,8 @@
 		D668539F2A446CE3000FFDFB /* CreateCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668539E2A446CE3000FFDFB /* CreateCell.swift */; };
 		D66853A42A45A27A000FFDFB /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853A32A45A279000FFDFB /* UserInfo.swift */; };
 		D66853C62A47106C000FFDFB /* MPSavedSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853C52A47106C000FFDFB /* MPSavedSignView.swift */; };
+		D68BC9832A571C42001158A2 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC9822A571C42001158A2 /* PassThroughView.swift */; };
+		D68BC9852A571C8C001158A2 /* MPScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC9842A571C8C001158A2 /* MPScrollableView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,6 +87,8 @@
 		D668539E2A446CE3000FFDFB /* CreateCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCell.swift; sourceTree = "<group>"; };
 		D66853A32A45A279000FFDFB /* UserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfo.swift; sourceTree = "<group>"; };
 		D66853C52A47106C000FFDFB /* MPSavedSignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPSavedSignView.swift; sourceTree = "<group>"; };
+		D68BC9822A571C42001158A2 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
+		D68BC9842A571C8C001158A2 /* MPScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPScrollableView.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -254,6 +258,8 @@
 				D60B333E2A3C383F008573EC /* MPResultView.swift */,
 				D66853C52A47106C000FFDFB /* MPSavedSignView.swift */,
 				D637FD572A4D4D5D000D3B10 /* MPStatusView.swift */,
+				D68BC9822A571C42001158A2 /* PassThroughView.swift */,
+				D68BC9842A571C8C001158A2 /* MPScrollableView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -393,6 +399,7 @@
 			files = (
 				D66853782A42ABA4000FFDFB /* UIViewController+Ext.swift in Sources */,
 				D66853262A3D6A02000FFDFB /* CategoryCell.swift in Sources */,
+				D68BC9852A571C8C001158A2 /* MPScrollableView.swift in Sources */,
 				D60B32B62A32EDAF008573EC /* MapVC.swift in Sources */,
 				D66853482A3DAEFA000FFDFB /* CategoryVC.swift in Sources */,
 				D637FD652A52B211000D3B10 /* NSNumber+Ext.swift in Sources */,
@@ -415,6 +422,7 @@
 				D66853242A3D48A7000FFDFB /* FavoriteAddVC.swift in Sources */,
 				D637FD562A4D44B4000D3B10 /* ScrollCategoryCell.swift in Sources */,
 				D668534C2A3EC9CF000FFDFB /* NamingCategoryVC.swift in Sources */,
+				D68BC9832A571C42001158A2 /* PassThroughView.swift in Sources */,
 				D61610992A4C2BBA00671127 /* TabBarVC.swift in Sources */,
 				D60B330F2A36DC18008573EC /* NaverSearchResult.swift in Sources */,
 				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,

@@ -720,12 +720,14 @@ PODS:
   - NMapsMap (3.16.2):
     - NMapsGeometry
   - PromisesObjC (2.1.1)
+  - SnapKit (5.6.0)
 
 DEPENDENCIES:
   - FirebaseAuth
   - FirebaseFirestore
   - GooglePlaces (= 8.0.0)
   - NMapsMap
+  - SnapKit
 
 SPEC REPOS:
   trunk:
@@ -748,6 +750,7 @@ SPEC REPOS:
     - NMapsGeometry
     - NMapsMap
     - PromisesObjC
+    - SnapKit
 
 SPEC CHECKSUMS:
   abseil: ebe5b5529fb05d93a8bdb7951607be08b7fa71bc
@@ -769,7 +772,8 @@ SPEC CHECKSUMS:
   NMapsGeometry: 53c573ead66466681cf123f99f698dc8071a4b83
   NMapsMap: aaa64717249b06ae82c3a3addb3a01f0e33100ab
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
+  SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
 
-PODFILE CHECKSUM: c25c8f30f60477e78c535c4fcd4b4fed6658e07b
+PODFILE CHECKSUM: 303052123ac0aa3ae14abfd35ac05c7b9b191daa
 
 COCOAPODS: 1.11.3

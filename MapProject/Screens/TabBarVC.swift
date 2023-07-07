@@ -13,7 +13,6 @@ class TabBarVC: UITabBarController {
         super.viewDidLoad()
         setupTabs()
         
-        //        tabBar.barTintColor = .systemGray
         tabBar.isTranslucent = false
         
     }
@@ -22,6 +21,7 @@ class TabBarVC: UITabBarController {
         
         let home = createTab(title: "Hello", image: UIImage(systemName: "house")!, vc: ScrollCategoryVC())
         let share = createTab(title: "Share", image: UIImage(systemName: "star")!, vc: NoViewController())
+        let navHome = UINavigationController(rootViewController: home)
         let nav = UINavigationController(rootViewController: share)
         
         setViewControllers([home, nav], animated: true)

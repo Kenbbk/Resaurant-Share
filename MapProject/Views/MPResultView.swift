@@ -172,7 +172,7 @@ class MPResultView: UIView {
         placePhotoImageView.image = UIImage()
         self.fetchedPlace = fetchedPlace
        
-        if let photoData = fetchedPlace.image {
+        if let photoData = fetchedPlace.image.first {
             
             GMSPlacesClient.shared().loadPlacePhoto(photoData) { image, error in
                 

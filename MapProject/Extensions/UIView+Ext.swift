@@ -14,7 +14,21 @@ extension UIView {
         addGestureRecognizer(tap)
     }
     
+    
+    
     @objc private func dismissKeyboardTouchOutside() {
         endEditing(true)
     }
+    
+    
+        func findViewController() -> UIViewController? {
+            if let nextResponder = self.next as? UIViewController {
+                return nextResponder
+            } else if let nextResponder = self.next as? UIView {
+                return nextResponder.findViewController()
+            } else {
+                return nil
+            }
+        }
+    
 }

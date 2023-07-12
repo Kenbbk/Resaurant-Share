@@ -20,9 +20,9 @@ class UserInfo {
     private var _categories: [Category] = [] {
         didSet {
             
-            let name = Notification.Name(categoryChangedIdentifier)
-            NotificationCenter.default.post(name: name, object: nil)
-            print(_categories)
+
+            NotificationCenter.default.post(name: Notification.Name.userInfoCategoriesChanged, object: nil)
+            
         }
     }
     

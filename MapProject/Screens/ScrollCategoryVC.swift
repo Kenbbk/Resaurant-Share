@@ -22,18 +22,18 @@ class ScrollCategoryVC: UIViewController {
         tb.register(CreateCell.self, forCellReuseIdentifier: CreateCell.identifier)
         tb.register(BlackTableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: BlackTableViewHeaderFooterView.identifier)
         tb.register(FavoriteStoreageCell.self, forCellReuseIdentifier: FavoriteStoreageCell.identifier)
-//        tb.addGestureRecognizer(tableViewGestureRecognizer)
+        
         return tb
     }()
     
     var tableViewGestureRecognizer: UIPanGestureRecognizer!
     
-    private lazy var mapVC: MapVC = {
-        let vc = self.getTopHierarchyViewController() as! MapVC
-        return vc
-    }()
-
-        
+    var mapVC: MapVC!
+    
+    var ScrollableContainer: RealScrollableView!
+    
+    var scrollableView: RealScrollableView!
+    
     
     //MARK: - Lifecycle
     
@@ -43,26 +43,30 @@ class ScrollCategoryVC: UIViewController {
         configureUI()
         createObserver()
         navigationController?.isNavigationBarHidden = true
-       
         
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        print("View did apeear")
-        if tableViewGestureRecognizer != nil { return }
-        tableViewGestureRecognizer = UIPanGestureRecognizer(target: mapVC, action: #selector(mapVC.bottomViewBeenScrolled(_:)))
-        placeTableView.addGestureRecognizer(tableViewGestureRecognizer)
-                tableViewGestureRecognizer.delegate = self
-
+    convenience init(scrollableView: RealScrollableView) {
+        self.init(nibName: nil, bundle: nil)
+        self.scrollableView = scrollableView
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+        mapVC = self.getTopHierarchyViewController() as! MapVC
+        ScrollableContainer = mapVC.ScrollableCategoryView
+        guard tableViewGestureRecognizer == nil else { return }
+        
+        tableViewGestureRecognizer = UIPanGestureRecognizer(target: ScrollableContainer, action: #selector(ScrollableContainer.viewTapped(_:)))
+        tableViewGestureRecognizer.delegate = self
+        placeTableView.addGestureRecognizer(tableViewGestureRecognizer)
+        
+    }
+    
+    
     
     
     //MARK: - Actions
-    
-    @objc func tableViewDragged(_ sender: UIPanGestureRecognizer) {
-
-    }
     
     @objc func categoryChanged() {
         print("DEBUG: user.info's category changed yay!")
@@ -71,13 +75,25 @@ class ScrollCategoryVC: UIViewController {
     
     //MARK: - Helpers
     
-   
+    
     
     private func fetchcategories() {
+        
+        var newCategories: [Category] = []
+        
         FavoriteSerivce.shared.fetchCategory { categories in
             
+            
+            let group = DispatchGroup()
+            
             for category in categories {
+                
+                group.enter()
+                
                 FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+                    
+                    defer { group.leave() }
+                    
                     switch result {
                     case .failure(let error):
                         print(error)
@@ -85,10 +101,13 @@ class ScrollCategoryVC: UIViewController {
                         
                         var newCategory = category
                         newCategory.addedPlaces = fetchedPlaces
-                        UserInfo.shared.categories.append(newCategory)
+                        newCategories.append(newCategory)
                         
                     }
                 }
+            }
+            group.notify(queue: .main) {
+                UserInfo.shared.categories = newCategories
             }
             
             print("debug UserInfo.shared.categories has been set")
@@ -97,7 +116,7 @@ class ScrollCategoryVC: UIViewController {
     
     
     private func createObserver() {
-        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name(UserInfo.shared.categoryChangedIdentifier), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name.userInfoCategoriesChanged, object: nil)
         
     }
     
@@ -116,7 +135,7 @@ class ScrollCategoryVC: UIViewController {
             placeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             placeTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: tabBarController?.tabBar.frame.size.height ?? 0)
         ])
-        }
+    }
 }
 
 //MARK: - TableView Data Source, TableView Delegate
@@ -140,7 +159,7 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
         
         
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             let vc = NamingCategoryVC()
@@ -150,14 +169,17 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
             tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
             let selectedCategory = UserInfo.shared.categories[indexPath.row - 1]
             
-            mapVC.topConstraint.constant = mapVC.getHeight(position: .bottom)
-            mapVC.currentHeight = mapVC.getHeight(position: .bottom)
-            mapVC.currentPosition = .bottom
+            
             mapVC.makeMarker(with: selectedCategory)
             mapVC.hideTextFieldAndShowCancelButton()
             
+            NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
             
-
+            
+            
+            
+            
+            
         }
     }
     
@@ -204,45 +226,73 @@ class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
 }
 
 extension ScrollCategoryVC: UIGestureRecognizerDelegate {
-    
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer == tableViewGestureRecognizer {
-//            let gesture =  gestureRecognizer as! UIPanGestureRecognizer
             
-            let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: placeTableView)
-            let parentVC = self.getTopHierarchyViewController() as! MapVC
-            // check if it is at top postion
+            let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: view)
             
-            if parentVC.currentPosition == .top {
-                print(parentVC.currentPosition)
+            if ScrollableContainer.currentPosition == .top {
+                
                 if placeTableView.contentOffset.y > 0 {
-                    print(translation.y)
-                    print("TableView should scroll")
+                    
                     return false
+                    
                 } else {
-                    if translation.y < 0 {
-                        print(translation.y)
-                        
-                        print("TableView should scrool-----")
-                        print("It is returning false")
-                        return false
-                    } else {
-                        print(translation.y)
-                        print("We should notify to parent Vc to adjust its size")
-                        return true
-                    }
+                    
+                    return translation.y > 0
                 }
                 
             } else {
-                print("Container View is not at the top postion")
-                print("of course notify")
+                
                 return true
             }
             
         }
         
         return true
-
-
     }
 }
+
+//extension ScrollCategoryVC: UIGestureRecognizerDelegate {
+//    
+//    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+//        if gestureRecognizer == tableViewGestureRecognizer {
+////            let gesture =  gestureRecognizer as! UIPanGestureRecognizer
+//            
+//            let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: placeTableView)
+//            let parentVC = self.getTopHierarchyViewController() as! MapVC
+//            // check if it is at top postion
+//            
+//            if parentVC.currentPosition == .top {
+//                print(parentVC.currentPosition)
+//                if placeTableView.contentOffset.y > 0 {
+//                    print(translation.y)
+//                    print("TableView should scroll")
+//                    return false
+//                } else {
+//                    if translation.y < 0 {
+//                        print(translation.y)
+//                        
+//                        print("TableView should scrool-----")
+//                        print("It is returning false")
+//                        return false
+//                    } else {
+//                        print(translation.y)
+//                        print("We should notify to parent Vc to adjust its size")
+//                        return true
+//                    }
+//                }
+//                
+//            } else {
+//                print("Container View is not at the top postion")
+//                print("of course notify")
+//                return true
+//            }
+//            
+//        }
+//        
+//        return true
+//
+//
+//    }
+//}

@@ -121,7 +121,7 @@ class CategoryVC: UIViewController {
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(self, name: Notification.Name(UserInfo.shared.categoryChangedIdentifier), object: nil)
+        NotificationCenter.default.removeObserver(self, name: Notification.Name.userInfoCategoriesChanged, object: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -204,7 +204,7 @@ class CategoryVC: UIViewController {
     //MARK: - Helpers
     
     private func createObserver() {
-        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name(UserInfo.shared.categoryChangedIdentifier), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name.userInfoCategoriesChanged, object: nil)
     }
     
     func setCategoriesAndInitalCategories() {
@@ -255,8 +255,8 @@ class CategoryVC: UIViewController {
     
     private func addToCategories(completion: @escaping (() -> Void)) {
         let shouldAdded = finishedSelection.subtracting(initialSelection)
-        print(shouldAdded)
-        print(fetchedPlace.name)
+        
+        
         let group = DispatchGroup()
         
         for category in shouldAdded {

@@ -15,7 +15,7 @@ class NoViewController: UIViewController {
         view.backgroundColor = .systemPink
         return view
     }()
-    
+        
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()

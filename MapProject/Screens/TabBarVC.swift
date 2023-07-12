@@ -37,7 +37,7 @@ class TabBarVC: UITabBarController {
     override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         let vc = self.getTopHierarchyViewController() as! MapVC
         
-        vc.scrollCategoryViewFilledTheSuperView(bool: item.title == "Share")
+//        vc.scrollCategoryViewFilledTheSuperView(bool: item.title == "Share")
         
     }
     

@@ -23,10 +23,10 @@ struct FetchedPlace {
     let rating: Float
     let lat: Double
     let lon: Double
-    let image: GMSPlacePhotoMetadata?
+    let image: [GMSPlacePhotoMetadata]
     let type: String
     
-    init(name: String, address: String, placeID: String, rating: Float, lat: Double, lon: Double, type: String ,image: GMSPlacePhotoMetadata? = nil) {
+    init(name: String, address: String, placeID: String, rating: Float, lat: Double, lon: Double, type: String ,image: [GMSPlacePhotoMetadata]) {
         self.name    = name
         self.address = address
         self.placeID = placeID
@@ -45,6 +45,6 @@ struct FetchedPlace {
         self.lat        = dictionary["lat"] as? Double ?? 0
         self.lon        = dictionary["lon"] as? Double ?? 0
         self.type       = dictionary["type"] as? String ?? ""
-        self.image      = nil
+        self.image      = []
     }
 }

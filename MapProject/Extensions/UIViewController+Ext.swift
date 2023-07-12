@@ -1,6 +1,5 @@
 //
-//  UIViewController+Ext.swift
-//  MapProject
+//  UIViewController+
 //
 //  Created by Woojun Lee on 2023/06/21.
 //

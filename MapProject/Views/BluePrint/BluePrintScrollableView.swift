@@ -7,11 +7,11 @@
 
 import UIKit
 
-class MPScrollableView: PassThroughView {
+class BluePrintScrollableView: PassThroughView {
     
     enum ScrollViewPosition: CGFloat {
         
-        case bottom = 0.85
+        case bottom = 0.78
         case middle = 0.55
         case top = 0.08
         
@@ -23,9 +23,9 @@ class MPScrollableView: PassThroughView {
     
    var currentHeight: CGFloat!
     
-    private lazy var scrollableView: UIView = {
+     lazy var scrollableView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemRed
+         view.backgroundColor = .white
         view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(viewTapped(_:))))
         return view
     }()
@@ -54,7 +54,7 @@ class MPScrollableView: PassThroughView {
             topConstraint.constant = currentHeight
         } else if state == .ended {
             changeTheHeightAtTheEnd()
-            print("Ended")
+            print("Is this Ended?")
         }
     }
     private func checkIfInTheRnage() {
@@ -77,7 +77,11 @@ class MPScrollableView: PassThroughView {
             } else {
                 currentPosition = .bottom
             }
-            topConstraint.constant = getHeight(position: currentPosition)
+            UIView.animate(withDuration: 0.1) {
+                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+                self.layoutIfNeeded()
+            }
+            
             
         case .middle:
             if currentHeight < getHeight(position: .middle) {
@@ -87,7 +91,11 @@ class MPScrollableView: PassThroughView {
             } else {
                 currentPosition = .middle
             }
-            topConstraint.constant = getHeight(position: currentPosition)
+            UIView.animate(withDuration: 0.1) {
+                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+                self.layoutIfNeeded()
+            }
+            
             
         case .top:
             if currentHeight > getHeight(position: .middle) {
@@ -97,13 +105,18 @@ class MPScrollableView: PassThroughView {
             } else {
                 currentPosition = .top
             }
-            topConstraint.constant = getHeight(position: currentPosition)
+            UIView.animate(withDuration: 0.1) {
+                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+                self.layoutIfNeeded()
+            }
+            
             
         }
     }
     
     private func getHeight(position: ScrollViewPosition) -> CGFloat {
-        position.rawValue * UIScreen.main.bounds.height
+        
+        return position.rawValue * UIScreen.main.bounds.height
     }
     
     private func configureUI() {

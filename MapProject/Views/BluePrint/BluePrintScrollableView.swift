@@ -114,7 +114,7 @@ class BluePrintScrollableView: PassThroughView {
         }
     }
     
-    private func getHeight(position: ScrollViewPosition) -> CGFloat {
+    func getHeight(position: ScrollViewPosition) -> CGFloat {
         
         return position.rawValue * UIScreen.main.bounds.height
     }

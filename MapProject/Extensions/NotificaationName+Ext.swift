@@ -12,4 +12,6 @@ extension Notification.Name {
     static let userInfoCategoriesChanged = Notification.Name("userInfoCategoriesChanged")
     
     static let selectedRowinScrollableCategoryVC = Notification.Name("selectedRowinScrollableCategoryVC")
+    
+    
 }

@@ -26,11 +26,9 @@ class ScrollFavPlaceVC: UIViewController {
     
     var addedPlaces: [FetchedPlace] = []
     
-    var newlyFetchplaces: [FetchedPlace] = []
-    
     var tablePanGesutre: UIPanGestureRecognizer!
     
-    var scrollableView: RealScrollableView!
+    var scrollableView: PlaceScrollableView!
     //MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -40,7 +38,9 @@ class ScrollFavPlaceVC: UIViewController {
         createObserver()
     }
     
-    convenience init(scrollableView: RealScrollableView) {
+    
+    
+    convenience init(scrollableView: PlaceScrollableView) {
         self.init(nibName: nil, bundle: nil)
         self.scrollableView = scrollableView
     }
@@ -51,63 +51,58 @@ class ScrollFavPlaceVC: UIViewController {
         
         guard let category = notification.object as? Category else { return }
         self.category = category
-        addedPlaces = category.addedPlaces
-        //        DispatchQueue.main.async {
-        //            self.myTableView.reloadData()
-        //        }
-        fetchAddedplace()
+        
+        fetchAddedPlace { places in
+            
+            guard let places else { return }
+            
+            self.resolvePlaces(with: places)
+        }
     }
     
     //MARK: - Helpers
     
-//    func fetchAddedplace() {
-//
-//
-//        for place in addedPlaces {
-//
-//            print("Enter")
-//            GooglePlacesManager.shared.resolveLocation(with: place.placeID) { result in
-//
-//
-//
-//                switch result {
-//                case .failure(let error):
-//                    print(error)
-//                case .success(let fetchPlace):
-//                    self.addedPlaces.append(fetchPlace)
-//
-//                }
-//            }
-//
-//        }
-//    }
-    
-        func fetchAddedplace() {
-            let group = DispatchGroup()
-            var temfetchedPlaces: [FetchedPlace] = []
-            for place in addedPlaces {
-                group.enter()
-                print("Enter")
-                GooglePlacesManager.shared.resolveLocation(with: place.placeID) { result in
-                    defer {
-                        group.leave()
-                    }
-                    switch result {
-                    case .failure(let error):
-                        print(error)
-                    case .success(let fetchPlace):
-                        temfetchedPlaces.append(fetchPlace)
-
-                    }
-                }
-            }
-            group.notify(queue: .main) {
-                print("Notify")
-                self.addedPlaces = temfetchedPlaces
-                self.myTableView.reloadData()
+    func fetchAddedPlace(completion: @escaping ([FetchedPlace]?) -> Void) {
+        guard let category else { return }
+        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+                completion(nil)
+            case .success(let places):
+                
+                completion(places)
             }
         }
-//
+    }
+    
+    func resolvePlaces(with places: [FetchedPlace]) {
+        var tempFetchedplaces: [FetchedPlace] = []
+        let group = DispatchGroup()
+        for place in places {
+            group.enter()
+            GooglePlacesManager.shared.resolveLocation(with: place.placeID) { result in
+                defer {
+                    group.leave()
+                }
+                switch result {
+                case .failure(let error):
+                    
+                    print(error)
+                    
+                case .success(let place):
+                    tempFetchedplaces.append(place)
+                    
+                }
+            }
+        }
+        group.notify(queue: .main) {
+            self.addedPlaces = tempFetchedplaces
+            
+            self.myTableView.reloadData()
+        }
+    }
+    
     private func createObserver() {
         NotificationCenter.default.addObserver(self, selector: #selector(selectedRowinScrollableCategoryVC(_:)), name: Notification.Name.selectedRowinScrollableCategoryVC, object: nil )
         
@@ -133,19 +128,15 @@ extension ScrollFavPlaceVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: FavPlaceCell.identifier, for: indexPath) as! FavPlaceCell
+        
         let place = addedPlaces[indexPath.row]
         
-        DispatchQueue.main.async {
-            cell.configureImage(fetchPlace: place)
-            cell.configureCell(addPlace: place)
-            
-        }
+        cell.place = place
         
         return cell
     }
-    
-    
 }
 
 extension ScrollFavPlaceVC: UIGestureRecognizerDelegate {
@@ -170,7 +161,6 @@ extension ScrollFavPlaceVC: UIGestureRecognizerDelegate {
                 
                 return true
             }
-            
         }
         
         return true

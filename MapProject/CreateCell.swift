@@ -10,11 +10,9 @@ import UIKit
 class CreateCell: UITableViewCell {
     
     static let identifier = "CreateCell"
+    
     //MARK: - Properties
 
-    
-    
-    
     private let leftImageView: UIImageView = {
        let iv = UIImageView()
         iv.image = UIImage(systemName: "plus.circle")
@@ -37,7 +35,6 @@ class CreateCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
         configureUI()
-        
         
     }
     

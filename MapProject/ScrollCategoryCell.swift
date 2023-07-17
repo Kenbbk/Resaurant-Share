@@ -7,10 +7,23 @@
 
 import UIKit
 
+
 class FavoriteStoreageCell: UITableViewCell {
     
     //MARK: - Properties
     static let identifier = "ScrollCategoryCell"
+    
+    var category: Category? {
+        didSet {
+            fetchPlaces()
+        }
+    }
+    
+    private var addedPlaces: [FetchedPlace] = [] {
+        didSet {
+            setLabel()
+        }
+    }
     
     private let leftImageView: UIImageView = {
        let iv = UIImageView()
@@ -58,11 +71,33 @@ class FavoriteStoreageCell: UITableViewCell {
     
     //MARK: - Helpers
     
-    func setLabel(colorNumber: Int, title: String, numberOfPlaces: Int) {
+    private func setLabel(colorNumber: Int, title: String, numberOfPlaces: Int) {
         leftImageView.tintColor = CustomColor.colors[colorNumber]
         titleLabel.text = title
+        
         statusView.label.text = "\(numberOfPlaces)"
     }
+    
+    private func setLabel() {
+        guard let category else { return }
+        leftImageView.tintColor = CustomColor.colors[category.colorNumber]
+        titleLabel.text = category.title
+        statusView.label.text = "\(addedPlaces.count)"
+    }
+    
+    private func fetchPlaces() {
+        guard let category else { return }
+        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let places):
+                self.addedPlaces = places
+            }
+        }
+    }
+    
+   
     
     //MARK: - UI
     private func configureUI() {

@@ -22,6 +22,7 @@ class MapVC: UIViewController {
     //MARK: - Properties
     
     
+    
     var fetchedPlace: FetchedPlace?
     var markers: [NMFMarker] = []
     var marker = NMFMarker()
@@ -34,19 +35,17 @@ class MapVC: UIViewController {
             }
         }
     }
-                                		
+    
     var isSearhcing = false {
         didSet {
             if isSearhcing {
                 rightImageView.isHidden = false
-                
                 
             } else {
                 searchResult.removeAll()
                 rightImageView.isHidden = true
                 marker.mapView = nil
                 resultView.isHidden = true
-                
             }
         }
     }
@@ -89,14 +88,14 @@ class MapVC: UIViewController {
         return imageView
     }()
     
-    let ScrollableCategoryView: RealScrollableView = {
-        let view = RealScrollableView()
+    let ScrollableCategoryView: CategoryScrollableView = {
+        let view = CategoryScrollableView()
         
         return view
     }()
     
-    private lazy var scrollablePlacesView: RealScrollableView = {
-        let view = RealScrollableView()
+    private lazy var scrollablePlacesView: PlaceScrollableView = {
+        let view = PlaceScrollableView()
         view.isHidden = true
         return view
     }()
@@ -106,8 +105,6 @@ class MapVC: UIViewController {
         
         return myView
     }()
-    
-    lazy var tabBarVC = TabBarVC()
     
     private lazy var rightCancelImageView: UIImageView = {
         let iv = UIImageView()
@@ -122,7 +119,7 @@ class MapVC: UIViewController {
         return iv
     }()
     
-    private let leftBackImageView: UIImageView = {
+    private lazy var leftBackImageView: UIImageView = {
         let iv = UIImageView()
         iv.isHidden = true
         iv.layer.cornerRadius = 15
@@ -130,6 +127,8 @@ class MapVC: UIViewController {
         iv.backgroundColor = .systemGray6
         iv.image = UIImage(systemName: "chevron.backward.circle.fill")
         iv.clipsToBounds = true
+        iv.isUserInteractionEnabled = true
+        iv.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(leftBackImageTapped(_:))))
         return iv
     }()
     
@@ -148,17 +147,28 @@ class MapVC: UIViewController {
         locationManager.requestWhenInUseAuthorization()
         configureUI()
         ScrollableCategoryView.scrollableView.layer.cornerRadius = 20
+        
     }
     
-  
+    
     
     //MARK: - Actions
+    
+    @objc func leftBackImageTapped(_ gesture: UITapGestureRecognizer) {
+        resultView.isHidden = true
+        scrollablePlacesView.isHidden = false
+        leftBackImageView.isHidden = true
+        
+    }
     
     @objc func rightCancelImageTapped(_ gesture: UITapGestureRecognizer) {
         rightCancelImageView.isHidden = true
         ScrollableCategoryView.isHidden = false
         scrollablePlacesView.isHidden = true
+        
         searchTF.isHidden = false
+        
+        resetMarkers()
     }
     
     @objc func leftButtonTapped(_ sender: UITapGestureRecognizer) {
@@ -195,7 +205,7 @@ class MapVC: UIViewController {
             marker.mapView = nil
             
             self.markers = []
-            print("Marker Reset")
+            
         }
     }
     
@@ -206,12 +216,22 @@ class MapVC: UIViewController {
         rightCancelImageView.isHidden = false
     }
     
-    func makeMarker(with category: Category) {
-        resetMarkers()
+    func fetchplaces(with category: Category, completion: @escaping ([FetchedPlace]) -> Void) {
+        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+                completion([])
+            case .success(let places):
+                completion(places)
+            }
+        }
+    }
+    
+    func makeMarkers(with places: [FetchedPlace]) {
+        guard !places.isEmpty else { return }
         
-        guard !category.addedPlaces.isEmpty else { return }
-        
-        for place in category.addedPlaces {
+        for place in places {
             
             let marker = NMFMarker(position: NMGLatLng(lat: place.lat, lng: place.lon))
             
@@ -237,9 +257,12 @@ class MapVC: UIViewController {
                     case .success(let fetchedPlace):
                         print("Success")
                         self.fetchedPlace = fetchedPlace
-                        self.resultView.setPlaceAndLabels(fetchedPlace: fetchedPlace, distance: NSNumber(floatLiteral: distance!))
-                        self.resultView.fetchCategories()
-                        self.resultView.changelayOut()
+                        
+                        self.resultView.fetchedPlace = place
+                        self.resultView.setLabels(distance: NSNumber(floatLiteral: distance!))
+                        self.resultView.isHidden = false
+                        self.scrollablePlacesView.isHidden = true
+                        self.leftBackImageView.isHidden = false
                         
                     }
                 }
@@ -247,21 +270,14 @@ class MapVC: UIViewController {
             }
         }
         
-        DispatchQueue.main.async {
-            
-//            self.marker.mapView = self.naverMap
-            print("markers.count =\(self.markers.count)")
-            let categoryLatAndLone: [NMGLatLng] = self.markers.compactMap({ $0.position})
-            
-            print("categoryLatAndLone count = \(categoryLatAndLone.count)")
-            let bounds = NMGLatLngBounds(latLngs: categoryLatAndLone)
-            
-            let cameraUpdate = NMFCameraUpdate(fit: bounds, paddingInsets: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100))
-            
-            self.naverMap.moveCamera(cameraUpdate)
-            
-        }
         
+        let categoryLatAndLone: [NMGLatLng] = markers.compactMap({ $0.position})
+        
+        let bounds = NMGLatLngBounds(latLngs: categoryLatAndLone)
+        
+        let cameraUpdate = NMFCameraUpdate(fit: bounds, paddingInsets: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100))
+        
+        self.naverMap.moveCamera(cameraUpdate)
         
     }
     
@@ -272,6 +288,7 @@ class MapVC: UIViewController {
         searchTF.rightViewMode = .always
         ScrollableCategoryView.isHidden = true
         resetMarkers()
+        
     }
     
     private func moveCamera() {
@@ -302,7 +319,6 @@ class MapVC: UIViewController {
         configureScrollablePlacesView()
         configureRightCancelImageView()
         configureLeftBackImageView()
-        
         
     }
     
@@ -356,7 +372,6 @@ class MapVC: UIViewController {
             make.left.right.bottom.equalToSuperview()
             make.height.equalTo(122)
         }
-        
     }
     
     private func configureCategoryScrollableView() {
@@ -365,15 +380,13 @@ class MapVC: UIViewController {
             make.edges.equalToSuperview()
         }
         
-        let myTabBarController = TabBarVC()
+        let myTabBarController = TabBarVC(mapVC: self, scrollableView: ScrollableCategoryView)
         addChild(myTabBarController)
         myTabBarController.didMove(toParent: self)
         
         myTabBarController.view.frame = ScrollableCategoryView.containerForTableView.frame
         
         ScrollableCategoryView.containerForTableView.addSubview(myTabBarController.view)
-        
-        
     }
     
     private func configureScrollablePlacesView() {
@@ -405,8 +418,8 @@ class MapVC: UIViewController {
             make.leading.equalToSuperview().inset(10)
             make.height.width.equalTo(30)
         }
-        
     }
+    
 }
 
 //MARK: - UITextFieldDelegate
@@ -448,7 +461,6 @@ extension MapVC: UITableViewDataSource, UITableViewDelegate {
         } else {
             return 10
         }
-        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -477,9 +489,8 @@ extension MapVC: UITableViewDataSource, UITableViewDelegate {
                 self.fetchedPlace = place
                 let location = NMGLatLng(lat: place.lat, lng: place.lon)
                 let cameraUpdate = NMFCameraUpdate(scrollTo: location)
-                self.resultView.setPlaceAndLabels(fetchedPlace: place, distance: distance)
-                self.resultView.fetchCategories()
-                self.resultView.changelayOut()
+                self.resultView.fetchedPlace = place
+                self.resultView.setLabels(distance: distance)
                 
                 
                 DispatchQueue.main.async {
@@ -500,6 +511,7 @@ extension MapVC: CustomResultViewDelegate {
             print("There is no fetched Place")
             return }
         let vc = CategoryVC(with: fetchedPlace)
+        vc.delegate = self
         vc.modalPresentationStyle = .overFullScreen
         
         present(vc, animated: true)
@@ -532,6 +544,23 @@ extension MapVC: CLLocationManagerDelegate {
         if locations.first == nil { return }
         print("LocationManager didupdateLocations called")
         
+        
+    }
+}
+
+extension MapVC: ScrollCategoryVCDelegate {
+    func categoryTapped(sender: ScrollCategoryVC, category: Category) {
+        fetchplaces(with: category) { places in
+            self.makeMarkers(with: places)
+        }
+        
+        hideTextFieldAndShowCancelButton()
+    }
+}
+
+extension MapVC: CategoryVCDelegate {
+    func saveButtonTapped(sender: CategoryVC) {
+        resultView.fetchedPlace = fetchedPlace
         
     }
 }

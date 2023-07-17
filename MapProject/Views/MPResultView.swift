@@ -16,7 +16,21 @@ class MPResultView: UIView {
     
     //MARK: - Properties
     
-    var fetchedPlace: FetchedPlace?
+    var fetchedPlace: FetchedPlace? {
+        didSet {
+            fetchCategories {
+                self.fetchFavoritedCategories {
+                    
+                    self.resetUI()
+                    self.changelayOut()
+                }
+            }
+        }
+    }
+    
+    var categories: [Category] = []
+    
+    var favoritedCategories: [Category] = []
     
     let padding: CGFloat                    = 10
     
@@ -30,14 +44,14 @@ class MPResultView: UIView {
     }()
     
     private let typeLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 13)
         label.textColor = UIColor.systemGray
         label.text = "Cafe"
         return label
     }()
     
-    let addressLabel: UILabel = {
+    private let addressLabel: UILabel = {
         let label = UILabel()
         label.text                          = "경상남도 양산시 가촌서로 11 물금한신더휴 아파트"
         label.font                          = UIFont.systemFont(ofSize: 14)
@@ -46,20 +60,20 @@ class MPResultView: UIView {
         
     }()
     
-    let distanceLabel: UILabel = {
+    private let distanceLabel: UILabel = {
         let label                            = UILabel()
         label.text                          = "40km"
         label.font                          = UIFont.systemFont(ofSize: 13)
         return label
     }()
     
-    let spacerView: UIView = {
+    private let spacerView: UIView = {
         let myView                           = UIView()
         myView.backgroundColor              = .systemGray3
         return myView
     }()
     
-    let favoriteImageView: UIImageView = {
+    private let favoriteImageView: UIImageView = {
         let imageView                        = UIImageView()
         imageView.image                     = UIImage(systemName: "star")
         imageView.tintColor                 = .gray
@@ -68,26 +82,26 @@ class MPResultView: UIView {
         return imageView
     }()
     
-    let categoryView: MPSavedSignView = {
+    private let categoryView: MPSavedSignView = {
         let view = MPSavedSignView()
         
         return view
     }()
     
-    lazy var savedLabel: UILabel = {
+    private lazy var savedLabel: UILabel = {
         let label                            = UILabel()
         label.numberOfLines                 = 1
         return label
     }()
     
     lazy var placePhotoImageView: UIImageView = {
-       let iv = UIImageView()
+        let iv = UIImageView()
         
         iv.clipsToBounds = true
         return iv
     }()
     
-    var delegate: CustomResultViewDelegate?
+    weak var delegate: CustomResultViewDelegate?
     
     //MARK: - Lifecycle
     override init(frame: CGRect) {
@@ -103,111 +117,104 @@ class MPResultView: UIView {
     }
     
     //MARK: - Actions
+    
     @objc private func imageViewTapped(_ gesture: UITapGestureRecognizer) {
         
         delegate?.favoriteButtonTapped()
-        
     }
     
     //MARK: - Helpers
     
-    func changelayOut() {
+    private func changelayOut() {
         
-        resetCateogryViewAndSavedLabel()
-        let addedCategory = UserInfo.shared.addedCategories
-        
-        DispatchQueue.main.async {
-            switch addedCategory.isEmpty {
-            case true:
-                self.categoryView.isHidden                  = true
-                self.savedLabel.isHidden                    = true
-                self.favoriteImageView.image                = UIImage(systemName: "star")
-                self.favoriteImageView.tintColor            = .gray
-            case false:
-                self.categoryView.isHidden                  = false
-                self.savedLabel.isHidden                    = false
-                self.favoriteImageView.image                = UIImage(systemName: "star.fill")
-                self.favoriteImageView.tintColor            = .orange.withAlphaComponent(0.8)
-                guard let firstAddedCategory                = addedCategory.first else { print("I cannot grab firstAddedCategory"); return }
-                self.categoryView.label.text                = firstAddedCategory.title
-                self.categoryView.leftImageView.tintColor   = CustomColor.colors[firstAddedCategory.colorNumber]
-                self.savedLabel.text                        = addedCategory.count >= 2 ? "and \(addedCategory.count - 1) more" : " Saved"
-            }
+        switch favoritedCategories.isEmpty {
             
-            self.categoryView.layer.cornerRadius            = self.categoryView.frame.height / 2
+        case true:
+            categoryView.isHidden                  = true
+            savedLabel.isHidden                    = true
+            favoriteImageView.image                = UIImage(systemName: "star")
+            favoriteImageView.tintColor            = .gray
             
+        case false:
+            categoryView.isHidden                  = false
+            savedLabel.isHidden                    = false
+            favoriteImageView.image                = UIImage(systemName: "star.fill")
+            favoriteImageView.tintColor            = .orange.withAlphaComponent(0.8)
+            
+            guard let firstAddedCategory           = favoritedCategories.first else { return }
+            categoryView.label.text                = firstAddedCategory.title
+            categoryView.leftImageView.tintColor   = CustomColor.colors[firstAddedCategory.colorNumber]
+            savedLabel.text                        = favoritedCategories.count >= 2 ? "and \(favoritedCategories.count - 1) more" : " Saved"
         }
+        categoryView.layer.cornerRadius            = categoryView.frame.height / 2
     }
-    func resetCateogryViewAndSavedLabel() {
-        DispatchQueue.main.async {
+    
+    private func resetUI() {
+        
             self.categoryView.isHidden              = true
             self.savedLabel.isHidden                = true
             self.favoriteImageView.image            = UIImage(named: "star")
             self.favoriteImageView.tintColor        = .gray
-            
+    }
+    
+    private func fetchCategories(completion: @escaping () -> Void) {
+        FavoriteSerivce.shared.fetchCategories { categories in
+            self.categories = categories
+            completion()
         }
     }
     
-    func fetchCategories() {
-        
-        guard let fetchedPlace = self.fetchedPlace else {
-            print("There is no fetchedPlace")
-            return
-        }
-
-        var addedCategories: [Category] = []
-        for category in UserInfo.shared.categories {
-            
-            if category.addedPlaces.contains(where: { $0.placeID == fetchedPlace.placeID }) {
-                addedCategories.append(category)
+    private func fetchFavoritedCategories(completion: @escaping () -> Void) {
+        guard let fetchedPlace else { return }
+        FavoriteSerivce.shared.getFavoritedCategories(categories: categories, place: fetchedPlace) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let categories):
+                self.favoritedCategories = categories
+                completion()
             }
         }
-       
-        UserInfo.shared.addedCategories = addedCategories
-        
-        
     }
     
-    func setPlaceAndLabels(fetchedPlace: FetchedPlace, distance: NSNumber ) {
+    func setLabels(distance: NSNumber) {
+        
+        resetPlacePhotoImageView()
+        
+        guard let fetchedPlace else { return }
+        
+        titleNameLabel.text = fetchedPlace.name
+        typeLabel.text = fetchedPlace.type
+        addressLabel.text = fetchedPlace.address
+        distanceLabel.text = distance.getDistanceString()
+        
+        loadPhoto { image in
+            self.placePhotoImageView.image = image
+        }
+    }
+    
+    private func resetPlacePhotoImageView() {
         placePhotoImageView.image = UIImage()
-        self.fetchedPlace = fetchedPlace
-       
-        if let photoData = fetchedPlace.image.first {
+    }
+    
+    
+    private func loadPhoto(completion: @escaping (UIImage?) -> Void) {
+        if let photoData = fetchedPlace?.image.first {
             
             GMSPlacesClient.shared().loadPlacePhoto(photoData) { image, error in
                 
                 if let error {
                     print(error)
+                    completion(nil)
                     return
                 }
-               
                 
-                DispatchQueue.main.async {
-                    self.placePhotoImageView.image = image
-                    self.titleNameLabel.text = fetchedPlace.name
-                    self.typeLabel.text = fetchedPlace.type
-                    self.addressLabel.text = fetchedPlace.address
-                    self.distanceLabel.text = distance.getDistanceString()
-                    
-                }
+                completion(image)
             }
-        } else {
-            DispatchQueue.main.async {
-                self.titleNameLabel.text = fetchedPlace.name
-                self.typeLabel.text = fetchedPlace.type
-                self.addressLabel.text = fetchedPlace.address
-                self.distanceLabel.text = distance.getDistanceString()
-            }
-            
         }
     }
     
-    private func setSavedCategoryLabel() {
-        if UserInfo.shared.addedCategories.count >= 2 {
-            
-        }
-    }
-    
+    //MARK: - UI
     private func configureSelf() {
         isHidden                = true
         backgroundColor         = .white
@@ -233,7 +240,7 @@ class MPResultView: UIView {
         NSLayoutConstraint.activate([
             titleNameLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: padding),
             titleNameLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: padding),
-//            titleNameLabel.trailingAnchor.constraint(equalTo: placePhotoImageView.leadingAnchor),
+            //            titleNameLabel.trailingAnchor.constraint(equalTo: placePhotoImageView.leadingAnchor),
             titleNameLabel.heightAnchor.constraint(equalToConstant: 35)
             
         ])

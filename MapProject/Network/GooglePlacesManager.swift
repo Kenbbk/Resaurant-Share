@@ -86,26 +86,66 @@ class GooglePlacesManager {
             let place = FetchedPlace(name: resolvedPlace.name!, address: resolvedPlace.formattedAddress! , placeID: resolvedPlace.placeID!, rating: resolvedPlace.rating, lat: resolvedPlace.coordinate.latitude, lon: resolvedPlace.coordinate.longitude, type: resolvedPlace.types?.first ?? "", image: resolvedPlace.photos ?? [])
             completion(.success(place))
             
+            
         }
         
         
     }
     
+//    func decodePhotoData(place: FetchedPlace, completion: @escaping ([UIImage]?) -> Void) {
+//
+//        if let images = cache.object(forKey: NSString(string: place.placeID)) {
+//            let objArray = NSMutableArray(array: images)
+//            if let swiftArray = objArray as NSArray as? [UIImage] {
+//
+//                completion(swiftArray)
+//            }
+//            return
+//        }
+//
+//
+//        var tempPhotoArray: [UIImage] = []
+//        let photoData = place.image
+//
+//        let group = DispatchGroup()
+//        for data in photoData {
+//            group.enter()
+//            client.loadPlacePhoto(data) { image, error in
+//                defer {
+//                    group.leave()
+//                }
+//                if let error {
+//                    print(error)
+//                    return
+//                }
+//
+//                guard let image else { return }
+//
+//                tempPhotoArray.append(image)
+//
+//            }
+//        }
+//
+//        group.notify(queue: .main) {
+//            completion(tempPhotoArray)
+//            if place.name == "RRACE" {
+//                print("RRACE is ready")
+//            }
+//            if place.name == "RR쇼륨" {
+//                print("RR쇼륨 photo is already up")
+//            }
+//            self.cache.setObject(NSArray(array: tempPhotoArray), forKey: NSString(string: place.placeID))
+//        }
+//    }
+//
     func decodePhotoData(place: FetchedPlace, completion: @escaping ([UIImage]?) -> Void) {
+
+
         
-        if let images = cache.object(forKey: NSString(string: place.placeID)) {
-            let objArray = NSMutableArray(array: images)
-            if let swiftArray = objArray as NSArray as? [UIImage] {
-                
-                completion(swiftArray)
-            }
-            return
-        }
-        
-        
+
         var tempPhotoArray: [UIImage] = []
-        let photoData = place.image
-        
+        let photoData = place.image.prefix(3)
+
         let group = DispatchGroup()
         for data in photoData {
             group.enter()
@@ -117,14 +157,14 @@ class GooglePlacesManager {
                     print(error)
                     return
                 }
-                
+
                 guard let image else { return }
-                
+
                 tempPhotoArray.append(image)
-                
+
             }
         }
-        
+
         group.notify(queue: .main) {
             completion(tempPhotoArray)
             if place.name == "RRACE" {
@@ -133,33 +173,11 @@ class GooglePlacesManager {
             if place.name == "RR쇼륨" {
                 print("RR쇼륨 photo is already up")
             }
-            self.cache.setObject(NSArray(array: tempPhotoArray), forKey: NSString(string: place.placeID))
+            
         }
     }
-    
-//    func decodePhotoData(photoData: [GMSPlacePhotoMetadata]) {
-//        var photoArray: [UIImage] = []
-//        let firstThreeData = photoData.prefix(3)
-//
-//        let group = DispatchGroup()
-//
-//        for data in firstThreeData {
-//            group.enter()
-//            client.loadPlacePhoto(data) { image, error in
-//                defer { group.leave() }
-//                if let error {
-//                    print(error)
-//                    return
-//                }
-//                guard let image else { return }
-//                photoArray.append(image)
-//            }
-//        }
-//        group.notify(queue: .main) {
-//
-//        }
-//
-//    }
+
+   
 }
 
 

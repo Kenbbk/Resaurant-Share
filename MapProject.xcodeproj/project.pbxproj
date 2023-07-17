@@ -40,9 +40,10 @@
 		D668539F2A446CE3000FFDFB /* CreateCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668539E2A446CE3000FFDFB /* CreateCell.swift */; };
 		D66853A42A45A27A000FFDFB /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853A32A45A279000FFDFB /* UserInfo.swift */; };
 		D66853C62A47106C000FFDFB /* MPSavedSignView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853C52A47106C000FFDFB /* MPSavedSignView.swift */; };
+		D66F96F02A6543AB0041A069 /* PlaceScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66F96EF2A6543AB0041A069 /* PlaceScrollableView.swift */; };
 		D68BC9832A571C42001158A2 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC9822A571C42001158A2 /* PassThroughView.swift */; };
 		D68BC9852A571C8C001158A2 /* BluePrintScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC9842A571C8C001158A2 /* BluePrintScrollableView.swift */; };
-		D68BC9872A57C1A6001158A2 /* RealScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC9862A57C1A6001158A2 /* RealScrollableView.swift */; };
+		D68BC9872A57C1A6001158A2 /* CategoryScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC9862A57C1A6001158A2 /* CategoryScrollableView.swift */; };
 		D68BC98B2A57F7E0001158A2 /* ScrollFavPlaceVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC98A2A57F7E0001158A2 /* ScrollFavPlaceVC.swift */; };
 		D68BC98E2A587EBE001158A2 /* FavPlaceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC98D2A587EBE001158A2 /* FavPlaceCell.swift */; };
 /* End PBXBuildFile section */
@@ -84,9 +85,10 @@
 		D668539E2A446CE3000FFDFB /* CreateCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCell.swift; sourceTree = "<group>"; };
 		D66853A32A45A279000FFDFB /* UserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfo.swift; sourceTree = "<group>"; };
 		D66853C52A47106C000FFDFB /* MPSavedSignView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPSavedSignView.swift; sourceTree = "<group>"; };
+		D66F96EF2A6543AB0041A069 /* PlaceScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceScrollableView.swift; sourceTree = "<group>"; };
 		D68BC9822A571C42001158A2 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
 		D68BC9842A571C8C001158A2 /* BluePrintScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluePrintScrollableView.swift; sourceTree = "<group>"; };
-		D68BC9862A57C1A6001158A2 /* RealScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealScrollableView.swift; sourceTree = "<group>"; };
+		D68BC9862A57C1A6001158A2 /* CategoryScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryScrollableView.swift; sourceTree = "<group>"; };
 		D68BC98A2A57F7E0001158A2 /* ScrollFavPlaceVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollFavPlaceVC.swift; sourceTree = "<group>"; };
 		D68BC98D2A587EBE001158A2 /* FavPlaceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavPlaceCell.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
@@ -220,9 +222,9 @@
 			isa = PBXGroup;
 			children = (
 				D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */,
+				D637FD552A4D44B4000D3B10 /* ScrollCategoryCell.swift */,
 				D66853252A3D6A02000FFDFB /* CategoryCell.swift */,
 				D668539E2A446CE3000FFDFB /* CreateCell.swift */,
-				D637FD552A4D44B4000D3B10 /* ScrollCategoryCell.swift */,
 				D68BC98D2A587EBE001158A2 /* FavPlaceCell.swift */,
 			);
 			name = Cells;
@@ -257,7 +259,8 @@
 				D60B333E2A3C383F008573EC /* MPResultView.swift */,
 				D66853C52A47106C000FFDFB /* MPSavedSignView.swift */,
 				D637FD572A4D4D5D000D3B10 /* MPStatusView.swift */,
-				D68BC9862A57C1A6001158A2 /* RealScrollableView.swift */,
+				D68BC9862A57C1A6001158A2 /* CategoryScrollableView.swift */,
+				D66F96EF2A6543AB0041A069 /* PlaceScrollableView.swift */,
 				D68BC98C2A5843DA001158A2 /* BluePrint */,
 			);
 			path = Views;
@@ -437,7 +440,8 @@
 				D66853552A41A652000FFDFB /* UIColor+Ext.swift in Sources */,
 				D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */,
 				D637FD5E2A4E766E000D3B10 /* GooglePlacesManager.swift in Sources */,
-				D68BC9872A57C1A6001158A2 /* RealScrollableView.swift in Sources */,
+				D66F96F02A6543AB0041A069 /* PlaceScrollableView.swift in Sources */,
+				D68BC9872A57C1A6001158A2 /* CategoryScrollableView.swift in Sources */,
 				D668539C2A43247C000FFDFB /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

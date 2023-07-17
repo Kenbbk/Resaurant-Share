@@ -8,10 +8,12 @@
 import UIKit
 import FirebaseAuth
 import FirebaseFirestore
+import FirebaseCore
 
 let COLLECTION_USERS = Firestore.firestore().collection("users")
 
 struct FavoriteSerivce {
+    
     
     enum FavoriteError: Error {
         case noCurrentUser
@@ -24,7 +26,8 @@ struct FavoriteSerivce {
     
     let uid = Auth.auth().currentUser?.uid
     
-    func fetchCategory(completion: @escaping ([Category]) -> Void ) {
+    func fetchCategories(completion: @escaping ([Category]) -> Void ) {
+        
         guard let uid else { return }
         
         COLLECTION_USERS.document(uid).collection("categories").getDocuments { snapShot, error in
@@ -33,7 +36,9 @@ struct FavoriteSerivce {
             
             let categories = documents.map( { Category(dictionary: $0.data())})
             
-            completion(categories)
+            let sortedCategories = categories.sorted { $0.timeStamp.dateValue() >  $1.timeStamp.dateValue()}
+            
+            completion(sortedCategories)
         }
     }
     
@@ -52,6 +57,38 @@ struct FavoriteSerivce {
         ])
         
         completion()
+    }
+    
+    func getFavoritedCategories(categories: [Category], place: FetchedPlace, completion: @escaping (Result<[Category], Error>) -> Void) {
+        
+        guard let uid else {
+            completion(.failure(FavoriteError.noCurrentUser))
+            return
+        }
+        
+        var tempCategories: [Category] = []
+        
+        let group = DispatchGroup()
+        
+        for category in categories {
+            group.enter()
+            let query = COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID).collection("places").whereField("placeID", isEqualTo: place.placeID)
+            query.getDocuments { snapshot, error in
+                defer { group.leave() }
+                
+                if let error {
+                    print(error)
+                    return
+                }
+                guard snapshot?.documents.count != 0 else { return }
+                
+                tempCategories.append(category)
+            }
+        }
+        
+        group.notify(queue: .main) {
+            completion(.success(tempCategories))
+        }
     }
     
     func fetchFavorite(category: Category, completion: @escaping (Result<[FetchedPlace], Error>) -> Void) {

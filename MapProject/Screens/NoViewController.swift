@@ -22,11 +22,8 @@ class NoViewController: UIViewController {
         view.addSubview(myView)
         view.backgroundColor = .systemGreen
         
-        
-        
     }
 
-   
     //MARK: - Actions
 
     //MARK: - Helpers

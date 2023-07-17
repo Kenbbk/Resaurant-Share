@@ -7,10 +7,12 @@
 
 import UIKit
 
-class FavoriteCell: UITableViewCell {
+class CategoryCell: UITableViewCell {
     
     static let identifier = "CategoryCell"
     //MARK: - Properties
+    
+    var category: Category?
 
     private let colors = CustomColor.colors
     
@@ -59,6 +61,7 @@ class FavoriteCell: UITableViewCell {
     
     
     //MARK: - Helpers
+    
     
     private func configureUI() {
         let padding: CGFloat = 10

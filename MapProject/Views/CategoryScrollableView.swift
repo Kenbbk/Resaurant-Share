@@ -7,7 +7,7 @@
 
 import UIKit
 
-class RealScrollableView: BluePrintScrollableView {
+class CategoryScrollableView: BluePrintScrollableView {
     
      let dragIcon: UIView = {
         let myView = UIView()
@@ -27,7 +27,7 @@ class RealScrollableView: BluePrintScrollableView {
         configureUI()
         
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -50,7 +50,7 @@ class RealScrollableView: BluePrintScrollableView {
         }
 }
 }
-extension RealScrollableView: UITableViewDataSource {
+extension CategoryScrollableView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 30
     }

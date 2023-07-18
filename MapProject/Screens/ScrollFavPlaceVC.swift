@@ -9,6 +9,10 @@ import UIKit
 import SnapKit
 import GooglePlaces
 
+protocol ScrollFavPlaceVCDelegate: AnyObject {
+    func tbPlaceTapped(_ sender: ScrollFavPlaceVC, place: FetchedPlace)
+}
+
 class ScrollFavPlaceVC: UIViewController {
     
     
@@ -16,11 +20,14 @@ class ScrollFavPlaceVC: UIViewController {
     lazy var myTableView: UITableView = {
         let tb = UITableView()
         tb.dataSource = self
+        tb.delegate = self
         tb.register(FavPlaceCell.self, forCellReuseIdentifier: FavPlaceCell.identifier)
         tb.rowHeight = 190
         
         return tb
     }()
+    
+    weak var delegate: ScrollFavPlaceVCDelegate?
     
     var category: Category?
     
@@ -137,6 +144,12 @@ extension ScrollFavPlaceVC: UITableViewDelegate, UITableViewDataSource {
         
         return cell
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("Place tapped")
+        delegate?.tbPlaceTapped(self, place: addedPlaces[indexPath.row])
+        
+    }
 }
 
 extension ScrollFavPlaceVC: UIGestureRecognizerDelegate {
@@ -166,3 +179,7 @@ extension ScrollFavPlaceVC: UIGestureRecognizerDelegate {
         return true
     }
 }
+
+
+    
+

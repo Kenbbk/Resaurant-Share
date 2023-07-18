@@ -12,8 +12,9 @@ import FirebaseCore
 
 let COLLECTION_USERS = Firestore.firestore().collection("users")
 
-struct FavoriteSerivce {
+class FavoriteSerivce {
     
+    var isEdited: Bool = false
     
     enum FavoriteError: Error {
         case noCurrentUser
@@ -43,7 +44,7 @@ struct FavoriteSerivce {
     }
     
     func addCategory(with category: Category, completion: @escaping () -> Void) {
-        
+        isEdited = true
         guard let uid else { return }
         
         let documentPath = COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID)
@@ -114,6 +115,7 @@ struct FavoriteSerivce {
     }
     
     func addFavorite(category: Category, place: FetchedPlace, completion: @escaping () -> Void) {
+        isEdited = true
         guard let uid else {
             print("UID doesn't exist")
             return
@@ -134,6 +136,7 @@ struct FavoriteSerivce {
     }
     
     func deleteFavorite(category: Category, place: FetchedPlace, completion: @escaping () -> Void) {
+        isEdited = true
         guard let uid else { return }
         
         COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID).collection("places").document(place.placeID).delete { _ in

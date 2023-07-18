@@ -7,7 +7,21 @@
 
 import UIKit
 
+protocol CategoryScrollableViewDelegate: AnyObject {
+    func refreshScrollableCategory()
+}
+
 class CategoryScrollableView: BluePrintScrollableView {
+    
+    override var isHidden: Bool {
+        didSet {
+            if isHidden == false && FavoriteSerivce.shared.isEdited == true {
+                delegate?.refreshScrollableCategory()
+            }
+        }
+    }
+    
+    weak var delegate: CategoryScrollableViewDelegate?
     
      let dragIcon: UIView = {
         let myView = UIView()

@@ -13,8 +13,15 @@ class PlaceScrollableView: BluePrintScrollableView {
         didSet {
             if isHidden {
                 currentPosition = .bottom
-                topConstraint.constant = getHeight(position: .bottom)
+//                topConstraint.constant = getHeight(position: .bottom)
             }
+        }
+    }
+    
+    override var currentPosition: BluePrintScrollableView.ScrollViewPosition {
+        didSet {
+            topConstraint.constant = getHeight(position: currentPosition)
+            
         }
     }
     

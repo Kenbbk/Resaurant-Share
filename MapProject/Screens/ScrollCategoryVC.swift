@@ -57,6 +57,7 @@ class ScrollCategoryVC: UIViewController {
         self.init(nibName: nil, bundle: nil)
         self.mapVC = mapVC
         self.scrollableView = scrollableView
+        scrollableView.delegate = self
         
     }
   
@@ -196,6 +197,15 @@ extension ScrollCategoryVC: UIGestureRecognizerDelegate {
 extension ScrollCategoryVC: NamingCategoryVCDelegate {
     func saveButtonTapped(sender: NamingCategoryVC) {
         fetchcategories()
+    }
+}
+
+extension ScrollCategoryVC: CategoryScrollableViewDelegate {
+    func refreshScrollableCategory() {
+        FavoriteSerivce.shared.isEdited = false
+        fetchcategories()
+        print("진행시켜")
+        
     }
 }
 

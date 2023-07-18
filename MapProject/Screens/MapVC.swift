@@ -188,11 +188,13 @@ class MapVC: UIViewController {
         if mytableView.isHidden == true {
             
             leftImageView.image = UIImage(systemName: "map.circle")
+            ScrollableCategoryView.isHidden = false
         }
+        
         
         isSearhcing = false
         searchTF.text = ""
-        ScrollableCategoryView.isHidden = false
+        
     }
     
     
@@ -396,6 +398,7 @@ class MapVC: UIViewController {
         }
         
         let vc = ScrollFavPlaceVC(scrollableView: scrollablePlacesView)
+        vc.delegate = self
         addChild(vc)
         didMove(toParent: self)
         scrollablePlacesView.containerForTableView.addSubview(vc.view)
@@ -562,6 +565,17 @@ extension MapVC: CategoryVCDelegate {
     func saveButtonTapped(sender: CategoryVC) {
         resultView.fetchedPlace = fetchedPlace
         
+    }
+}
+
+extension MapVC: ScrollFavPlaceVCDelegate {
+    func tbPlaceTapped(_ sender: ScrollFavPlaceVC, place: FetchedPlace) {
+        let location = NMGLatLng(lat: place.lat, lng: place.lon)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: location)
+        cameraUpdate.animation = .easeOut
+        
+        naverMap.moveCamera(cameraUpdate)
+        scrollablePlacesView.currentPosition = .bottom
     }
 }
 

@@ -147,10 +147,7 @@ class MapVC: UIViewController {
         locationManager.requestWhenInUseAuthorization()
         configureUI()
         ScrollableCategoryView.scrollableView.layer.cornerRadius = 20
-        
     }
-    
-    
     
     //MARK: - Actions
     
@@ -165,9 +162,9 @@ class MapVC: UIViewController {
         rightCancelImageView.isHidden = true
         ScrollableCategoryView.isHidden = false
         scrollablePlacesView.isHidden = true
-        
+        leftBackImageView.isHidden = true
         searchTF.isHidden = false
-        
+        resultView.isHidden = true
         resetMarkers()
     }
     
@@ -573,6 +570,7 @@ extension MapVC: ScrollFavPlaceVCDelegate {
         let location = NMGLatLng(lat: place.lat, lng: place.lon)
         let cameraUpdate = NMFCameraUpdate(scrollTo: location)
         cameraUpdate.animation = .easeOut
+        cameraUpdate.animationDuration = 0.5
         
         naverMap.moveCamera(cameraUpdate)
         scrollablePlacesView.currentPosition = .bottom

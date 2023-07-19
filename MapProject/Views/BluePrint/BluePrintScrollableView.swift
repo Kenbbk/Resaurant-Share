@@ -19,7 +19,15 @@ class BluePrintScrollableView: PassThroughView {
     
     var topConstraint: NSLayoutConstraint!
     
-    var currentPosition: ScrollViewPosition = .bottom
+    var currentPosition: ScrollViewPosition = .bottom {
+        didSet {
+            UIView.animate(withDuration: 0.1) {
+                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+                self.layoutIfNeeded()
+            }
+            
+        }
+    }
     
    var currentHeight: CGFloat!
     
@@ -54,7 +62,7 @@ class BluePrintScrollableView: PassThroughView {
             topConstraint.constant = currentHeight
         } else if state == .ended {
             changeTheHeightAtTheEnd()
-            print("Is this Ended?")
+            
         }
     }
     private func checkIfInTheRnage() {
@@ -77,10 +85,10 @@ class BluePrintScrollableView: PassThroughView {
             } else {
                 currentPosition = .bottom
             }
-            UIView.animate(withDuration: 0.1) {
-                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
-                self.layoutIfNeeded()
-            }
+//            UIView.animate(withDuration: 0.1) {
+//                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+//                self.layoutIfNeeded()
+//            }
             
             
         case .middle:
@@ -91,10 +99,10 @@ class BluePrintScrollableView: PassThroughView {
             } else {
                 currentPosition = .middle
             }
-            UIView.animate(withDuration: 0.1) {
-                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
-                self.layoutIfNeeded()
-            }
+//            UIView.animate(withDuration: 0.1) {
+//                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+//                self.layoutIfNeeded()
+//            }
             
             
         case .top:
@@ -105,10 +113,10 @@ class BluePrintScrollableView: PassThroughView {
             } else {
                 currentPosition = .top
             }
-            UIView.animate(withDuration: 0.1) {
-                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
-                self.layoutIfNeeded()
-            }
+//            UIView.animate(withDuration: 0.1) {
+//                self.topConstraint.constant = self.getHeight(position: self.currentPosition)
+//                self.layoutIfNeeded()
+//            }
             
             
         }

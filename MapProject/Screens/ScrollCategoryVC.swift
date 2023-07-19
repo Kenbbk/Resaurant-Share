@@ -202,9 +202,12 @@ extension ScrollCategoryVC: NamingCategoryVCDelegate {
 
 extension ScrollCategoryVC: CategoryScrollableViewDelegate {
     func refreshScrollableCategory() {
-        FavoriteSerivce.shared.isEdited = false
-        fetchcategories()
-        print("진행시켜")
+        if FavoriteSerivce.shared.isEdited == true {
+            FavoriteSerivce.shared.isEdited = false
+            fetchcategories()
+            print("진행시켜")
+        }
+        
         
     }
 }

@@ -15,7 +15,7 @@ class CategoryScrollableView: BluePrintScrollableView {
     
     override var isHidden: Bool {
         didSet {
-            if isHidden == false && FavoriteSerivce.shared.isEdited == true {
+            if isHidden == false {
                 delegate?.refreshScrollableCategory()
             }
         }

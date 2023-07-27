@@ -65,8 +65,11 @@ class MapVC: UIViewController {
         tf.delegate = self
         tf.backgroundColor = .white
         tf.layer.cornerRadius = 10
-        tf.layer.borderWidth = 1
-        tf.layer.borderColor = UIColor.systemGray4.cgColor
+
+//        tf.layer.borderColor = UIColor.systemGray4.cgColor
+//        tf.layer.shadowColor = UIColor.black.cgColor
+        tf.layer.shadowOpacity = 0.2
+        tf.layer.shadowOffset = .zero
         
         return tf
     }()
@@ -287,7 +290,6 @@ class MapVC: UIViewController {
         searchTF.rightViewMode = .always
         ScrollableCategoryView.isHidden = true
         resetMarkers()
-        
     }
     
     private func moveCamera() {
@@ -351,6 +353,7 @@ class MapVC: UIViewController {
         
         searchTF.rightView = rightImageView
         searchTF.rightViewMode = .whileEditing
+        
         searchTF.rightView?.isUserInteractionEnabled = true
         searchTF.rightView?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(rightButtonTapped(_:))))
     }
@@ -358,7 +361,7 @@ class MapVC: UIViewController {
     private func configureTableView() {
         view.addSubview(mytableView)
         mytableView.snp.makeConstraints { make in
-            make.top.equalTo(searchTF.snp.bottom)
+            make.top.equalTo(searchTF.snp.bottom).offset(2)
             make.left.right.bottom.equalToSuperview()
         }
     }

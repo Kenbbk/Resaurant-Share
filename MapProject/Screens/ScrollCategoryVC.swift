@@ -47,7 +47,11 @@ class ScrollCategoryVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchcategories()
+        fetchcategories { categories in
+            self.fetchFavoritePlaces(categories: categories) { categories in
+                print("Categories")
+            }
+        }
         configureUI()
         createObserver()
         navigationController?.isNavigationBarHidden = true
@@ -85,172 +89,185 @@ class ScrollCategoryVC: UIViewController {
             
             completion(categories)
             
-//            self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel(categories: categories)
-//            DispatchQueue.main.async {
-//                self.placeTableView.reloadData()
-//            }
+            //            self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel(categories: categories)
+            //            DispatchQueue.main.async {
+            //                self.placeTableView.reloadData()
+            //            }
         }
     }
     
-    private func fetchFavoritePlaces(category: Category) {
-        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-            case .success(let places):
+    private func fetchFavoritePlaces(categories: [Category], completion: @escaping ([Category]) -> Void) {
+        var categoriesWithPlaces: [Category] = []
+        let group = DispatchGroup()
+        for category in categories {
+            group.enter()
+            FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+                defer { group.leave() }
+                switch result {
+                case .failure(let error):
+                    print(error)
+                case .success(let places):
+                    var newCategory = category
+                    newCategory.addedPlaces = places
+                    categoriesWithPlaces.append(newCategory)
+                }
+                
+            }
+            group.notify(queue: .main) {
+                completion(categoriesWithPlaces)
+            }
+            
+        }
+    }
+        
+        private func createObserver() {
+            NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name.userInfoCategoriesChanged, object: nil)
+            
+        }
+        
+        private func configureUI() {
+            configureTB()
+        }
+        
+        private func configureTB() {
+            
+            view.addSubview(placeTableView)
+            placeTableView.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                placeTableView.topAnchor.constraint(equalTo: view.topAnchor),
+                placeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                placeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                placeTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: tabBarController?.tabBar.frame.size.height ?? 0)
+            ])
+        }
+    }
+    
+    //MARK: - TableView Data Source, TableView Delegate
+    
+    extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            guard let ScrollCategoryVCListViewModel else { return 0}
+            return ScrollCategoryVCListViewModel.numberOfRows
+        }
+        
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            if indexPath.row == 0 {
+                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+                return cell
+            }
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+            let category = categories[indexPath.row - 1]
+            cell.viewModel = ScrollCategoryVCViewModel(category: category)
+            
+            cell.category = category
+            
+            return cell
+            
+        }
+        
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            if indexPath.row == 0 {
+                let vc = NamingCategoryVC()
+                vc.delegate = self
+                vc.modalPresentationStyle = .overFullScreen
+                present(vc, animated: true)
+            } else {
+                tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+                let selectedCategory = categories[indexPath.row - 1]
+                
+                scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
+                
+                
+                NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
                 
             }
         }
-    }
-    
-    private func createObserver() {
-        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name.userInfoCategoriesChanged, object: nil)
         
-    }
-    
-    private func configureUI() {
-        configureTB()
-    }
-    
-    private func configureTB() {
-        
-        view.addSubview(placeTableView)
-        placeTableView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            placeTableView.topAnchor.constraint(equalTo: view.topAnchor),
-            placeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            placeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            placeTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: tabBarController?.tabBar.frame.size.height ?? 0)
-        ])
-    }
-}
-
-//MARK: - TableView Data Source, TableView Delegate
-
-extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let ScrollCategoryVCListViewModel else { return 0}
-        return ScrollCategoryVCListViewModel.numberOfRows
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row == 0 {
-            let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
-            return cell
+        func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+            let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: BlackTableViewHeaderFooterView.identifier) as! BlackTableViewHeaderFooterView
+            header.setTextLabel()
+            print("------------------------------ debug UserInfo.shared.categories.count has been printed")
+            
+            return header
         }
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
-        let category = categories[indexPath.row - 1]
-        cell.viewModel = ScrollCategoryVCViewModel(category: category)
+        func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+            50
+        }
         
-        cell.category = category
-        
-        return cell
-        
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 0 {
-            let vc = NamingCategoryVC()
-            vc.delegate = self
-            vc.modalPresentationStyle = .overFullScreen
-            present(vc, animated: true)
-        } else {
-            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-            let selectedCategory = categories[indexPath.row - 1]
-            
-            scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
-            
-            
-            NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
-            
+        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+            return 70
         }
     }
     
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: BlackTableViewHeaderFooterView.identifier) as! BlackTableViewHeaderFooterView
-        header.setTextLabel()
-        print("------------------------------ debug UserInfo.shared.categories.count has been printed")
-        
-        return header
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        50
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 70
-    }
-}
-
-extension ScrollCategoryVC: UIGestureRecognizerDelegate {
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer == tableViewGestureRecognizer {
-            
-            let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: view)
-            
-            if scrollableView.currentPosition == .top {
+    extension ScrollCategoryVC: UIGestureRecognizerDelegate {
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            if gestureRecognizer == tableViewGestureRecognizer {
                 
-                if placeTableView.contentOffset.y > 0 {
+                let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: view)
+                
+                if scrollableView.currentPosition == .top {
                     
-                    return false
+                    if placeTableView.contentOffset.y > 0 {
+                        
+                        return false
+                        
+                    } else {
+                        
+                        return translation.y > 0
+                    }
                     
                 } else {
                     
-                    return translation.y > 0
+                    return true
                 }
-                
-            } else {
-                
-                return true
             }
+            
+            return true
         }
-        
-        return true
     }
-}
-
-extension ScrollCategoryVC: NamingCategoryVCDelegate {
-    func saveButtonTapped(sender: NamingCategoryVC) {
-        fetchcategories()
-    }
-}
-
-extension ScrollCategoryVC: CategoryScrollableViewDelegate {
-    func categoryScrollableViewHiddenStateChanged() {
-        if FavoriteSerivce.shared.isEdited == true {
-            FavoriteSerivce.shared.isEdited = false
+    
+    extension ScrollCategoryVC: NamingCategoryVCDelegate {
+        func saveButtonTapped(sender: NamingCategoryVC) {
             fetchcategories()
-            print("진행시켜")
+        }
+    }
+    
+    extension ScrollCategoryVC: CategoryScrollableViewDelegate {
+        func categoryScrollableViewHiddenStateChanged() {
+            if FavoriteSerivce.shared.isEdited == true {
+                FavoriteSerivce.shared.isEdited = false
+                fetchcategories()
+                print("진행시켜")
+            }
+            
+            
+        }
+    }
+    
+    class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
+        
+        static let identifier = "BlackTableViewHeaderFooterView"
+        
+        override init(reuseIdentifier: String?) {
+            super.init(reuseIdentifier: reuseIdentifier)
+            
+            contentView.backgroundColor = .white
+            
+            textLabel?.numberOfLines = 0
+            
         }
         
+        required init?(coder aDecoder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+        
+        func setTextLabel() {
+            textLabel?.text = UserInfo.shared.categories.isEmpty ? "All lists" : "All lists \(UserInfo.shared.categories.count)"
+            textLabel?.font = .boldSystemFont(ofSize: 24)
+            textLabel?.textColor = .black
+        }
         
     }
-}
-
-class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
-    
-    static let identifier = "BlackTableViewHeaderFooterView"
-    
-    override init(reuseIdentifier: String?) {
-        super.init(reuseIdentifier: reuseIdentifier)
-        
-        contentView.backgroundColor = .white
-        
-        textLabel?.numberOfLines = 0
-        
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func setTextLabel() {
-        textLabel?.text = UserInfo.shared.categories.isEmpty ? "All lists" : "All lists \(UserInfo.shared.categories.count)"
-        textLabel?.font = .boldSystemFont(ofSize: 24)
-        textLabel?.textColor = .black
-    }
-    
-}

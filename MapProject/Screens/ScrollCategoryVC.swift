@@ -17,6 +17,8 @@ class ScrollCategoryVC: UIViewController {
     
     //MARK: - Properties
     
+    var ScrollCategoryVCListViewModel: ScrollCategoryVCListViewModel?
+    
     lazy var placeTableView: UITableView = {
         let tb = UITableView(frame: CGRect(x: 0, y: 0, width: Int(view.frame.size.height), height: Int(view.frame.size.height - tabBarController!.tabBar.frame.height)), style: .grouped)
         tb.backgroundColor = .white
@@ -60,7 +62,7 @@ class ScrollCategoryVC: UIViewController {
         scrollableView.delegate = self
         
     }
-  
+    
     
     //MARK: - Actions
     
@@ -77,13 +79,26 @@ class ScrollCategoryVC: UIViewController {
         placeTableView.addGestureRecognizer(tableViewGestureRecognizer)
     }
     
-    private func fetchcategories() {
+    private func fetchcategories(completion: @escaping ([Category]) -> Void) {
         
-       FavoriteSerivce.shared.fetchCategories { categories in
+        FavoriteSerivce.shared.fetchCategories { categories in
             
-            self.categories = categories
-            DispatchQueue.main.async {
-                self.placeTableView.reloadData()
+            completion(categories)
+            
+//            self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel(categories: categories)
+//            DispatchQueue.main.async {
+//                self.placeTableView.reloadData()
+//            }
+        }
+    }
+    
+    private func fetchFavoritePlaces(category: Category) {
+        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+            switch result {
+            case .failure(let error):
+                print(error)
+            case .success(let places):
+                
             }
         }
     }
@@ -115,7 +130,8 @@ class ScrollCategoryVC: UIViewController {
 
 extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        categories.count + 1
+        guard let ScrollCategoryVCListViewModel else { return 0}
+        return ScrollCategoryVCListViewModel.numberOfRows
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -126,12 +142,14 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
         let category = categories[indexPath.row - 1]
+        cell.viewModel = ScrollCategoryVCViewModel(category: category)
+        
         cell.category = category
         
         return cell
         
-        }
-
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             let vc = NamingCategoryVC()
@@ -145,9 +163,9 @@ extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
             scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
             
             
-            NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory) 
+            NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
             
-            }
+        }
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -201,7 +219,7 @@ extension ScrollCategoryVC: NamingCategoryVCDelegate {
 }
 
 extension ScrollCategoryVC: CategoryScrollableViewDelegate {
-    func refreshScrollableCategory() {
+    func categoryScrollableViewHiddenStateChanged() {
         if FavoriteSerivce.shared.isEdited == true {
             FavoriteSerivce.shared.isEdited = false
             fetchcategories()

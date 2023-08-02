@@ -66,8 +66,7 @@ class MapVC: UIViewController {
         tf.backgroundColor = .white
         tf.layer.cornerRadius = 10
 
-//        tf.layer.borderColor = UIColor.systemGray4.cgColor
-//        tf.layer.shadowColor = UIColor.black.cgColor
+
         tf.layer.shadowOpacity = 0.2
         tf.layer.shadowOffset = .zero
         

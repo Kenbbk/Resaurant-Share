@@ -13,6 +13,8 @@ class FavoriteStoreageCell: UITableViewCell {
     //MARK: - Properties
     static let identifier = "ScrollCategoryCell"
     
+    var viewModel: ScrollCategoryVCViewModel!
+    
     var category: Category? {
         didSet {
             fetchPlaces()
@@ -80,8 +82,8 @@ class FavoriteStoreageCell: UITableViewCell {
     
     private func setLabel() {
         guard let category else { return }
-        leftImageView.tintColor = CustomColor.colors[category.colorNumber]
-        titleLabel.text = category.title
+        leftImageView.tintColor = CustomColor.colors[viewModel.colorNumber]
+        titleLabel.text = viewModel.categoryName
         statusView.label.text = "\(addedPlaces.count)"
     }
     

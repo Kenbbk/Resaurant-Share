@@ -8,7 +8,9 @@
 import UIKit
 
 protocol CategoryScrollableViewDelegate: AnyObject {
-    func refreshScrollableCategory()
+    func categoryScrollableViewHiddenStateChanged()
+    
+    
 }
 
 class CategoryScrollableView: BluePrintScrollableView {
@@ -16,7 +18,7 @@ class CategoryScrollableView: BluePrintScrollableView {
     override var isHidden: Bool {
         didSet {
             if isHidden == false {
-                delegate?.refreshScrollableCategory()
+                delegate?.categoryScrollableViewHiddenStateChanged()
             }
         }
     }

@@ -8,6 +8,11 @@
 import UIKit
 import NMapsMap
 
+enum Section {
+    case main
+    
+}
+
 protocol ScrollCategoryVCDelegate: AnyObject {
     func categoryTapped(sender: ScrollCategoryVC, category: Category)
 }
@@ -17,13 +22,13 @@ class ScrollCategoryVC: UIViewController {
     
     //MARK: - Properties
     
-    var ScrollCategoryVCListViewModel: ScrollCategoryVCListViewModel?
+    var scrollCategoryVCListViewModel: ScrollCategoryVCListViewModel?
     
     lazy var placeTableView: UITableView = {
         let tb = UITableView(frame: CGRect(x: 0, y: 0, width: Int(view.frame.size.height), height: Int(view.frame.size.height - tabBarController!.tabBar.frame.height)), style: .grouped)
         tb.backgroundColor = .white
         
-        tb.dataSource = self
+        
         tb.delegate = self
         tb.register(CreateCell.self, forCellReuseIdentifier: CreateCell.identifier)
         tb.register(BlackTableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: BlackTableViewHeaderFooterView.identifier)
@@ -31,6 +36,8 @@ class ScrollCategoryVC: UIViewController {
         
         return tb
     }()
+    
+    var dataSource: UITableViewDiffableDataSource<Section, Category>!
     
     var categories: [Category] = []
     
@@ -45,13 +52,51 @@ class ScrollCategoryVC: UIViewController {
     
     //MARK: - Lifecycle
     
+    private func configureDataSource() {
+        dataSource = UITableViewDiffableDataSource<Section, Category>(tableView: placeTableView, cellProvider: { tableView, indexPath, itemIdentifier in
+            if indexPath.row == 0 {
+                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+                return cell
+            } else if indexPath.row == 1 {
+                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+                return cell
+            }
+            
+            let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+            
+            cell.viewModel = self.scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
+            
+            
+            return cell
+        })
+    }
+    
+    private func createSnapShot(snapshot: NSDiffableDataSourceSnapshot<Section, Category>) {
+//        var snapshot =  NSDiffableDataSourceSnapshot<Section, Person>()
+        
+//        snapshot.appendSections([.main])
+//        snapshot.appendItems(persons)
+        dataSource?.apply(snapshot, animatingDifferences: true, completion: nil)
+        
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchcategories { categories in
-            self.fetchFavoritePlaces(categories: categories) { categories in
-                print("Categories")
-            }
-        }
+        scrollCategoryVCListViewModel = ScrollCategoryVCListViewModel()
+        scrollCategoryVCListViewModel?.delegate = self
+        scrollableView.delegate = scrollCategoryVCListViewModel
+        configureDataSource()
+//        fetchcategories { categories in
+//
+//            self.fetchFavoritePlaces(categories: categories) { categories in
+//                self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel()
+//                self.categories = categories
+//
+//                DispatchQueue.main.async {
+//                    self.placeTableView.reloadData()
+//                }
+//            }
+//        }
         configureUI()
         createObserver()
         navigationController?.isNavigationBarHidden = true
@@ -63,7 +108,7 @@ class ScrollCategoryVC: UIViewController {
         self.init(nibName: nil, bundle: nil)
         self.mapVC = mapVC
         self.scrollableView = scrollableView
-        scrollableView.delegate = self
+//        scrollableView.delegate = self
         
     }
     
@@ -89,13 +134,11 @@ class ScrollCategoryVC: UIViewController {
             
             completion(categories)
             
-            //            self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel(categories: categories)
-            //            DispatchQueue.main.async {
-            //                self.placeTableView.reloadData()
-            //            }
+            
         }
     }
     private func fetchFavoritePlaces(categories: [Category], completion: @escaping ([Category]) -> Void)  {
+    
         var categoriesWithPlaces: [Category] = []
         let group = DispatchGroup()
         for category in categories {
@@ -112,161 +155,173 @@ class ScrollCategoryVC: UIViewController {
                 }
                 
             }
-            group.notify(queue: .main) {
-                completion(categoriesWithPlaces)
-            }
-            
         }
-    }
-        
-        private func createObserver() {
-            NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name.userInfoCategoriesChanged, object: nil)
+        group.notify(queue: .main) {
             
-        }
-        
-        private func configureUI() {
-            configureTB()
-        }
-        
-        private func configureTB() {
-            
-            view.addSubview(placeTableView)
-            placeTableView.translatesAutoresizingMaskIntoConstraints = false
-            
-            NSLayoutConstraint.activate([
-                placeTableView.topAnchor.constraint(equalTo: view.topAnchor),
-                placeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                placeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                placeTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: tabBarController?.tabBar.frame.size.height ?? 0)
-            ])
+            completion(categoriesWithPlaces)
         }
     }
     
-    //MARK: - TableView Data Source, TableView Delegate
+    private func createObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(categoryChanged), name: Notification.Name.userInfoCategoriesChanged, object: nil)
+        
+    }
     
-    extension ScrollCategoryVC: UITableViewDataSource, UITableViewDelegate {
-        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            guard let ScrollCategoryVCListViewModel else { return 0}
-            return ScrollCategoryVCListViewModel.numberOfRows
-        }
+    private func configureUI() {
+        configureTB()
+    }
+    
+    private func configureTB() {
         
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            if indexPath.row == 0 {
-                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
-                return cell
-            }
-            
-            let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
-            let category = categories[indexPath.row - 1]
-            cell.viewModel = ScrollCategoryVCViewModel(category: category)
-            
-            cell.category = category
-            
-            return cell
-            
-        }
+        view.addSubview(placeTableView)
+        placeTableView.translatesAutoresizingMaskIntoConstraints = false
         
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            if indexPath.row == 0 {
-                let vc = NamingCategoryVC()
-                vc.delegate = self
-                vc.modalPresentationStyle = .overFullScreen
-                present(vc, animated: true)
-            } else {
-                tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-                let selectedCategory = categories[indexPath.row - 1]
-                
-                scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
-                
-                
-                NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
-                
-            }
-        }
-        
-        func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-            let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: BlackTableViewHeaderFooterView.identifier) as! BlackTableViewHeaderFooterView
-            header.setTextLabel()
-            print("------------------------------ debug UserInfo.shared.categories.count has been printed")
+        NSLayoutConstraint.activate([
+            placeTableView.topAnchor.constraint(equalTo: view.topAnchor),
+            placeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            placeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            placeTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: tabBarController?.tabBar.frame.size.height ?? 0)
+        ])
+    }
+}
+
+//MARK: - TableView Data Source, TableView Delegate
+
+extension ScrollCategoryVC: UITableViewDelegate {
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        guard let scrollCategoryVCListViewModel else { return 0}
+//        return scrollCategoryVCListViewModel.numberOfRows
+//    }
+//
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        if indexPath.row == 0 {
+//            let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+//            return cell
+//        }
+//
+//        let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+//
+////        let category = categories[indexPath.row - 1]
+//        cell.viewModel = scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
+//
+//
+//
+//        return cell
+//
+//    }
+//
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row == 0 {
+            let vc = NamingCategoryVC()
+            vc.delegate = self
+            vc.modalPresentationStyle = .overFullScreen
+            present(vc, animated: true)
+        } else {
+            tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+            guard let selectedCategory = scrollCategoryVCListViewModel?.getCategoryAtIndex(indexPath.row) else { return }
             
-            return header
-        }
-        
-        func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-            50
-        }
-        
-        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 70
+            scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
+            
+            
+            NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
+            
         }
     }
     
-    extension ScrollCategoryVC: UIGestureRecognizerDelegate {
-        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            if gestureRecognizer == tableViewGestureRecognizer {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: BlackTableViewHeaderFooterView.identifier) as! BlackTableViewHeaderFooterView
+        header.setTextLabel()
+        print("------------------------------ debug UserInfo.shared.categories.count has been printed")
+        
+        return header
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        50
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
+    }
+}
+
+extension ScrollCategoryVC: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer == tableViewGestureRecognizer {
+            
+            let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: view)
+            
+            if scrollableView.currentPosition == .top {
                 
-                let translation = (gestureRecognizer as! UIPanGestureRecognizer).translation(in: view)
-                
-                if scrollableView.currentPosition == .top {
+                if placeTableView.contentOffset.y > 0 {
                     
-                    if placeTableView.contentOffset.y > 0 {
-                        
-                        return false
-                        
-                    } else {
-                        
-                        return translation.y > 0
-                    }
+                    return false
                     
                 } else {
                     
-                    return true
+                    return translation.y > 0
                 }
+                
+            } else {
+                
+                return true
             }
-            
-            return true
         }
+        
+        return true
+    }
+}
+
+extension ScrollCategoryVC: NamingCategoryVCDelegate {
+    func saveButtonTapped(sender: NamingCategoryVC) {
+        scrollCategoryVCListViewModel?.updateCategories()
+        
+//        fetchcategories { categories in
+//            self.fetchFavoritePlaces(categories: categories) { categories in
+//
+//            }
+//        }
+    }
+}
+
+
+
+
+extension ScrollCategoryVC: ScrollCategoryVCListViewModelDelegate {
+    func ScrollCategoryVCListViewModelUpdated(snapshot: NSDiffableDataSourceSnapshot<Section, Category>) {
+        dataSource.apply(snapshot)
+        print(placeTableView.numberOfRows(inSection: 0))
+        print(snapshot.numberOfItems)
     }
     
-    extension ScrollCategoryVC: NamingCategoryVCDelegate {
-        func saveButtonTapped(sender: NamingCategoryVC) {
-            fetchcategories()
-        }
+//    func ScrollCategoryVCListViewModelUpdated(snapshot) {
+//        createSnapShot(snapshot: <#T##NSDiffableDataSourceSnapshot<Section, Category>#>)
+//    }
+    
+    
+}
+
+class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
+    
+    static let identifier = "BlackTableViewHeaderFooterView"
+    
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
+        
+        contentView.backgroundColor = .white
+        
+        textLabel?.numberOfLines = 0
+        
     }
     
-    extension ScrollCategoryVC: CategoryScrollableViewDelegate {
-        func categoryScrollableViewHiddenStateChanged() {
-            if FavoriteSerivce.shared.isEdited == true {
-                FavoriteSerivce.shared.isEdited = false
-                fetchcategories()
-                print("진행시켜")
-            }
-            
-            
-        }
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
-    class BlackTableViewHeaderFooterView : UITableViewHeaderFooterView {
-        
-        static let identifier = "BlackTableViewHeaderFooterView"
-        
-        override init(reuseIdentifier: String?) {
-            super.init(reuseIdentifier: reuseIdentifier)
-            
-            contentView.backgroundColor = .white
-            
-            textLabel?.numberOfLines = 0
-            
-        }
-        
-        required init?(coder aDecoder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        
-        func setTextLabel() {
-            textLabel?.text = UserInfo.shared.categories.isEmpty ? "All lists" : "All lists \(UserInfo.shared.categories.count)"
-            textLabel?.font = .boldSystemFont(ofSize: 24)
-            textLabel?.textColor = .black
-        }
-        
+    func setTextLabel() {
+        textLabel?.text = UserInfo.shared.categories.isEmpty ? "All lists" : "All lists \(UserInfo.shared.categories.count)"
+        textLabel?.font = .boldSystemFont(ofSize: 24)
+        textLabel?.textColor = .black
     }
+    
+}

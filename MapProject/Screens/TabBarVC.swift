@@ -48,13 +48,12 @@ class TabBarVC: UITabBarController {
         vc.tabBarItem.title = title
         vc.tabBarItem.image = image
         
+
         return vc
     }
     
     override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
-        
-        
-    }
+        }
     
     
 }

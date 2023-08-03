@@ -12,9 +12,14 @@ import FirebaseCore
 
 let COLLECTION_USERS = Firestore.firestore().collection("users")
 
+protocol FavoriteServiceDelegate: AnyObject {
+    func updateBeenMade()
+}
+
 class FavoriteSerivce {
     
-    var isEdited: Bool = false
+    
+    weak var delegate: FavoriteServiceDelegate?
     
     enum FavoriteError: Error {
         case noCurrentUser
@@ -44,7 +49,7 @@ class FavoriteSerivce {
     }
     
     func addCategory(with category: Category, completion: @escaping () -> Void) {
-        isEdited = true
+        delegate?.updateBeenMade()
         guard let uid else { return }
         
         let documentPath = COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID)
@@ -115,7 +120,7 @@ class FavoriteSerivce {
     }
     
     func addFavorite(category: Category, place: FetchedPlace, completion: @escaping () -> Void) {
-        isEdited = true
+        delegate?.updateBeenMade()
         guard let uid else {
             print("UID doesn't exist")
             return
@@ -136,7 +141,7 @@ class FavoriteSerivce {
     }
     
     func deleteFavorite(category: Category, place: FetchedPlace, completion: @escaping () -> Void) {
-        isEdited = true
+        delegate?.updateBeenMade()
         guard let uid else { return }
         
         COLLECTION_USERS.document(uid).collection("categories").document(category.categoryUID).collection("places").document(place.placeID).delete { _ in

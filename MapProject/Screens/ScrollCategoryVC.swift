@@ -95,8 +95,7 @@ class ScrollCategoryVC: UIViewController {
             //            }
         }
     }
-    
-    private func fetchFavoritePlaces(categories: [Category], completion: @escaping ([Category]) -> Void) {
+    private func fetchFavoritePlaces(categories: [Category], completion: @escaping ([Category]) -> Void)  {
         var categoriesWithPlaces: [Category] = []
         let group = DispatchGroup()
         for category in categories {

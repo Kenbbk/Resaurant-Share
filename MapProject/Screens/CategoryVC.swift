@@ -106,22 +106,25 @@ class CategoryVC: UIViewController {
     
     //MARK: - Lifecycle
     
+    override func loadView() {
+        
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setTitleLabel()
         configureUI()
         addGesutreonView()
         
-        fetchCategories {
+        Task {
+            await fetchCategoriesThenFetchFavoritedCategory()
+            myTableView.reloadData()
             
-            self.fetchFavoritedCategories {
-                
-                self.myTableView.reloadData()
-                
-                self.setInitialCategories()
-                self.HighlightAddedCategories()
-            }
+            setInitialCategories()
+            HighlightAddedCategories()
         }
+        
     }
     
     init(with place: FetchedPlace) {
@@ -144,45 +147,38 @@ class CategoryVC: UIViewController {
     
     //MARK: - Actions
     
-    @objc private func buttonTapped() {
+    @objc private func buttonTapped() async {
         
         let group = DispatchGroup()
-        
-        if let selectedIndexPath = myTableView.indexPathsForSelectedRows {
-            
-            selectedIndexPath.forEach({
-                let category = categories[$0.row - 1]
-                finishedSelection.insert(category)
-            })
-            
-            group.enter()
-            self.removeFromCategories {
-                group.leave()
+        do {
+            if let selectedIndexPath = myTableView.indexPathsForSelectedRows {
+                
+                selectedIndexPath.forEach({
+                    let category = categories[$0.row - 1]
+                    finishedSelection.insert(category)
+                })
+                
+                try await removeFromCategories()
+                try await addToCategories()
+                
+                
+            } else {
+                
+                guard initialSelection.isEmpty == false else { return }
+                
+                try await removeFromCategories()
+                
             }
-            
-            group.enter()
-            addToCategories {
-                group.leave()
-            }
-            
-        } else {
-            
-            guard initialSelection.isEmpty == false else { return }
-            
-            group.enter()
-            
-            removeFromCategories {
-                group.leave()
-            }
-            
-        }
-        
-        group.notify(queue: .main) {
             
             self.view.backgroundColor = .clear
             self.dismiss(animated: true)
             self.delegate?.saveButtonTapped(sender: self)
+            
+         
+        } catch {
+            print(error)
         }
+        
     }
     
     @objc private func rightImageViewTapped(_ gesture: UITapGestureRecognizer) {
@@ -199,28 +195,54 @@ class CategoryVC: UIViewController {
     
     //MARK: - Helpers
     
-    private func fetchCategories(completion: @escaping () -> Void) {
-        FavoriteSerivce.shared.fetchCategories { categories in
-            self.categories = categories
-            completion()
+    private func fetchCategoriesThenFetchFavoritedCategory() async {
+        do {
+            try await fetchCategories()
+            try await fetchFavoritedCategories()
+        } catch {
+            print(error)
+            
         }
+        
     }
     
-    private func fetchFavoritedCategories(completion: @escaping () -> Void) {
-        FavoriteSerivce.shared.getFavoritedCategories(categories: categories, place: fetchedPlace) { result in
-            defer {
-                completion()
-                
-            }
-            switch result {
-                
-            case .failure(let error):
-                print(error)
-            case .success(let categories):
-                self.favoritedCategories = categories
-            }
-        }
+    private func fetchCategories() async throws {
+        let categories = try await CategoryService.shared.fetchCategories()
+        self.categories = categories
+        //        return categories
+        
     }
+    
+    
+    //    private func fetchCategories(completion: @escaping () -> Void) {
+    //        FavoriteSerivce.shared.fetchCategories { categories in
+    //            self.categories = categories
+    //            completion()
+    //        }
+    //    }
+    
+    private func fetchFavoritedCategories() async throws {
+        let favoritedCategories = try await CategoryService.shared.getFavoritedCategories(categories: categories, place: fetchedPlace)
+        
+        self.favoritedCategories = favoritedCategories
+        
+    }
+    
+    //    private func fetchFavoritedCategories(completion: @escaping () -> Void) {
+    //        FavoriteSerivce.shared.getFavoritedCategories(categories: categories, place: fetchedPlace) { result in
+    //            defer {
+    //                completion()
+    //
+    //            }
+    //            switch result {
+    //
+    //            case .failure(let error):
+    //                print(error)
+    //            case .success(let categories):
+    //                self.favoritedCategories = categories
+    //            }
+    //        }
+    //    }
     
     func setInitialCategories() {
         
@@ -239,39 +261,41 @@ class CategoryVC: UIViewController {
         }
     }
     
-    private func removeFromCategories(completion: @escaping (() -> Void)) {
+    private func removeFromCategories() async throws {
         
-        let shouldRemoved = initialSelection.subtracting(finishedSelection)
+        let shouldRemoved = Array(initialSelection.subtracting(finishedSelection))
         
         let group = DispatchGroup()
         
-        for category in shouldRemoved {
-            group.enter()
-            
-            FavoriteSerivce.shared.deleteFavorite(category: category, place: fetchedPlace) {
-                group.leave()
-            }
-        }
-        
-        group.notify(queue: .main) {
-            completion()
-        }
+        try await FavoriteSerivce.shared.deleteFavorite(categories: shouldRemoved, place: fetchedPlace)
     }
     
-    private func addToCategories(completion: @escaping (() -> Void)) {
-        let shouldAdded = finishedSelection.subtracting(initialSelection)
+    //    private func removeFromCategories(completion: @escaping (() -> Void)) {
+    //
+    //        let shouldRemoved = initialSelection.subtracting(finishedSelection)
+    //
+    //        let group = DispatchGroup()
+    //
+    //        for category in shouldRemoved {
+    //            group.enter()
+    //
+    //            FavoriteSerivce.shared.deleteFavorite(category: category, place: fetchedPlace) {
+    //                group.leave()
+    //            }
+    //        }
+    //
+    //        group.notify(queue: .main) {
+    //            completion()
+    //        }
+    //    }
+    
+    private func addToCategories() async throws {
+        let shouldAdded = Array(finishedSelection.subtracting(initialSelection))
         
         let group = DispatchGroup()
         
-        for category in shouldAdded {
-            group.enter()
-            FavoriteSerivce.shared.addFavorite(category: category, place: fetchedPlace) {
-                group.leave()
-            }
-        }
-        group.notify(queue: .main) {
-            completion()
-        }
+        try await FavoriteSerivce.shared.deleteFavorite(categories: shouldAdded, place: fetchedPlace)
+        
     }
     
     private func setTitleLabel() {
@@ -439,16 +463,22 @@ extension CategoryVC: UIGestureRecognizerDelegate {
 }
 
 extension CategoryVC: NamingCategoryVCDelegate {
-    func saveButtonTapped(sender: NamingCategoryVC) {
-        fetchCategories {
-            
-            self.fetchFavoritedCategories {
-                
-                self.myTableView.reloadData()
-                
-                self.setInitialCategories()
-                self.HighlightAddedCategories()
-            }
-        }
+    func saveButtonTapped(sender: NamingCategoryVC) async {
+        await fetchCategoriesThenFetchFavoritedCategory()
+        
+        self.myTableView.reloadData()
+        self.setInitialCategories()
+        self.HighlightAddedCategories()
+        
+        //        fetchCategories {
+        //
+        //            self.fetchFavoritedCategories {
+        //
+        //                self.myTableView.reloadData()
+        //
+        //                self.setInitialCategories()
+        //                self.HighlightAddedCategories()
+        //            }
+        //        }
     }
 }

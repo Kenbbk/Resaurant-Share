@@ -217,17 +217,21 @@ class MapVC: UIViewController {
         rightCancelImageView.isHidden = false
     }
     
-    func fetchplaces(with category: Category, completion: @escaping ([FetchedPlace]) -> Void) {
-        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-                completion([])
-            case .success(let places):
-                completion(places)
-            }
-        }
+    func fetchPlaces(from category: Category) async throws -> [FetchedPlace] {
+        try await FavoriteSerivce.shared.fetchFavoritePlaces(from: category)
     }
+    
+//    func fetchplaces(with category: Category, completion: @escaping ([FetchedPlace]) -> Void) {
+//        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+//            switch result {
+//            case .failure(let error):
+//                print(error)
+//                completion([])
+//            case .success(let places):
+//                completion(places)
+//            }
+//        }
+//    }
     
     func makeMarkers(with places: [FetchedPlace]) {
         guard !places.isEmpty else { return }
@@ -551,11 +555,11 @@ extension MapVC: CLLocationManagerDelegate {
 }
 
 extension MapVC: ScrollCategoryVCDelegate {
-    func categoryTapped(sender: ScrollCategoryVC, category: Category) {
-        fetchplaces(with: category) { places in
-            self.makeMarkers(with: places)
-        }
+    func categoryTapped(sender: ScrollCategoryVC, category: Category) async throws {
+        let fetchedplaces = try await fetchPlaces(from: category)
         
+        makeMarkers(with: fetchedplaces)
+       
         hideTextFieldAndShowCancelButton()
     }
 }

@@ -6,11 +6,11 @@
 //
 
 import Foundation
-import UIKit
+
 import FirebaseFirestore
 
 protocol ScrollCategoryVCListViewModelDelegate: AnyObject {
-    func ScrollCategoryVCListViewModelUpdated(snapshot: NSDiffableDataSourceSnapshot<Section, Category>)
+    func ScrollCategoryVCListViewModelUpdated(categoryModels: [CategoryModel])
 }
 
 class ScrollCategoryVCListViewModel {
@@ -24,8 +24,7 @@ class ScrollCategoryVCListViewModel {
     var categories: [Category] = [] {
         didSet {
             
-            delegate?.ScrollCategoryVCListViewModelUpdated(snapshot: snapshot)
-            shouldUpdate = false
+            
         }
     }
     
@@ -35,63 +34,78 @@ class ScrollCategoryVCListViewModel {
     
     init() {
         FavoriteSerivce.shared.delegate = self
-        updateCategories()
+        Task {
+            await updateCategories()
+        }
+        
     }
     
     func getCategoryAtIndex(_ index: Int) -> Category {
-        return categories [ index - 1]
+        return categories [ index]
     }
     
     func getCategoryViewModelAtIndex(_ index: Int) -> ScrollCategoryVCViewModel  {
-        let category = self.categories[ index - 1]
+        let category = self.categories[index]
         return ScrollCategoryVCViewModel(category: category)
     }
     
-    func updateCategories() {
-        fetchcategories { categories in
-            self.fetchFavoritePlaces(categories: categories) { categories in
-                self.categories = categories
-            }
-        }
-
-    }
+    //    func updateCategories() {
+    //        fetchcategories { categories in
+    //            self.fetchFavoritePlaces(categories: categories) { [weak self] categories in
+    //                guard let self else { return }
+    //                self.categories = categories
+    //                let categoryModels = self.makeCategoryModel(categories: categories)
+    //                self.delegate?.ScrollCategoryVCListViewModelUpdated(categoryModels: categoryModels)
+    //                self.shouldUpdate = false
+    //            }
+    //        }
+    //
+    //    }
     
-    private func fetchcategories(completion: @escaping ([Category]) -> Void) {
-        
-        FavoriteSerivce.shared.fetchCategories { categories in
+    func updateCategories() async {
+        do {
+            let tempCategories = try await fetchcategories()
+            self.categories = try await fetchFavoritePlaces(from: tempCategories)
+            let categoryModels = self.makeCategoryModel(categories: categories)
+            self.delegate?.ScrollCategoryVCListViewModelUpdated(categoryModels: categoryModels)
+            self.shouldUpdate = false
             
-            completion(categories)
+        } catch {
+            print(error)
+            
+            
         }
     }
     
-    private func fetchFavoritePlaces(categories: [Category], completion: @escaping ([Category]) -> Void) {
+    
+    
+    
+    //    private func fetchcategories(completion: @escaping ([Category]) -> Void) {
+    //
+    //        FavoriteSerivce.shared.fetchCategories { categories in
+    //
+    //            completion(categories)
+    //        }
+    //    }
+    
+    private func fetchcategories() async throws -> [Category] {
         
-//        var categoriesWithPlaces: [Category] = []
-        var categoriesWithPlaces: [Category] = [Category(title: "Mock", colorNumber: 0, description: "Mock", timeStamp: Timestamp(date: Date().pastDate()))]
-        let group = DispatchGroup()
-        for category in categories {
-            group.enter()
-            FavoriteSerivce.shared.fetchFavorite(category: category) { result in
-                defer { group.leave() }
-                switch result {
-                case .failure(let error):
-                    print(error)
-                case .success(let places):
-                    var newCategory = category
-                    newCategory.addedPlaces = places
-                    categoriesWithPlaces.append(newCategory)
-                }
-                
-            }
-        }
-        group.notify(queue: .main) {
-            var snapshot = NSDiffableDataSourceSnapshot<Section, Category>()
-            snapshot.appendSections([.main])
-            snapshot.appendItems(categoriesWithPlaces.sorted(by: { $0.timeStamp.dateValue() < $1.timeStamp.dateValue()}))
-            self.snapshot = snapshot
-            completion(categoriesWithPlaces)
-            print(categoriesWithPlaces.count)
-        }
+        let categories = try await CategoryService.shared.fetchCategories()
+        self.categories = categories
+        return categories
+        
+    }
+    
+    private func fetchFavoritePlaces(from categories: [Category]) async throws -> [Category]  {
+        
+        return try await CategoryService.shared.fetchCategoriesWithPlaces(categories)
+        
+    }
+    
+    
+    private func makeCategoryModel(categories: [Category]) -> [CategoryModel] {
+        let categoryModels = categories.map({ CategoryModel(title: $0.title, colorNumber: $0.colorNumber, description: $0.description, categoryUID: $0.categoryUID)})
+        return categoryModels
     }
 }
 
@@ -106,7 +120,10 @@ extension ScrollCategoryVCListViewModel: FavoriteServiceDelegate {
 extension ScrollCategoryVCListViewModel: CategoryScrollableViewDelegate {
     func categoryScrollableViewHiddenStateChanged() {
         if shouldUpdate {
-            updateCategories()
+            Task {
+                await updateCategories()
+            }
+            
         }
     }
     

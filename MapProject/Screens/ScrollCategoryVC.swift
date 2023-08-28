@@ -8,13 +8,13 @@
 import UIKit
 import NMapsMap
 
-enum Section {
-    case main
-    
+enum Section: Int {
+    case create
+    case categories
 }
 
 protocol ScrollCategoryVCDelegate: AnyObject {
-    func categoryTapped(sender: ScrollCategoryVC, category: Category)
+    func categoryTapped(sender: ScrollCategoryVC, category: Category) async throws
 }
 
 class ScrollCategoryVC: UIViewController {
@@ -37,7 +37,7 @@ class ScrollCategoryVC: UIViewController {
         return tb
     }()
     
-    var dataSource: UITableViewDiffableDataSource<Section, Category>!
+    var dataSource: UITableViewDiffableDataSource<Section, CategoryModel>!
     
     var categories: [Category] = []
     
@@ -53,29 +53,64 @@ class ScrollCategoryVC: UIViewController {
     //MARK: - Lifecycle
     
     private func configureDataSource() {
-        dataSource = UITableViewDiffableDataSource<Section, Category>(tableView: placeTableView, cellProvider: { tableView, indexPath, itemIdentifier in
-            if indexPath.row == 0 {
+        dataSource = UITableViewDiffableDataSource<Section, CategoryModel>(tableView: placeTableView, cellProvider: { tableView, indexPath, itemIdentifier in
+            
+            
+            
+            //            let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+            //
+            //            cell.viewModel = self.scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
+            //            return cell
+            
+            guard let section = Section(rawValue: indexPath.section) else {
+                return UITableViewCell()
+                
+            }
+            
+            if section.rawValue == 0 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
                 return cell
-            } else if indexPath.row == 1 {
-                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+                
+                cell.viewModel = self.scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
                 return cell
             }
             
-            let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
-            
-            cell.viewModel = self.scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
             
             
-            return cell
+            
+            //            let section = Section(rawValue: indexPath.row)
+            
+            //                        if indexPath.row == 0 {
+            //                            let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+            //                            return cell
+            //                        }
+            
+            //            switch section {
+            //            case .create:
+            //                let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+            //                return cell
+            //            case .categories:
+            //                let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+            //
+            //                cell.viewModel = self.scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
+            //                return cell
+            //            case .none:
+            //                return UITableViewCell()
+            //            }
+            
+            
         })
     }
     
-    private func createSnapShot(snapshot: NSDiffableDataSourceSnapshot<Section, Category>) {
-//        var snapshot =  NSDiffableDataSourceSnapshot<Section, Person>()
+    private func createSnapShot(categoryModels: [CategoryModel]) {
         
-//        snapshot.appendSections([.main])
-//        snapshot.appendItems(persons)
+        var snapshot = NSDiffableDataSourceSnapshot<Section, CategoryModel>()
+        snapshot.appendSections([.create, .categories])
+        snapshot.appendItems(categoryModels, toSection: .categories)
+        snapshot.appendItems([CategoryModel(title: "Section1", colorNumber: 1, description: "", categoryUID: "")], toSection: .create)
+        
         dataSource?.apply(snapshot, animatingDifferences: true, completion: nil)
         
     }
@@ -86,17 +121,17 @@ class ScrollCategoryVC: UIViewController {
         scrollCategoryVCListViewModel?.delegate = self
         scrollableView.delegate = scrollCategoryVCListViewModel
         configureDataSource()
-//        fetchcategories { categories in
-//
-//            self.fetchFavoritePlaces(categories: categories) { categories in
-//                self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel()
-//                self.categories = categories
-//
-//                DispatchQueue.main.async {
-//                    self.placeTableView.reloadData()
-//                }
-//            }
-//        }
+        //        fetchcategories { categories in
+        //
+        //            self.fetchFavoritePlaces(categories: categories) { categories in
+        //                self.ScrollCategoryVCListViewModel = MapProject.ScrollCategoryVCListViewModel()
+        //                self.categories = categories
+        //
+        //                DispatchQueue.main.async {
+        //                    self.placeTableView.reloadData()
+        //                }
+        //            }
+        //        }
         configureUI()
         createObserver()
         navigationController?.isNavigationBarHidden = true
@@ -108,7 +143,7 @@ class ScrollCategoryVC: UIViewController {
         self.init(nibName: nil, bundle: nil)
         self.mapVC = mapVC
         self.scrollableView = scrollableView
-//        scrollableView.delegate = self
+        //        scrollableView.delegate = self
         
     }
     
@@ -128,38 +163,34 @@ class ScrollCategoryVC: UIViewController {
         placeTableView.addGestureRecognizer(tableViewGestureRecognizer)
     }
     
-    private func fetchcategories(completion: @escaping ([Category]) -> Void) {
+    private func fetchcategories() async throws -> [Category] {
         
-        FavoriteSerivce.shared.fetchCategories { categories in
-            
-            completion(categories)
-            
-            
-        }
+        let categories = try await CategoryService.shared.fetchCategories()
+        self.categories = categories
+        return categories
+        
     }
-    private func fetchFavoritePlaces(categories: [Category], completion: @escaping ([Category]) -> Void)  {
     
-        var categoriesWithPlaces: [Category] = []
-        let group = DispatchGroup()
-        for category in categories {
-            group.enter()
-            FavoriteSerivce.shared.fetchFavorite(category: category) { result in
-                defer { group.leave() }
-                switch result {
-                case .failure(let error):
-                    print(error)
-                case .success(let places):
-                    var newCategory = category
-                    newCategory.addedPlaces = places
-                    categoriesWithPlaces.append(newCategory)
+    private func fetchFavoritePlaces(from categories: [Category]) async throws -> [Category]  {
+        
+        return try await withThrowingTaskGroup(of: (Category, [FetchedPlace]).self) { group in
+            for category in categories {
+                group.addTask {
+                    
+                    try await (category, FavoriteSerivce.shared.fetchFavoritePlaces(from: category))
                 }
-                
             }
-        }
-        group.notify(queue: .main) {
+            var result: [Category] = []
             
-            completion(categoriesWithPlaces)
+            for try await (category, places) in group {
+                var newCategory = category
+                newCategory.addedPlaces = places
+                result.append(category)
+            }
+            
+            return result
         }
+        
     }
     
     private func createObserver() {
@@ -188,30 +219,30 @@ class ScrollCategoryVC: UIViewController {
 //MARK: - TableView Data Source, TableView Delegate
 
 extension ScrollCategoryVC: UITableViewDelegate {
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        guard let scrollCategoryVCListViewModel else { return 0}
-//        return scrollCategoryVCListViewModel.numberOfRows
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        if indexPath.row == 0 {
-//            let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
-//            return cell
-//        }
-//
-//        let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
-//
-////        let category = categories[indexPath.row - 1]
-//        cell.viewModel = scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
-//
-//
-//
-//        return cell
-//
-//    }
-//
+    //    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    //        guard let scrollCategoryVCListViewModel else { return 0}
+    //        return scrollCategoryVCListViewModel.numberOfRows
+    //    }
+    //
+    //    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    //        if indexPath.row == 0 {
+    //            let cell = tableView.dequeueReusableCell(withIdentifier: CreateCell.identifier, for: indexPath) as! CreateCell
+    //            return cell
+    //        }
+    //
+    //        let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteStoreageCell.identifier, for: indexPath) as! FavoriteStoreageCell
+    //
+    ////        let category = categories[indexPath.row - 1]
+    //        cell.viewModel = scrollCategoryVCListViewModel?.getCategoryViewModelAtIndex(indexPath.row)
+    //
+    //
+    //
+    //        return cell
+    //
+    //    }
+    //
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 0 {
+        if indexPath.section == 0 {
             let vc = NamingCategoryVC()
             vc.delegate = self
             vc.modalPresentationStyle = .overFullScreen
@@ -220,8 +251,9 @@ extension ScrollCategoryVC: UITableViewDelegate {
             tableView.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
             guard let selectedCategory = scrollCategoryVCListViewModel?.getCategoryAtIndex(indexPath.row) else { return }
             
-            scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
-            
+            Task {
+                try await scrollCategoryVCDelegate?.categoryTapped(sender: self, category: selectedCategory)
+            }
             
             NotificationCenter.default.post(name: NSNotification.Name.selectedRowinScrollableCategoryVC, object: selectedCategory)
             
@@ -273,14 +305,14 @@ extension ScrollCategoryVC: UIGestureRecognizerDelegate {
 }
 
 extension ScrollCategoryVC: NamingCategoryVCDelegate {
-    func saveButtonTapped(sender: NamingCategoryVC) {
-        scrollCategoryVCListViewModel?.updateCategories()
+    func saveButtonTapped(sender: NamingCategoryVC) async {
+        await scrollCategoryVCListViewModel?.updateCategories()
         
-//        fetchcategories { categories in
-//            self.fetchFavoritePlaces(categories: categories) { categories in
-//
-//            }
-//        }
+        //        fetchcategories { categories in
+        //            self.fetchFavoritePlaces(categories: categories) { categories in
+        //
+        //            }
+        //        }
     }
 }
 
@@ -288,15 +320,24 @@ extension ScrollCategoryVC: NamingCategoryVCDelegate {
 
 
 extension ScrollCategoryVC: ScrollCategoryVCListViewModelDelegate {
-    func ScrollCategoryVCListViewModelUpdated(snapshot: NSDiffableDataSourceSnapshot<Section, Category>) {
-        dataSource.apply(snapshot)
-        print(placeTableView.numberOfRows(inSection: 0))
-        print(snapshot.numberOfItems)
+    
+    
+    
+    
+    func ScrollCategoryVCListViewModelUpdated(categoryModels: [CategoryModel]) {
+        createSnapShot(categoryModels: categoryModels)
+        print("models count is \(categoryModels.count)")
     }
     
-//    func ScrollCategoryVCListViewModelUpdated(snapshot) {
-//        createSnapShot(snapshot: <#T##NSDiffableDataSourceSnapshot<Section, Category>#>)
-//    }
+    //    func ScrollCategoryVCListViewModelUpdated() {
+    //        dataSource.apply(snapshot)
+    //        print(placeTableView.numberOfRows(inSection: 0))
+    //        print(snapshot.numberOfItems)
+    //    }
+    
+    //    func ScrollCategoryVCListViewModelUpdated(snapshot) {
+    //        createSnapShot(snapshot: <#T##NSDiffableDataSourceSnapshot<Section, Category>#>)
+    //    }
     
     
 }

@@ -10,7 +10,7 @@ import FirebaseFirestore
 import SnapKit
 
 protocol NamingCategoryVCDelegate: AnyObject {
-    func saveButtonTapped(sender: NamingCategoryVC)
+    func saveButtonTapped(sender: NamingCategoryVC) async
 }
 
 class NamingCategoryVC: UIViewController {
@@ -190,7 +190,7 @@ class NamingCategoryVC: UIViewController {
         dismiss(animated: true)
     }
     
-    @objc func saveButtonTapped(_ gesture: UITapGestureRecognizer) {
+    @objc func saveButtonTapped(_ gesture: UITapGestureRecognizer) async {
         guard let categoryTitle = nameTextField.text else { return }
         guard let colorNumber = collectionView.indexPathsForSelectedItems?.first?.row else { return }
         
@@ -198,13 +198,18 @@ class NamingCategoryVC: UIViewController {
         let timeStamp = Timestamp(date: Date())
         
         let category = Category(title: categoryTitle, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
-        FavoriteSerivce.shared.addCategory(with: category) {
-            
-            self.delegate?.saveButtonTapped(sender: self)
-            DispatchQueue.main.async {
-                self.dismiss(animated: true)
-            }
-        }
+        
+        await addCategory(category: category)
+        await self.delegate?.saveButtonTapped(sender: self)
+        dismiss(animated: true)
+        
+//        FavoriteSerivce.shared.addCategory(with: category) {
+//
+//            self.delegate?.saveButtonTapped(sender: self)
+//            DispatchQueue.main.async {
+//                self.dismiss(animated: true)
+//            }
+//        }
     }
     
     @objc func keyboarWillShow(sender: Notification) {
@@ -230,6 +235,13 @@ class NamingCategoryVC: UIViewController {
     
     //MARK: - Helpers
     
+    private func addCategory(category: Category) async {
+        do {
+         try await CategoryService.shared.addCategory(with: category)
+        } catch {
+            print(error)
+        }
+    }
     
     private func setupKeyboardHiding() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboarWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)

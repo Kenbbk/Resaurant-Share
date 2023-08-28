@@ -58,30 +58,40 @@ class ScrollFavPlaceVC: UIViewController {
         
         guard let category = notification.object as? Category else { return }
         self.category = category
-        
-        fetchAddedPlace { places in
+        Task {
+            do {
+                let places = try await fetchAddedPlace()
+                resolvePlaces(with: places)
+            } catch {
+                print(error)
+            }
             
-            guard let places else { return }
-            
-            self.resolvePlaces(with: places)
         }
+       
     }
     
     //MARK: - Helpers
     
-    func fetchAddedPlace(completion: @escaping ([FetchedPlace]?) -> Void) {
-        guard let category else { return }
-        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-                completion(nil)
-            case .success(let places):
-                
-                completion(places)
-            }
-        }
+    func fetchAddedPlace() async throws -> [FetchedPlace] {
+        guard let category else { throw FBError.noCategory }
+        
+        return try await FavoriteSerivce.shared.fetchFavoritePlaces(from: category)
+        
     }
+    
+//    func fetchAddedPlace(completion: @escaping ([FetchedPlace]?) -> Void) {
+//        guard let category else { return }
+//        FavoriteSerivce.shared.fetchFavorite(category: category) { result in
+//            switch result {
+//            case .failure(let error):
+//                print(error)
+//                completion(nil)
+//            case .success(let places):
+//
+//                completion(places)
+//            }
+//        }
+//    }
     
     func resolvePlaces(with places: [FetchedPlace]) {
         var tempFetchedplaces: [FetchedPlace] = []

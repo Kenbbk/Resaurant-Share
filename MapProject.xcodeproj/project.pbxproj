@@ -47,6 +47,9 @@
 		D68BC98B2A57F7E0001158A2 /* ScrollFavPlaceVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC98A2A57F7E0001158A2 /* ScrollFavPlaceVC.swift */; };
 		D68BC98E2A587EBE001158A2 /* FavPlaceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68BC98D2A587EBE001158A2 /* FavPlaceCell.swift */; };
 		D6B3DC372A79599E0084B42D /* ScrollCategoryVCViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B3DC362A79599E0084B42D /* ScrollCategoryVCViewModel.swift */; };
+		D6CC86BF2A9B738700AE8C10 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86BE2A9B738700AE8C10 /* CategoryService.swift */; };
+		D6CC86C12A9C5C4600AE8C10 /* CategoryVCMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C02A9C5C4600AE8C10 /* CategoryVCMainView.swift */; };
+		D6EEC22A2A7BFAD800DA751C /* CategoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -93,6 +96,9 @@
 		D68BC98A2A57F7E0001158A2 /* ScrollFavPlaceVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollFavPlaceVC.swift; sourceTree = "<group>"; };
 		D68BC98D2A587EBE001158A2 /* FavPlaceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavPlaceCell.swift; sourceTree = "<group>"; };
 		D6B3DC362A79599E0084B42D /* ScrollCategoryVCViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCategoryVCViewModel.swift; sourceTree = "<group>"; };
+		D6CC86BE2A9B738700AE8C10 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
+		D6CC86C02A9C5C4600AE8C10 /* CategoryVCMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryVCMainView.swift; sourceTree = "<group>"; };
+		D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryModel.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -162,6 +168,7 @@
 				D60B33402A3C5AB2008573EC /* GoogleService-Info.plist */,
 				D60B32BA2A32EDB0008573EC /* Assets.xcassets */,
 				D60B32BF2A32EDB0008573EC /* Info.plist */,
+				D6CC86C02A9C5C4600AE8C10 /* CategoryVCMainView.swift */,
 			);
 			path = MapProject;
 			sourceTree = "<group>";
@@ -173,6 +180,7 @@
 				D668539B2A43247C000FFDFB /* Category.swift */,
 				D66853A32A45A279000FFDFB /* UserInfo.swift */,
 				D637FD602A5024B7000D3B10 /* Place.swift */,
+				D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -197,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				D66853212A3CCEAB000FFDFB /* FavoriteService.swift */,
+				D6CC86BE2A9B738700AE8C10 /* CategoryService.swift */,
 				D637FD5D2A4E766E000D3B10 /* GooglePlacesManager.swift */,
 			);
 			path = Network;
@@ -430,6 +439,7 @@
 				D66853782A42ABA4000FFDFB /* UIViewController+Ext.swift in Sources */,
 				D66853262A3D6A02000FFDFB /* CategoryCell.swift in Sources */,
 				D68BC9852A571C8C001158A2 /* BluePrintScrollableView.swift in Sources */,
+				D6CC86BF2A9B738700AE8C10 /* CategoryService.swift in Sources */,
 				D60B32B62A32EDAF008573EC /* MapVC.swift in Sources */,
 				D66853482A3DAEFA000FFDFB /* CategoryVC.swift in Sources */,
 				D637FD652A52B211000D3B10 /* NSNumber+Ext.swift in Sources */,
@@ -459,6 +469,8 @@
 				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,
 				D66853552A41A652000FFDFB /* UIColor+Ext.swift in Sources */,
 				D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */,
+				D6EEC22A2A7BFAD800DA751C /* CategoryModel.swift in Sources */,
+				D6CC86C12A9C5C4600AE8C10 /* CategoryVCMainView.swift in Sources */,
 				D637FD5E2A4E766E000D3B10 /* GooglePlacesManager.swift in Sources */,
 				D66F96F02A6543AB0041A069 /* PlaceScrollableView.swift in Sources */,
 				D68BC9872A57C1A6001158A2 /* CategoryScrollableView.swift in Sources */,

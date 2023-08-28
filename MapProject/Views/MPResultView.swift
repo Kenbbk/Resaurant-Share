@@ -18,13 +18,27 @@ class MPResultView: UIView {
     
     var fetchedPlace: FetchedPlace? {
         didSet {
-            fetchCategories {
-                self.fetchFavoritedCategories {
-                    
+            Task {
+                do {
+                    let categories = try await fetchCategories()
+                    await fetchFavoritedCategories()
                     self.resetUI()
                     self.changelayOut()
+                   
+                    
+                    
+                    
+                } catch {
+                    print(error)
                 }
             }
+//            fetchCategories {
+//                self.fetchFavoritedCategories {
+//                    
+//                    self.resetUI()
+//                    self.changelayOut()
+//                }
+//            }
         }
     }
     
@@ -157,23 +171,20 @@ class MPResultView: UIView {
             self.favoriteImageView.tintColor        = .gray
     }
     
-    private func fetchCategories(completion: @escaping () -> Void) {
-        FavoriteSerivce.shared.fetchCategories { categories in
-            self.categories = categories
-            completion()
-        }
+    private func fetchCategories() async throws -> [Category] {
+        
+        let categories = try await CategoryService.shared.fetchCategories()
+        self.categories = categories
+        return categories
+        
     }
     
-    private func fetchFavoritedCategories(completion: @escaping () -> Void) {
+    private func fetchFavoritedCategories() async {
         guard let fetchedPlace else { return }
-        FavoriteSerivce.shared.getFavoritedCategories(categories: categories, place: fetchedPlace) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-            case .success(let categories):
-                self.favoritedCategories = categories
-                completion()
-            }
+        do {
+            self.favoritedCategories = try await CategoryService.shared.getFavoritedCategories(categories: categories, place: fetchedPlace)
+        } catch {
+            print(error)
         }
     }
     

@@ -12,8 +12,10 @@ class CategoryCell: UITableViewCell {
     static let identifier = "CategoryCell"
     //MARK: - Properties
     
-    var category: Category?
-
+//    var shouldHighlight: Bool = false {
+//        didSet { rightImageView.tintColor = shouldHighlight ? .blue.withAlphaComponent(0.8) : .systemGray3 }
+//    }
+       
     private let colors = CustomColor.colors
     
     private let leftImageView: UIImageView = {
@@ -44,8 +46,7 @@ class CategoryCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         selectionStyle = .none
         configureUI()
-        setLabelText()
-        
+
     }
     
     required init?(coder: NSCoder) {
@@ -54,9 +55,9 @@ class CategoryCell: UITableViewCell {
     
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        rightImageView.tintColor = selected ? .blue.withAlphaComponent(0.8) : .systemGray3
+        rightImageView.tintColor =  isSelected ? .blue.withAlphaComponent(0.8) : .systemGray3
     }
+    
     //MARK: - Actions
     
     
@@ -96,30 +97,15 @@ class CategoryCell: UITableViewCell {
         ])
     }
     
-    func setLabelText() {
-        let attributedText = NSMutableAttributedString(string: "제주도 먹을거", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
+    func setOtherIndexPathLabel(with model: CategoryCellModel) {
         
+        let text = model.title
+        leftImageView.tintColor = CustomColor.colors[model.colorNumber]
         
-        attributedText.append(NSAttributedString(string: " 17", attributes: [.font: UIFont.systemFont(ofSize: 18), .foregroundColor: UIColor.black.withAlphaComponent(0.6)]))
-        
-        label.attributedText = attributedText
-    }
-    
-    func configureFirstIndex() {
-        let attributedText = NSAttributedString(string: "Create list", attributes: [.foregroundColor: UIColor.systemGray])
-        
-        rightImageView.isHidden = true
-        label.attributedText = attributedText
-    }
-    
-    func setOtherIndexPathLabel(with category: Category) {
-        let text = category.title
-        leftImageView.tintColor = CustomColor.colors[category.colorNumber]
         
         label.text = text
     }
-    
-    
+   
     
     
 }

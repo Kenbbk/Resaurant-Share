@@ -66,7 +66,7 @@ class FavoriteSerivce {
         await withThrowingTaskGroup(of: type(of: ())) { group in
             for category in categories {
                 group.addTask {
-                    try await self.addFavorite(this: place, to: category)
+                    try await self.addFavorite(place, to: category)
                 }
             }
         }
@@ -75,7 +75,7 @@ class FavoriteSerivce {
     
     
     
-    func addFavorite(this place: FetchedPlace, to category: Category) async throws {
+    func addFavorite(_ place: FetchedPlace, to category: Category) async throws {
         delegate?.updateBeenMade()
         
         guard let uid else { throw FBError.noUserUID }

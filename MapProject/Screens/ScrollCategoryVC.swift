@@ -243,7 +243,7 @@ extension ScrollCategoryVC: UITableViewDelegate {
     //
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
-            let vc = NamingCategoryVC()
+            let vc = CreatingCategoryVC()
             vc.delegate = self
             vc.modalPresentationStyle = .overFullScreen
             present(vc, animated: true)
@@ -304,20 +304,13 @@ extension ScrollCategoryVC: UIGestureRecognizerDelegate {
     }
 }
 
-extension ScrollCategoryVC: NamingCategoryVCDelegate {
-    func saveButtonTapped(sender: NamingCategoryVC) async {
-        await scrollCategoryVCListViewModel?.updateCategories()
-        
-        //        fetchcategories { categories in
-        //            self.fetchFavoritePlaces(categories: categories) { categories in
-        //
-        //            }
-        //        }
+extension ScrollCategoryVC: CreatingCategoryVCDelegate {
+    func saveButtonTapped() {
+        Task {
+            await scrollCategoryVCListViewModel?.updateCategories()
+        }
     }
 }
-
-
-
 
 extension ScrollCategoryVC: ScrollCategoryVCListViewModelDelegate {
     

@@ -30,7 +30,7 @@
 		D66853222A3CCEAB000FFDFB /* FavoriteService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853212A3CCEAB000FFDFB /* FavoriteService.swift */; };
 		D66853262A3D6A02000FFDFB /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853252A3D6A02000FFDFB /* CategoryCell.swift */; };
 		D66853482A3DAEFA000FFDFB /* CategoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853472A3DAEFA000FFDFB /* CategoryVC.swift */; };
-		D668534C2A3EC9CF000FFDFB /* NamingCategoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534B2A3EC9CF000FFDFB /* NamingCategoryVC.swift */; };
+		D668534C2A3EC9CF000FFDFB /* CreatingCategoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534B2A3EC9CF000FFDFB /* CreatingCategoryVC.swift */; };
 		D668534E2A3F2054000FFDFB /* ColorCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */; };
 		D66853522A418888000FFDFB /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853512A418888000FFDFB /* Constants.swift */; };
 		D66853552A41A652000FFDFB /* UIColor+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66853542A41A652000FFDFB /* UIColor+Ext.swift */; };
@@ -50,6 +50,8 @@
 		D6CC86BF2A9B738700AE8C10 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86BE2A9B738700AE8C10 /* CategoryService.swift */; };
 		D6CC86C12A9C5C4600AE8C10 /* CategoryVCMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C02A9C5C4600AE8C10 /* CategoryVCMainView.swift */; };
 		D6CC86C32A9DF96900AE8C10 /* CategoryCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C22A9DF96900AE8C10 /* CategoryCellModel.swift */; };
+		D6CC86C72A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C62A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift */; };
+		D6CC86C92AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C82AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift */; };
 		D6EEC22A2A7BFAD800DA751C /* CategoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -80,7 +82,7 @@
 		D66853212A3CCEAB000FFDFB /* FavoriteService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteService.swift; sourceTree = "<group>"; };
 		D66853252A3D6A02000FFDFB /* CategoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
 		D66853472A3DAEFA000FFDFB /* CategoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryVC.swift; sourceTree = "<group>"; };
-		D668534B2A3EC9CF000FFDFB /* NamingCategoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamingCategoryVC.swift; sourceTree = "<group>"; };
+		D668534B2A3EC9CF000FFDFB /* CreatingCategoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingCategoryVC.swift; sourceTree = "<group>"; };
 		D668534D2A3F2054000FFDFB /* ColorCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorCollectionViewCell.swift; sourceTree = "<group>"; };
 		D66853512A418888000FFDFB /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		D66853542A41A652000FFDFB /* UIColor+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Ext.swift"; sourceTree = "<group>"; };
@@ -100,6 +102,8 @@
 		D6CC86BE2A9B738700AE8C10 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
 		D6CC86C02A9C5C4600AE8C10 /* CategoryVCMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryVCMainView.swift; sourceTree = "<group>"; };
 		D6CC86C22A9DF96900AE8C10 /* CategoryCellModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryCellModel.swift; sourceTree = "<group>"; };
+		D6CC86C62A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingCategoryVCMainView.swift; sourceTree = "<group>"; };
+		D6CC86C82AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingCategoryCollectionVC.swift; sourceTree = "<group>"; };
 		D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryModel.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -182,7 +186,6 @@
 				D66853A32A45A279000FFDFB /* UserInfo.swift */,
 				D637FD602A5024B7000D3B10 /* Place.swift */,
 				D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */,
-				D6CC86C22A9DF96900AE8C10 /* CategoryCellModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -249,8 +252,8 @@
 			isa = PBXGroup;
 			children = (
 				D60B32B52A32EDAF008573EC /* MapVC.swift */,
-				D6CC86C42A9F1FC700AE8C10 /* CategoryVC */,
-				D668534B2A3EC9CF000FFDFB /* NamingCategoryVC.swift */,
+				D6CC86C42A9F1FC700AE8C10 /* CategoryUI */,
+				D6CC86C52A9F201B00AE8C10 /* CreatingCategoryUI */,
 				D61610982A4C2BBA00671127 /* TabBarVC.swift */,
 				D616109A2A4C2CF700671127 /* ScrollCategoryVC.swift */,
 				D637FD662A53E835000D3B10 /* NoViewController.swift */,
@@ -298,13 +301,24 @@
 			path = "View Models";
 			sourceTree = "<group>";
 		};
-		D6CC86C42A9F1FC700AE8C10 /* CategoryVC */ = {
+		D6CC86C42A9F1FC700AE8C10 /* CategoryUI */ = {
 			isa = PBXGroup;
 			children = (
+				D6CC86C22A9DF96900AE8C10 /* CategoryCellModel.swift */,
 				D66853472A3DAEFA000FFDFB /* CategoryVC.swift */,
 				D6CC86C02A9C5C4600AE8C10 /* CategoryVCMainView.swift */,
 			);
-			path = CategoryVC;
+			path = CategoryUI;
+			sourceTree = "<group>";
+		};
+		D6CC86C52A9F201B00AE8C10 /* CreatingCategoryUI */ = {
+			isa = PBXGroup;
+			children = (
+				D668534B2A3EC9CF000FFDFB /* CreatingCategoryVC.swift */,
+				D6CC86C62A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift */,
+				D6CC86C82AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift */,
+			);
+			path = CreatingCategoryUI;
 			sourceTree = "<group>";
 		};
 		D6E4FB262A720167001CBB3A /* Service */ = {
@@ -452,12 +466,14 @@
 				D68BC9852A571C8C001158A2 /* BluePrintScrollableView.swift in Sources */,
 				D6CC86BF2A9B738700AE8C10 /* CategoryService.swift in Sources */,
 				D60B32B62A32EDAF008573EC /* MapVC.swift in Sources */,
+				D6CC86C92AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift in Sources */,
 				D66853482A3DAEFA000FFDFB /* CategoryVC.swift in Sources */,
 				D637FD652A52B211000D3B10 /* NSNumber+Ext.swift in Sources */,
 				D66853222A3CCEAB000FFDFB /* FavoriteService.swift in Sources */,
 				D60B32B22A32EDAF008573EC /* AppDelegate.swift in Sources */,
 				D6CC86C32A9DF96900AE8C10 /* CategoryCellModel.swift in Sources */,
 				D616109B2A4C2CF700671127 /* ScrollCategoryVC.swift in Sources */,
+				D6CC86C72A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift in Sources */,
 				D637FD582A4D4D5D000D3B10 /* MPStatusView.swift in Sources */,
 				D65434CD2A5A93FE0036C06C /* NotificaationName+Ext.swift in Sources */,
 				D637FD612A5024B7000D3B10 /* Place.swift in Sources */,
@@ -475,7 +491,7 @@
 				D668539F2A446CE3000FFDFB /* CreateCell.swift in Sources */,
 				D637FD562A4D44B4000D3B10 /* ScrollCategoryCell.swift in Sources */,
 				D68BC98E2A587EBE001158A2 /* FavPlaceCell.swift in Sources */,
-				D668534C2A3EC9CF000FFDFB /* NamingCategoryVC.swift in Sources */,
+				D668534C2A3EC9CF000FFDFB /* CreatingCategoryVC.swift in Sources */,
 				D68BC9832A571C42001158A2 /* PassThroughView.swift in Sources */,
 				D61610992A4C2BBA00671127 /* TabBarVC.swift in Sources */,
 				D60B33172A39A1F5008573EC /* CustomInfoWindowDataSource.swift in Sources */,

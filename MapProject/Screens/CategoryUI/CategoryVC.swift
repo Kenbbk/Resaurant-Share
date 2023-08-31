@@ -100,6 +100,7 @@ class CategoryVC: UIViewController {
         do {
             categories = try await CategoryService.shared.fetchCategories()
             favoritedCategories = try await CategoryService.shared.getFavoritedCategories(categories: categories, place: fetchedPlace)
+            print("finished fetching")
         } catch {
             print(error)
         }
@@ -136,20 +137,40 @@ class CategoryVC: UIViewController {
     }
 }
 
-extension CategoryVC: NamingCategoryVCDelegate {
-    func saveButtonTapped(sender: NamingCategoryVC) async {
-        await fetchCategoriesThenFetchFavoritedCategory()
-        makeCellModel()
-        applySnapshot()
+extension CategoryVC: CreatingCategoryVCDelegate {
+    func saveButtonTapped() {
+        print("Delegate called from other side")
+    }
+    
+    func saveButtonTapped(sender: CreatingCategoryVC) {
+        
+//        Task {
+//            print("I will fetch categories")
+//            await fetchCategoriesThenFetchFavoritedCategory()
+//            print("makeCellModel")
+//            makeCellModel()
+//            applySnapshot()
+//        }
+        
+      
     }
 }
 
 //MARK: - MainView Delegate
 
 extension CategoryVC: CategoryVCMainViewDelegate {
+    func saveButtonTapped(categoryVCMainView: CategoryVCMainView) {
+        Task {
+            await updateCategories()
+        }
+        print("why this is called?")
+        self.dismiss(animated: true)
+        self.delegate?.saveButtonTapped(sender: self)
+    }
+    
     func cellTapped(indexPath: IndexPath) {
         if indexPath.section == 0 {
-            let vc = NamingCategoryVC()
+            let vc = CreatingCategoryVC()
             vc.delegate = self
             vc.modalPresentationStyle = .overFullScreen
             
@@ -168,13 +189,13 @@ extension CategoryVC: CategoryVCMainViewDelegate {
         dismiss(animated: true)
     }
     
-    func saveButtonTapped() {
-        
-        Task {
-            await updateCategories()
-        }
-        
-        self.dismiss(animated: true)
-        self.delegate?.saveButtonTapped(sender: self)
-    }
+//    func saveButtonTapped() {
+//
+//        Task {
+//            await updateCategories()
+//        }
+//        print("why this is called?")
+//        self.dismiss(animated: true)
+//        self.delegate?.saveButtonTapped(sender: self)
+//    }
 }

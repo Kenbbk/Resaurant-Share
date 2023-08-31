@@ -11,7 +11,7 @@ import FirebaseFirestore
 
 protocol CategoryVCMainViewDelegate: AnyObject {
     func dismissTapped()
-    func saveButtonTapped()
+    func saveButtonTapped(categoryVCMainView: CategoryVCMainView)
     func cellTapped(indexPath: IndexPath)
     func cellDeselect()
     
@@ -28,6 +28,7 @@ class CategoryVCMainView: UIView {
         set {
             saveButton.setTitle(newValue.title, for: .normal)
             saveButton.backgroundColor = newValue.isActive ? .blue : .gray
+            saveButton.isUserInteractionEnabled = newValue.isActive
         }
     }
     
@@ -129,7 +130,7 @@ class CategoryVCMainView: UIView {
     
     @objc private func saveButtonTapped() {
         backgroundColor = .clear
-        delegate?.saveButtonTapped()
+        delegate?.saveButtonTapped(categoryVCMainView: self)
     }
     
     //MARK: - Helpers

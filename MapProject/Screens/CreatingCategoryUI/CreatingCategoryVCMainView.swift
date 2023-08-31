@@ -1,24 +1,20 @@
 //
-//  AddNameViewController.swift
+//  CreatingCategoryVcMainView.swift
 //  MapProject
 //
-//  Created by Woojun Lee on 2023/06/18.
+//  Created by Woojun Lee on 2023/08/30.
 //
 
 import UIKit
-import FirebaseFirestore
-import SnapKit
 
-protocol NamingCategoryVCDelegate: AnyObject {
-    func saveButtonTapped(sender: NamingCategoryVC) async
+protocol CreatingCategoryVCMainViewDelegate: AnyObject {
+    func dismissTapped()
+    func saveButtonTapped()
 }
 
-class NamingCategoryVC: UIViewController {
+class CreatingCategoryVCMainView: UIView {
     
     //MARK: - Properties
-    
-    private let colors = CustomColor.colors
-    
     private var isReadyToSave: Bool = false {
         didSet {
             
@@ -27,7 +23,7 @@ class NamingCategoryVC: UIViewController {
         }
     }
     
-    weak var delegate: NamingCategoryVCDelegate?
+    weak var delegate: CreatingCategoryVCMainViewDelegate?
     
     private var activeTextField: UITextField?
     
@@ -39,7 +35,7 @@ class NamingCategoryVC: UIViewController {
         return gesture
     }()
     
-    private let wholeContainerView: UIView = {
+    let wholeContainerView: UIView = {
         let myView = UIView()
         myView.layer.cornerRadius = 20
         myView.backgroundColor = .white
@@ -67,7 +63,6 @@ class NamingCategoryVC: UIViewController {
     private let addListLabel: UILabel = {
         let label = UILabel()
         label.text = "Add list"
-        
         label.font = UIFont.boldSystemFont(ofSize: 20)
         return label
     }()
@@ -84,20 +79,15 @@ class NamingCategoryVC: UIViewController {
         return iv
     }()
     
-    private lazy var nameTextField: UITextField = {
+    private(set) lazy var nameTextField: UITextField = {
         let tf = UITextField()
         tf.delegate = self
         tf.clearButtonMode = .whileEditing
         tf.attributedPlaceholder = NSAttributedString(string: "Enter a list name", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
-        
         return tf
     }()
     
-    private let colorContainerView: UIView = {
-        let view = UIView()
-        
-        return view
-    }()
+    let collectionContainer = UIView()
     
     private let selecColorLabel: UILabel = {
         let label = UILabel()
@@ -106,18 +96,9 @@ class NamingCategoryVC: UIViewController {
         return label
     }()
     
-    private lazy var collectionView: UICollectionView = {
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: configureFlowLayout())
-        collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: ColorCollectionViewCell.identifier)
-        collectionView.showsHorizontalScrollIndicator = false
-        collectionView.dataSource = self
-        collectionView.delegate = self
-        return collectionView
-    }()
-    
     private let descriptionContainerView = UIView()
     
-    private let descriptionLabel: UILabel = {
+    let descriptionLabel: UILabel = {
         let label = UILabel()
         let attributedText = NSMutableAttributedString(string: "Description", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
         attributedText.append(NSAttributedString(string: " option", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
@@ -135,16 +116,15 @@ class NamingCategoryVC: UIViewController {
         return myView
     }()
     
-    private let descriptionCountLabel: UILabel = {
+    let descriptionCountLabel: UILabel = {
         let label = UILabel()
-        
         let attributedText = NSMutableAttributedString(string: "0", attributes: [.font: UIFont.systemFont(ofSize: 13)])
         attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
         label.attributedText = attributedText
         return label
     }()
     
-    private lazy var descriptionTextField: UITextField = {
+    private(set) lazy var descriptionTextField: UITextField = {
         let tf = UITextField()
         tf.delegate = self
         tf.layer.cornerRadius = 5
@@ -155,7 +135,7 @@ class NamingCategoryVC: UIViewController {
     
     private lazy var saveButton: UIButton = {
         let button = UIButton()
-        button.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(saveButtonTapped(_:))))
+        button.addTarget(self, action: #selector(saveButtonTapped(_:)), for: .touchUpInside)
         button.backgroundColor = .systemGray4
         button.setTitle("Save", for: .normal)
         button.layer.cornerRadius = 8
@@ -171,84 +151,55 @@ class NamingCategoryVC: UIViewController {
     }()
     
     //MARK: - Lifecycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    
+    override init(frame: CGRect) {
         
+        super.init(frame: frame)
         configureUI()
         setupKeyboardHiding()
-        
     }
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        NotificationCenter.default.removeObserver(self)
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     //MARK: - Actions
     
-    @objc func cancelImageTapped(_ gesture: UITapGestureRecognizer) {
-        
-        dismiss(animated: true)
+    @objc func saveButtonTapped(_ sender: UIButton) {
+        delegate?.saveButtonTapped()
     }
     
-    @objc func saveButtonTapped(_ gesture: UITapGestureRecognizer) async {
-        guard let categoryTitle = nameTextField.text else { return }
-        guard let colorNumber = collectionView.indexPathsForSelectedItems?.first?.row else { return }
-        
-        let description = descriptionTextField.text!
-        let timeStamp = Timestamp(date: Date())
-        
-        let category = Category(title: categoryTitle, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
-        
-        await addCategory(category: category)
-        await self.delegate?.saveButtonTapped(sender: self)
-        dismiss(animated: true)
-        
-//        FavoriteSerivce.shared.addCategory(with: category) {
-//
-//            self.delegate?.saveButtonTapped(sender: self)
-//            DispatchQueue.main.async {
-//                self.dismiss(animated: true)
-//            }
-//        }
+    @objc func cancelImageTapped(_ gesture: UITapGestureRecognizer) {
+        delegate?.dismissTapped()
+    }
+    
+    @objc func touchedOutside(_ sender: UITapGestureRecognizer) {
+        endEditing(true)
     }
     
     @objc func keyboarWillShow(sender: Notification) {
         
-        view.addGestureRecognizer(touchOutsideGesture)
+        addGestureRecognizer(touchOutsideGesture)
         // if active text field is not nil
         if activeTextField == descriptionTextField {
             print(activeTextField!)
-            view.frame.origin.y = 0 - 80
+            self.frame.origin.y = 0 - 80
         }
     }
     
     @objc func keyboardWillHide(sender: Notification) {
-        view.removeGestureRecognizer(touchOutsideGesture)
-        view.frame.origin.y = 0
-    }
-    
-    @objc func touchedOutside(_ sender: UITapGestureRecognizer) {
-        
-        view.endEditing(true)
-        print("I am tapped")
+        self.removeGestureRecognizer(touchOutsideGesture)
+        self.frame.origin.y = 0
     }
     
     //MARK: - Helpers
-    
-    private func addCategory(category: Category) async {
-        do {
-         try await CategoryService.shared.addCategory(with: category)
-        } catch {
-            print(error)
-        }
-    }
     
     private func setupKeyboardHiding() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboarWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
-    private func setAttributedText(sender: UITextField) {
+    private func setAttributedText(sender: UITextField) { // service로 빼줄까?
         if sender == nameTextField {
             guard let textFieldCount = sender.text?.count else { return }
             let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
@@ -262,191 +213,11 @@ class NamingCategoryVC: UIViewController {
             descriptionCountLabel.attributedText = attributedText
         }
     }
-    
-    private func configureFlowLayout() -> UICollectionViewFlowLayout{
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.itemSize = CGSize(width: 40, height: 40)
-        flowLayout.scrollDirection = .horizontal
-        flowLayout.sectionInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-        return flowLayout
-    }
-    
-    
-    //MARK: - UI
-    
-    private func configureUI() {
-        
-        configureWholeContainerView()
-        configureTopContainerView()
-        configureTFContainerView()
-        configureColorContainerView()
-        configureDescriptionContainerView()
-        configureBottomContainerView()
-    }
-    
-    private func configureWholeContainerView() {
-        
-        view.addSubview(wholeContainerView)
-        wholeContainerView.snp.makeConstraints { make in
-            make.bottom.leading.trailing.equalToSuperview()
-            make.height.equalTo(700)
-        }
-    }
-    
-    private func configureTopContainerView() {
-        
-        wholeContainerView.addSubview(titleContainerView)
-        titleContainerView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(60)
-        }
-        
-        titleContainerView.addSubview(addListLabel)
-        addListLabel.snp.makeConstraints { make in
-            make.centerX.centerY.equalToSuperview()
-            make.width.equalTo(100)
-            make.height.equalTo(30)
-        }
-        
-        titleContainerView.addSubview(cancelImageView)
-        cancelImageView.snp.makeConstraints { make in
-            make.centerY.equalTo(titleContainerView)
-            make.trailing.equalTo(titleContainerView).inset(padding)
-        }
-    }
-    
-    private func configureTFContainerView() {
-        
-        wholeContainerView.addSubview(TFContainerView)
-        TFContainerView.snp.makeConstraints { make in
-            make.top.equalTo(titleContainerView.snp.bottom).offset(30)
-            make.leading.trailing.equalToSuperview().inset(padding)
-            make.height.equalTo(50)
-        }
-        
-        TFContainerView.addSubview(tfCountLabel)
-        tfCountLabel.snp.makeConstraints { make in
-            make.centerY.trailing.equalToSuperview()
-            make.width.height.equalTo(40)
-        }
-        
-        TFContainerView.addSubview(nameTextField)
-        nameTextField.snp.makeConstraints { make in
-            make.centerY.leading.equalToSuperview()
-            make.trailing.equalTo(tfCountLabel.snp.leading).offset(5)
-            make.height.equalTo(40)
-        }
-        
-        let spacer = UIView()
-        TFContainerView.addSubview(spacer)
-        spacer.translatesAutoresizingMaskIntoConstraints = false
-        spacer.backgroundColor = .black
-        
-        spacer.snp.makeConstraints { make in
-            make.bottom.equalToSuperview()
-            make.leading.trailing.equalToSuperview()
-            make.height.equalTo(1)
-        }
-    }
-    
-    private func configureColorContainerView() {
-        wholeContainerView.addSubview(colorContainerView)
-        colorContainerView.snp.makeConstraints { make in
-            make.top.equalTo(TFContainerView.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview()
-            make.height.equalTo(200)
-        }
-        
-        colorContainerView.addSubview(selecColorLabel)
-        selecColorLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.leading.trailing.equalToSuperview().inset(padding)
-            make.height.equalTo(35)
-        }
-        
-        colorContainerView.addSubview(collectionView)
-        collectionView.snp.makeConstraints { make in
-            make.top.equalTo(selecColorLabel.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview()
-            make.height.equalTo(50)
-        }
-        
-        let spacer = UIView()
-        spacer.backgroundColor = .systemGray6
-        colorContainerView.addSubview(spacer)
-        
-        spacer.snp.makeConstraints { make in
-            make.leading.trailing.bottom.equalToSuperview()
-            make.height.equalTo(5)
-        }
-    }
-    
-    private func configureDescriptionContainerView() {
-        wholeContainerView.addSubview(descriptionContainerView)
-        descriptionContainerView.snp.makeConstraints { make in
-            make.top.equalTo(colorContainerView.snp.bottom)
-            make.leading.trailing.equalToSuperview()
-            make.height.equalTo(150)
-        }
-        
-        descriptionContainerView.addSubview(descriptionLabel)
-        descriptionLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(5)
-            make.leading.equalToSuperview().inset(padding)
-            make.width.equalTo(200)
-            make.height.equalTo(35)
-        }
-        
-        descriptionContainerView.addSubview(enclosingDescriptionView)
-        enclosingDescriptionView.snp.makeConstraints { make in
-            make.top.equalTo(descriptionLabel.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview().inset(padding)
-            make.height.equalTo(40)
-        }
-        
-        let leftSpacingView = UIView()
-        enclosingDescriptionView.addSubview(leftSpacingView)
-        leftSpacingView.snp.makeConstraints { make in
-            make.leading.top.bottom.equalToSuperview()
-            make.width.equalTo(10)
-        }
-        
-        enclosingDescriptionView.addSubview(descriptionCountLabel)
-        descriptionCountLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
-            make.trailing.equalToSuperview().inset(10)
-            make.width.height.equalTo(30)
-        }
-        
-        enclosingDescriptionView.addSubview(descriptionTextField)
-        descriptionTextField.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.leading.equalTo(leftSpacingView.snp.trailing)
-            make.trailing.equalTo(descriptionCountLabel.snp.leading)
-            make.height.equalTo(40)
-        }
-    }
-    
-    private func configureBottomContainerView() {
-        wholeContainerView.addSubview(bottomContainerView)
-        bottomContainerView.snp.makeConstraints { make in
-            make.bottom.leading.trailing.equalToSuperview()
-            make.height.equalTo(80)
-        }
-        
-        bottomContainerView.addSubview(saveButton)
-        saveButton.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().inset(20)
-            make.leading.trailing.equalToSuperview().inset(padding)
-            make.height.equalTo(50)
-        }
-    }
 }
 
+//MARK: - textfield Delegate
 
-//MARK: - UITextFieldDelegate
-
-extension NamingCategoryVC: UITextFieldDelegate {
+extension CreatingCategoryVCMainView: UITextFieldDelegate {
     
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
@@ -500,42 +271,13 @@ extension NamingCategoryVC: UITextFieldDelegate {
     
 }
 
-//MARK: - UICollectionViewDataSource
-extension NamingCategoryVC: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        colors.count
-        
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCollectionViewCell.identifier, for: indexPath) as! ColorCollectionViewCell
-        if indexPath.row == 0 {
-            cell.setUpInitialColor(with: colors[indexPath.row])
-            cell.isSelected = true
-            
-        } else {
-            cell.setUpInitialColor(with: colors[indexPath.row])
-        }
-        
-        return cell
-    }
-}
+//MARK: - Gesture Delegate
 
-//MARK: - UICollectionViewdelegate
-
-extension NamingCategoryVC: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-        let selectedIndexPath = IndexPath(item: 0, section: 0)
-        collectionView.selectItem(at: selectedIndexPath, animated: false, scrollPosition: [])
-    }
-}
-
-extension NamingCategoryVC: UIGestureRecognizerDelegate {
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+extension CreatingCategoryVCMainView: UIGestureRecognizerDelegate {
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         let location = gestureRecognizer.location(in: self.wholeContainerView)
         
-        let convertedRectBounds = collectionView.convert(collectionView.bounds, to: self.wholeContainerView)
+        let convertedRectBounds = collectionContainer.convert(collectionContainer.bounds, to: self.wholeContainerView)
         
         if convertedRectBounds.contains(location) {
             return false
@@ -545,3 +287,162 @@ extension NamingCategoryVC: UIGestureRecognizerDelegate {
     }
 }
 
+
+//MARK: - UI
+
+extension CreatingCategoryVCMainView {
+    
+    private func configureUI() {
+        
+        configureWholeContainerView()
+        configureTopContainerView()
+        configureTFContainerView()
+        configureCollectionContainer()
+        configureDescriptionContainerView()
+        configureBottomContainerView()
+    }
+    
+    private func configureWholeContainerView() {
+        
+        addSubview(wholeContainerView)
+        wholeContainerView.snp.makeConstraints { make in
+            make.bottom.leading.trailing.equalToSuperview()
+            make.height.equalTo(700)
+        }
+        
+        [titleContainerView, TFContainerView, collectionContainer, descriptionContainerView, bottomContainerView].forEach { wholeContainerView.addSubview($0)}
+    }
+    
+    private func configureTopContainerView() {
+        
+        [addListLabel, cancelImageView].forEach { titleContainerView.addSubview($0)}
+        titleContainerView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.height.equalTo(60)
+        }
+        
+        addListLabel.snp.makeConstraints { make in
+            make.centerX.centerY.equalToSuperview()
+            make.width.equalTo(100)
+            make.height.equalTo(30)
+        }
+        
+        cancelImageView.snp.makeConstraints { make in
+            make.centerY.equalTo(titleContainerView)
+            make.trailing.equalTo(titleContainerView).inset(padding)
+        }
+    }
+    
+    private func configureTFContainerView() {
+        let spacer = UIView()
+        spacer.backgroundColor = .black
+        
+        [tfCountLabel, nameTextField, spacer, selecColorLabel].forEach { TFContainerView.addSubview($0)}
+        
+        TFContainerView.snp.makeConstraints { make in
+            make.top.equalTo(titleContainerView.snp.bottom).offset(30)
+            make.leading.trailing.equalToSuperview().inset(padding)
+            make.height.equalTo(120)
+        }
+        
+        tfCountLabel.snp.makeConstraints { make in
+            make.centerY.trailing.equalToSuperview()
+            make.width.height.equalTo(40)
+        }
+        
+        nameTextField.snp.makeConstraints { make in
+            make.centerY.leading.equalToSuperview()
+            make.trailing.equalTo(tfCountLabel.snp.leading).offset(5)
+            make.height.equalTo(40)
+        }
+        
+       spacer.snp.makeConstraints { make in
+           make.top.equalTo(nameTextField.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(1)
+        }
+        
+        selecColorLabel.snp.makeConstraints { make in
+            make.bottom.leading.trailing.equalToSuperview()
+            make.height.equalTo(35)
+        }
+    }
+    
+    private func configureCollectionContainer() {
+        
+        collectionContainer.snp.makeConstraints { make in
+            make.top.equalTo(TFContainerView.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(50)
+        }
+    }
+    
+    private func configureDescriptionContainerView() {
+        
+        let spacer = UIView()
+        spacer.backgroundColor = .systemGray6
+        
+        descriptionContainerView.snp.makeConstraints { make in
+            make.top.equalTo(collectionContainer.snp.bottom).offset(150)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(155)
+        }
+        
+        descriptionContainerView.addSubview(spacer)
+        spacer.snp.makeConstraints { make in
+            make.leading.trailing.top.equalToSuperview()
+            make.height.equalTo(5)
+        }
+        
+        descriptionContainerView.addSubview(descriptionLabel)
+        descriptionLabel.snp.makeConstraints { make in
+            make.top.equalTo(spacer.snp.bottom)
+            make.leading.equalToSuperview().inset(padding)
+            make.height.equalTo(35)
+        }
+        
+        descriptionContainerView.addSubview(enclosingDescriptionView)
+        enclosingDescriptionView.snp.makeConstraints { make in
+            make.top.equalTo(descriptionLabel.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview().inset(padding)
+            make.height.equalTo(40)
+        }
+        
+        let leftSpacingView = UIView()
+        enclosingDescriptionView.addSubview(leftSpacingView)
+        leftSpacingView.snp.makeConstraints { make in
+            make.leading.top.bottom.equalToSuperview()
+            make.width.equalTo(10)
+        }
+        
+        enclosingDescriptionView.addSubview(descriptionCountLabel)
+        descriptionCountLabel.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.trailing.equalToSuperview().inset(10)
+            make.width.height.equalTo(30)
+        }
+        
+        enclosingDescriptionView.addSubview(descriptionTextField)
+        descriptionTextField.snp.makeConstraints { make in
+            make.top.equalToSuperview()
+            make.leading.equalTo(leftSpacingView.snp.trailing)
+            make.trailing.equalTo(descriptionCountLabel.snp.leading)
+            make.height.equalTo(40)
+        }
+    }
+    
+    private func configureBottomContainerView() {
+        
+        bottomContainerView.snp.makeConstraints { make in
+            make.bottom.leading.trailing.equalToSuperview()
+            make.height.equalTo(80)
+        }
+        
+        bottomContainerView.addSubview(saveButton)
+        saveButton.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().inset(20)
+            make.leading.trailing.equalToSuperview().inset(padding)
+            make.height.equalTo(50)
+        }
+    }
+}

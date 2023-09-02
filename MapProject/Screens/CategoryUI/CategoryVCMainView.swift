@@ -11,7 +11,7 @@ import FirebaseFirestore
 
 protocol CategoryVCMainViewDelegate: AnyObject {
     func dismissTapped()
-    func saveButtonTapped(categoryVCMainView: CategoryVCMainView)
+    func saveButtonTappedInCategoryVC()
     func cellTapped(indexPath: IndexPath)
     func cellDeselect()
     
@@ -34,16 +34,16 @@ class CategoryVCMainView: UIView {
     
     weak var delegate: CategoryVCMainViewDelegate?
     
-    let containerView: UIView = {
+    private let containerView: UIView = {
         let myView = UIView()
         myView.backgroundColor = .white
         myView.layer.cornerRadius = 20
         return myView
     }()
     
-     let topContainerView = UIView()
+     private let topContainerView = UIView()
     
-     lazy var topLeftImageView: UIImageView = {
+     private lazy var topLeftImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "mappin")
         iv.clipsToBounds = true
@@ -56,7 +56,7 @@ class CategoryVCMainView: UIView {
         return label
     }()
     
-     lazy var topRightImageView: UIImageView = {
+     private lazy var topRightImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "x.circle")
         iv.isUserInteractionEnabled = true
@@ -66,7 +66,7 @@ class CategoryVCMainView: UIView {
         return iv
     }()
     
-     lazy var saveButton: UIButton = {
+     private(set) lazy var saveButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemGray4
         button.setTitle("Save", for: .normal)
@@ -75,7 +75,7 @@ class CategoryVCMainView: UIView {
         return button
     }()
     
-     let bottomContainerView: UIView = {
+     private let bottomContainerView: UIView = {
         let myView = UIView()
         myView.backgroundColor = .white
         myView.layer.borderWidth = 0.17
@@ -84,7 +84,7 @@ class CategoryVCMainView: UIView {
         return myView
     }()
     
-    lazy var myTableView: UITableView = {
+    private(set) lazy var myTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(CreateCell.self, forCellReuseIdentifier: CreateCell.identifier)
         tableView.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.identifier)
@@ -100,7 +100,7 @@ class CategoryVCMainView: UIView {
         return gesture
     }()
     
-    var dataSource: UITableViewDiffableDataSource<Section, CategoryCellModel>!
+    private(set) var dataSource: UITableViewDiffableDataSource<Section, CategoryCellModel>!
     
     //MARK: - Lifecycle
     override init(frame: CGRect) {
@@ -130,7 +130,7 @@ class CategoryVCMainView: UIView {
     
     @objc private func saveButtonTapped() {
         backgroundColor = .clear
-        delegate?.saveButtonTapped(categoryVCMainView: self)
+        delegate?.saveButtonTappedInCategoryVC()
     }
     
     //MARK: - Helpers
@@ -143,7 +143,10 @@ class CategoryVCMainView: UIView {
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.identifier, for: indexPath) as! CategoryCell
                 if cellModel.shouldHighLighted == true {
+                    
                     tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+                    cell.isSelected = true
+                    
                 }
                 cell.setOtherIndexPathLabel(with: cellModel)
                 return cell
@@ -203,6 +206,7 @@ extension CategoryVCMainView {
         addSubview(containerView)
         
         containerView.snp.makeConstraints { make in
+            
             make.leading.trailing.bottom.equalToSuperview()
             make.height.equalTo(700)
         }

@@ -305,7 +305,8 @@ extension ScrollCategoryVC: UIGestureRecognizerDelegate {
 }
 
 extension ScrollCategoryVC: CreatingCategoryVCDelegate {
-    func saveButtonTapped() {
+    
+    func saveButtonTappedinCreatingCategoryVC() {
         Task {
             await scrollCategoryVCListViewModel?.updateCategories()
         }
@@ -321,17 +322,6 @@ extension ScrollCategoryVC: ScrollCategoryVCListViewModelDelegate {
         createSnapShot(categoryModels: categoryModels)
         print("models count is \(categoryModels.count)")
     }
-    
-    //    func ScrollCategoryVCListViewModelUpdated() {
-    //        dataSource.apply(snapshot)
-    //        print(placeTableView.numberOfRows(inSection: 0))
-    //        print(snapshot.numberOfItems)
-    //    }
-    
-    //    func ScrollCategoryVCListViewModelUpdated(snapshot) {
-    //        createSnapShot(snapshot: <#T##NSDiffableDataSourceSnapshot<Section, Category>#>)
-    //    }
-    
     
 }
 

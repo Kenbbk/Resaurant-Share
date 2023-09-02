@@ -9,19 +9,13 @@ import UIKit
 
 protocol CreatingCategoryVCMainViewDelegate: AnyObject {
     func dismissTapped()
-    func saveButtonTapped()
+    func saveButtonTappedInCreatingCategory()
+    
 }
 
 class CreatingCategoryVCMainView: UIView {
     
     //MARK: - Properties
-    private var isReadyToSave: Bool = false {
-        didSet {
-            
-            saveButton.backgroundColor = isReadyToSave ? .blue : .systemGray4
-            saveButton.isUserInteractionEnabled = isReadyToSave
-        }
-    }
     
     weak var delegate: CreatingCategoryVCMainViewDelegate?
     
@@ -35,7 +29,7 @@ class CreatingCategoryVCMainView: UIView {
         return gesture
     }()
     
-    let wholeContainerView: UIView = {
+    private let wholeContainerView: UIView = {
         let myView = UIView()
         myView.layer.cornerRadius = 20
         myView.backgroundColor = .white
@@ -49,16 +43,7 @@ class CreatingCategoryVCMainView: UIView {
         return myView
     }()
     
-    private let TFContainerView = UIView()
-    
-    private let tfCountLabel: UILabel = {
-        let label = UILabel()
-        
-        let attributedText = NSMutableAttributedString(string: "0", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-        attributedText.append(NSAttributedString(string: "/20", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-        label.attributedText = attributedText
-        return label
-    }()
+    private let nameTFContainerView = UIView()
     
     private let addListLabel: UILabel = {
         let label = UILabel()
@@ -79,12 +64,10 @@ class CreatingCategoryVCMainView: UIView {
         return iv
     }()
     
-    private(set) lazy var nameTextField: UITextField = {
-        let tf = UITextField()
-        tf.delegate = self
-        tf.clearButtonMode = .whileEditing
-        tf.attributedPlaceholder = NSAttributedString(string: "Enter a list name", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
-        return tf
+    private(set) lazy var nameTextfFieldView: CountingTextfieldView = {
+        let view = CountingTextfieldView(maxCount: 20)
+        view.delegate = self
+        return view
     }()
     
     let collectionContainer = UIView()
@@ -98,7 +81,7 @@ class CreatingCategoryVCMainView: UIView {
     
     private let descriptionContainerView = UIView()
     
-    let descriptionLabel: UILabel = {
+    private let descriptionLabel: UILabel = {
         let label = UILabel()
         let attributedText = NSMutableAttributedString(string: "Description", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
         attributedText.append(NSAttributedString(string: " option", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
@@ -116,21 +99,10 @@ class CreatingCategoryVCMainView: UIView {
         return myView
     }()
     
-    let descriptionCountLabel: UILabel = {
-        let label = UILabel()
-        let attributedText = NSMutableAttributedString(string: "0", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-        attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-        label.attributedText = attributedText
-        return label
-    }()
-    
-    private(set) lazy var descriptionTextField: UITextField = {
-        let tf = UITextField()
-        tf.delegate = self
-        tf.layer.cornerRadius = 5
-        tf.clearButtonMode = .whileEditing
-        tf.attributedPlaceholder = NSAttributedString(string: "Enter a note", attributes: [.font: UIFont.boldSystemFont(ofSize: 18)])
-        return tf
+    private(set) lazy var descriptionTextFieldView: CountingTextfieldView = {
+        let view = CountingTextfieldView(maxCount: 30)
+        view.delegate = self
+        return view
     }()
     
     private lazy var saveButton: UIButton = {
@@ -157,6 +129,7 @@ class CreatingCategoryVCMainView: UIView {
         super.init(frame: frame)
         configureUI()
         setupKeyboardHiding()
+        
     }
     
     required init?(coder: NSCoder) {
@@ -166,7 +139,7 @@ class CreatingCategoryVCMainView: UIView {
     //MARK: - Actions
     
     @objc func saveButtonTapped(_ sender: UIButton) {
-        delegate?.saveButtonTapped()
+        delegate?.saveButtonTappedInCreatingCategory()
     }
     
     @objc func cancelImageTapped(_ gesture: UITapGestureRecognizer) {
@@ -180,11 +153,11 @@ class CreatingCategoryVCMainView: UIView {
     @objc func keyboarWillShow(sender: Notification) {
         
         addGestureRecognizer(touchOutsideGesture)
-        // if active text field is not nil
-        if activeTextField == descriptionTextField {
-            print(activeTextField!)
-            self.frame.origin.y = 0 - 80
+
+        if descriptionTextFieldView.textField.isEditing {
+            self.frame.origin.y = 0 - 160
         }
+       
     }
     
     @objc func keyboardWillHide(sender: Notification) {
@@ -198,77 +171,6 @@ class CreatingCategoryVCMainView: UIView {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboarWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
-    
-    private func setAttributedText(sender: UITextField) { // service로 빼줄까?
-        if sender == nameTextField {
-            guard let textFieldCount = sender.text?.count else { return }
-            let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            attributedText.append(NSAttributedString(string: "/20", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-            tfCountLabel.attributedText = attributedText
-        } else {
-            guard let textFieldCount = sender.text?.count else { return }
-            
-            let attributedText = NSMutableAttributedString(string: "\(textFieldCount)", attributes: [.font: UIFont.systemFont(ofSize: 13)])
-            attributedText.append(NSAttributedString(string: "/30", attributes: [.foregroundColor: UIColor.systemGray2, .font: UIFont.systemFont(ofSize: 13)]))
-            descriptionCountLabel.attributedText = attributedText
-        }
-    }
-}
-
-//MARK: - textfield Delegate
-
-extension CreatingCategoryVCMainView: UITextFieldDelegate {
-    
-    
-    func textFieldDidChangeSelection(_ textField: UITextField) {
-        
-        if textField == nameTextField {
-            if let trimmedTextCount = textField.text?.trimmingCharacters(in: .whitespaces).count {
-                isReadyToSave = trimmedTextCount == 0 ? false : true
-            }
-        }
-        setAttributedText(sender: textField)
-    }
-    
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        
-        activeTextField = textField
-        
-        if textField == descriptionTextField {
-            enclosingDescriptionView.backgroundColor = .white
-            enclosingDescriptionView.layer.borderColor = UIColor.blue.withAlphaComponent(0.8).cgColor
-        }
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        if let trimmedTextCount = textField.text?.trimmingCharacters(in: .whitespaces).count {
-            if trimmedTextCount == 0 {
-                textField.text = ""
-                setAttributedText(sender: textField)
-            }
-        }
-        activeTextField = nil
-    }
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // get the current text, or use an empty string if that failed
-        var maxCount = 20
-        if textField == descriptionTextField {
-            maxCount = 30
-        }
-        
-        let currentText = textField.text ?? ""
-        
-        // attempt to read the range they are trying to change, or exit if we can't
-        guard let stringRange = Range(range, in: currentText) else { return false }
-        
-        // add their new text to the existing text
-        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-        
-        // make sure the result is under 16 characters
-        return updatedText.count <= maxCount
-    }
-    
 }
 
 //MARK: - Gesture Delegate
@@ -287,6 +189,29 @@ extension CreatingCategoryVCMainView: UIGestureRecognizerDelegate {
     }
 }
 
+extension CreatingCategoryVCMainView: CountingTextFieldViewDelegate {
+    func didChange(sender: CountingTextfieldView, letterCount: Int) {
+        if sender == nameTextfFieldView {
+            saveButton.backgroundColor = letterCount == 0 ? .systemGray4 : .blue
+            saveButton.isUserInteractionEnabled = letterCount == 0 ? false : true
+        }
+    }
+    
+    func becomeEditing(sender: CountingTextfieldView) {
+        if sender == descriptionTextFieldView {
+            enclosingDescriptionView.layer.borderColor = UIColor.systemBlue.cgColor
+            enclosingDescriptionView.backgroundColor = .white
+        }
+    }
+    
+    func endEditing(sender: CountingTextfieldView) {
+        if sender == descriptionTextFieldView {
+            enclosingDescriptionView.layer.borderColor = UIColor.systemGray6.cgColor
+            enclosingDescriptionView.backgroundColor = .systemGray6
+        }
+    }
+}
+
 
 //MARK: - UI
 
@@ -296,7 +221,7 @@ extension CreatingCategoryVCMainView {
         
         configureWholeContainerView()
         configureTopContainerView()
-        configureTFContainerView()
+        configureNameTFContainerView()
         configureCollectionContainer()
         configureDescriptionContainerView()
         configureBottomContainerView()
@@ -310,7 +235,7 @@ extension CreatingCategoryVCMainView {
             make.height.equalTo(700)
         }
         
-        [titleContainerView, TFContainerView, collectionContainer, descriptionContainerView, bottomContainerView].forEach { wholeContainerView.addSubview($0)}
+        [titleContainerView, nameTFContainerView, collectionContainer, descriptionContainerView, bottomContainerView].forEach { wholeContainerView.addSubview($0)}
     }
     
     private func configureTopContainerView() {
@@ -333,36 +258,31 @@ extension CreatingCategoryVCMainView {
         }
     }
     
-    private func configureTFContainerView() {
+    private func configureNameTFContainerView() {
         let spacer = UIView()
         spacer.backgroundColor = .black
         
-        [tfCountLabel, nameTextField, spacer, selecColorLabel].forEach { TFContainerView.addSubview($0)}
-        
-        TFContainerView.snp.makeConstraints { make in
+        [nameTextfFieldView, spacer, selecColorLabel].forEach { nameTFContainerView.addSubview($0)}
+        nameTFContainerView.snp.makeConstraints { make in
             make.top.equalTo(titleContainerView.snp.bottom).offset(30)
             make.leading.trailing.equalToSuperview().inset(padding)
-            make.height.equalTo(120)
+            make.height.equalTo(150)
         }
         
-        tfCountLabel.snp.makeConstraints { make in
-            make.centerY.trailing.equalToSuperview()
-            make.width.height.equalTo(40)
-        }
-        
-        nameTextField.snp.makeConstraints { make in
-            make.centerY.leading.equalToSuperview()
-            make.trailing.equalTo(tfCountLabel.snp.leading).offset(5)
+        nameTextfFieldView.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(35)
+            make.leading.trailing.equalToSuperview()
             make.height.equalTo(40)
         }
         
-       spacer.snp.makeConstraints { make in
-           make.top.equalTo(nameTextField.snp.bottom)
+        spacer.snp.makeConstraints { make in
+            make.top.equalTo(nameTextfFieldView.snp.bottom)
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(1)
         }
         
         selecColorLabel.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().inset(10)
             make.bottom.leading.trailing.equalToSuperview()
             make.height.equalTo(35)
         }
@@ -371,19 +291,19 @@ extension CreatingCategoryVCMainView {
     private func configureCollectionContainer() {
         
         collectionContainer.snp.makeConstraints { make in
-            make.top.equalTo(TFContainerView.snp.bottom).offset(10)
+            make.top.equalTo(nameTFContainerView.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(50)
         }
     }
     
     private func configureDescriptionContainerView() {
-        
+
         let spacer = UIView()
         spacer.backgroundColor = .systemGray6
-        
+    
         descriptionContainerView.snp.makeConstraints { make in
-            make.top.equalTo(collectionContainer.snp.bottom).offset(150)
+            make.top.equalTo(collectionContainer.snp.bottom).offset(100)
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(155)
         }
@@ -415,18 +335,10 @@ extension CreatingCategoryVCMainView {
             make.width.equalTo(10)
         }
         
-        enclosingDescriptionView.addSubview(descriptionCountLabel)
-        descriptionCountLabel.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
-            make.trailing.equalToSuperview().inset(10)
-            make.width.height.equalTo(30)
-        }
-        
-        enclosingDescriptionView.addSubview(descriptionTextField)
-        descriptionTextField.snp.makeConstraints { make in
-            make.top.equalToSuperview()
+        enclosingDescriptionView.addSubview(descriptionTextFieldView)
+        descriptionTextFieldView.snp.makeConstraints { make in
+            make.top.trailing.equalToSuperview()
             make.leading.equalTo(leftSpacingView.snp.trailing)
-            make.trailing.equalTo(descriptionCountLabel.snp.leading)
             make.height.equalTo(40)
         }
     }

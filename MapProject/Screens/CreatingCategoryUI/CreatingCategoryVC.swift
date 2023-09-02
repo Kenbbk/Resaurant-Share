@@ -10,7 +10,7 @@ import FirebaseFirestore
 import SnapKit
 
 protocol CreatingCategoryVCDelegate: AnyObject {
-    func saveButtonTapped()
+    func saveButtonTappedinCreatingCategoryVC()
 }
 
 class CreatingCategoryVC: UIViewController {
@@ -59,7 +59,6 @@ class CreatingCategoryVC: UIViewController {
     private func addCategory(category: Category) async {
         do {
             try await CategoryService.shared.addCategory(with: category)
-            print("AddCategory finished")
         } catch {
             print(error)
         }
@@ -67,31 +66,26 @@ class CreatingCategoryVC: UIViewController {
 }
 
 extension CreatingCategoryVC: CreatingCategoryVCMainViewDelegate  {
-    func dismissTapped() {
-        dismiss(animated: true)
-    }
-    
-    func saveButtonTapped() {
-        guard let categoryTitle = rootView.nameTextField.text else { return }
+    func saveButtonTappedInCreatingCategory() {
+        guard let categoryTitle = rootView.nameTextfFieldView.textField.text else { return }
         guard let colorNumber = collectionVC.collectionView.indexPathsForSelectedItems?.first?.row else { return }
         
-        let description = rootView.descriptionTextField.text!
+        let description = rootView.descriptionTextFieldView.textField.text!
         let timeStamp = Timestamp(date: Date())
         
         let category = Category(title: categoryTitle, colorNumber: colorNumber, description: description, timeStamp: timeStamp)
         
         Task {
             await addCategory(category: category)
-            print("Save button Tapped")
-            delegate?.saveButtonTapped()
+            delegate?.saveButtonTappedinCreatingCategoryVC()
+            dismiss(animated: true)
         }
-        
-       
-        
-//        dismiss(animated: true)
-//        
-        
     }
+    
+    func dismissTapped() {
+        dismiss(animated: true)
+    }
+    
 }
 
 

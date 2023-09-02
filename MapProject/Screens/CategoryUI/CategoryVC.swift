@@ -16,24 +16,22 @@ class CategoryVC: UIViewController {
     
     //MARK: - Properties
     
-    var selectedIndex: [IndexPath] {
+    private var selectedIndex: [IndexPath] {
         let selectedIndex = rootView.myTableView.indexPathsForSelectedRows == nil ? [] : rootView.myTableView.indexPathsForSelectedRows!
         return selectedIndex
     }
     
-    var models: [CategoryCellModel] = []
-    
-    private let padding: CGFloat = 15
+    private var models: [CategoryCellModel] = []
     
     private var favoritedCategories: [Category] = []
     
     private var fetchedPlace: FetchedPlace
     
-    var categories: [Category] = []
+    private var categories: [Category] = []
     
     weak var delegate: CategoryVCDelegate?
     
-    var rootView: CategoryVCMainView {
+    private var rootView: CategoryVCMainView {
         view as! CategoryVCMainView
     }
     
@@ -51,7 +49,7 @@ class CategoryVC: UIViewController {
         Task {
             await fetchCategoriesThenFetchFavoritedCategory()
             makeCellModel()
-            applySnapshot()
+            await applySnapshot()
             rootView.buttonState = determineButtonState()
         }
     }
@@ -87,13 +85,14 @@ class CategoryVC: UIViewController {
         }
     }
     
-    private func applySnapshot() {
+    private func applySnapshot() async {
         let dataSource = rootView.dataSource
         var snapshot = NSDiffableDataSourceSnapshot<Section, CategoryCellModel>()
         snapshot.appendSections([.create, .categories])
         snapshot.appendItems([CategoryCellModel(title: "dummy", colorNumber: 0, categoryUID: "dummy", shouldHighLighted: true)], toSection: .create)
         snapshot.appendItems(models, toSection: .categories)
-        dataSource?.apply(snapshot, animatingDifferences: false)
+        await dataSource?.apply(snapshot, animatingDifferences: false)
+        
     }
     
     private func fetchCategoriesThenFetchFavoritedCategory() async {
@@ -113,6 +112,7 @@ class CategoryVC: UIViewController {
             return selectedIndex.isEmpty ? ("Save", false) : ("Save", true)
             
         case false:
+            
             return selectedIndex.isEmpty ? ("Save Delete", true) : ("Save", true)
         }
     }
@@ -134,32 +134,26 @@ class CategoryVC: UIViewController {
     
     private func setTitleLabel() {
         rootView.topLabel.text = fetchedPlace.name
+        
     }
 }
 
 extension CategoryVC: CreatingCategoryVCDelegate {
-    func saveButtonTapped() {
-        print("Delegate called from other side")
-    }
-    
-    func saveButtonTapped(sender: CreatingCategoryVC) {
-        
-//        Task {
-//            print("I will fetch categories")
-//            await fetchCategoriesThenFetchFavoritedCategory()
-//            print("makeCellModel")
-//            makeCellModel()
-//            applySnapshot()
-//        }
-        
-      
+    func saveButtonTappedinCreatingCategoryVC() {
+        Task {
+            print("I will fetch categories")
+            await fetchCategoriesThenFetchFavoritedCategory()
+            print("makeCellModel")
+            makeCellModel()
+            await applySnapshot()
+        }
     }
 }
 
 //MARK: - MainView Delegate
 
 extension CategoryVC: CategoryVCMainViewDelegate {
-    func saveButtonTapped(categoryVCMainView: CategoryVCMainView) {
+    func saveButtonTappedInCategoryVC() {
         Task {
             await updateCategories()
         }
@@ -188,14 +182,5 @@ extension CategoryVC: CategoryVCMainViewDelegate {
     func dismissTapped() {
         dismiss(animated: true)
     }
-    
-//    func saveButtonTapped() {
-//
-//        Task {
-//            await updateCategories()
-//        }
-//        print("why this is called?")
-//        self.dismiss(animated: true)
-//        self.delegate?.saveButtonTapped(sender: self)
-//    }
+
 }

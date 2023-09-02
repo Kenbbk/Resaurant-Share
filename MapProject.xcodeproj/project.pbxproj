@@ -53,6 +53,7 @@
 		D6CC86C72A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C62A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift */; };
 		D6CC86C92AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6CC86C82AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift */; };
 		D6EEC22A2A7BFAD800DA751C /* CategoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */; };
+		D6F09E402AA1E90B002E87D5 /* CountingTextfieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6F09E3F2AA1E90B002E87D5 /* CountingTextfieldView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +106,7 @@
 		D6CC86C62A9F20C100AE8C10 /* CreatingCategoryVCMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingCategoryVCMainView.swift; sourceTree = "<group>"; };
 		D6CC86C82AA019F300AE8C10 /* CreatingCategoryCollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatingCategoryCollectionVC.swift; sourceTree = "<group>"; };
 		D6EEC2292A7BFAD800DA751C /* CategoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryModel.swift; sourceTree = "<group>"; };
+		D6F09E3F2AA1E90B002E87D5 /* CountingTextfieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountingTextfieldView.swift; sourceTree = "<group>"; };
 		E90245960E2BF356826B56A2 /* Pods-MapProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapProject.debug.xcconfig"; path = "Target Support Files/Pods-MapProject/Pods-MapProject.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -280,6 +282,7 @@
 				D68BC9862A57C1A6001158A2 /* CategoryScrollableView.swift */,
 				D66F96EF2A6543AB0041A069 /* PlaceScrollableView.swift */,
 				D68BC98C2A5843DA001158A2 /* BluePrint */,
+				D6F09E3F2AA1E90B002E87D5 /* CountingTextfieldView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -490,6 +493,7 @@
 				D668537A2A42AD36000FFDFB /* UIView+Ext.swift in Sources */,
 				D668539F2A446CE3000FFDFB /* CreateCell.swift in Sources */,
 				D637FD562A4D44B4000D3B10 /* ScrollCategoryCell.swift in Sources */,
+				D6F09E402AA1E90B002E87D5 /* CountingTextfieldView.swift in Sources */,
 				D68BC98E2A587EBE001158A2 /* FavPlaceCell.swift in Sources */,
 				D668534C2A3EC9CF000FFDFB /* CreatingCategoryVC.swift in Sources */,
 				D68BC9832A571C42001158A2 /* PassThroughView.swift in Sources */,
